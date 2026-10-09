@@ -209,8 +209,7 @@ export default function HomePage() {
           {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
         <a className="brand-lockup" href="#" aria-label="ZERO CLOTHING home">
-          <span className="brand-wordmark">ZERO</span>
-          <span className="brand-subtitle">C L O T H I N G</span>
+          <img className="brand-logo-image" src="https://raw.githubusercontent.com/ziadelkady20-blip/ZERO/main/IMG_0832.PNG" alt="ZERO CLOTHING official logo" />
         </a>
 
         <nav className={mobileMenuOpen ? "main-nav is-open" : "main-nav"} aria-label="Main navigation">
@@ -347,8 +346,7 @@ export default function HomePage() {
         <div className="footer-top">
           <div className="footer-brand">
             <a className="brand-lockup footer-lockup" href="#">
-              <span className="brand-wordmark">ZERO</span>
-              <span className="brand-subtitle">C L O T H I N G</span>
+              <img className="brand-logo-image" src="https://raw.githubusercontent.com/ziadelkady20-blip/ZERO/main/IMG_0832.PNG" alt="ZERO CLOTHING official logo" />
             </a>
             <p>{t.footerLine}</p>
           </div>
