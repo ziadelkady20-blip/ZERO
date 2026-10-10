@@ -352,11 +352,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="editorial-strip">
-        <div className="editorial-image"><img src={ZERO_MODEL_IMAGE} alt="Male model wearing a white ZERO compression shirt" loading="lazy" /></div>
-        <div className="editorial-copy"><p className="eyebrow"><span className="eyebrow-line" />THE ZERO POINT OF VIEW</p><h2>MORE THAN<br/><span>CLOTHING.</span></h2><p>Good design doesn’t ask for attention. It earns a second look. Clean silhouettes, thoughtful details, and essentials that belong to you.</p><a href="#standard" className="button button-outline">DISCOVER OUR STANDARD <ArrowRight size={16}/></a><span className="editorial-watermark">Z.</span></div>
-      </section>
-
       <section className="benefits-row">
         <div><span className="benefit-number">01</span><div><strong>DESIGNED TO MOVE</strong><p>Comfort for every day.</p></div></div>
         <div><span className="benefit-number">02</span><div><strong>LESS, BUT BETTER</strong><p>Essentials without the noise.</p></div></div>
