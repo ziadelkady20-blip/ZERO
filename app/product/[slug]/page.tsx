@@ -12,6 +12,7 @@ type Product = {
 };
 type CartItem = { variantId: string; productId: string; nameEn: string; nameAr: string; image: string; size: string; color: string; price: number; quantity: number; stock: number };
 const CART_KEY = "zero-cart-v1";
+const FALLBACK_PRODUCT_IMAGE = "https://raw.githubusercontent.com/ziadelkady20-blip/ZERO/main/hero%20zero.png";
 
 export default function ProductDetailPage() {
   const params = useParams<{ slug: string }>();
@@ -40,7 +41,7 @@ export default function ProductDetailPage() {
   const sizes = useMemo(() => Array.from(new Set((product?.variants || []).map(v => v.size))), [product]);
   const colors = useMemo(() => Array.from(new Set((product?.variants || []).filter(v => v.size === size).map(v => v.color))), [product, size]);
   const variant = product?.variants.find(v => v.size === size && v.color === color);
-  const image = product?.images[0]?.url || "";
+  const image = product?.images[0]?.url || FALLBACK_PRODUCT_IMAGE;
   const title = product ? (ar ? product.nameAr : product.nameEn) : "";
   const description = product ? (ar ? product.descriptionAr : product.descriptionEn) : "";
 
