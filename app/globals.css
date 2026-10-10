@@ -209,7 +209,7 @@ body{background:#050505;color:#f8f8f6}
 .announcement-bar{background:#cfcfc8;color:#090909;min-height:32px;font-size:9px;letter-spacing:.19em}
 .site-header{background:#050505;color:#f8f8f6;border-bottom:1px solid rgba(255,255,255,.13);height:84px;grid-template-columns:180px 1fr auto;padding:0 4.2%;gap:20px}
 .brand-lockup{width:166px;height:58px;background:#050505;overflow:visible;position:relative;justify-self:start}
-.brand-logo-image{width:100%;height:100%;object-fit:contain;object-position:center;background:#050505;mix-blend-mode:screen;filter:contrast(1.12) brightness(1.12);padding:0;transform:scale(1.04)}
+.brand-logo-image{width:100%;height:100%;object-fit:cover;object-position:center 58%;background:#050505;mix-blend-mode:screen;filter:contrast(1.12) brightness(1.12);padding:0;transform:scale(1.04)}
 .brand-lockup:hover .brand-logo-image{transform:scale(1.08)}
 .main-nav{gap:clamp(14px,2.1vw,32px);justify-content:center}
 .main-nav a,.bag-button,.text-action,.icon-button{color:#f8f8f6}
