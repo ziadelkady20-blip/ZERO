@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import "../admin.css";
 
 type Variant={id?:string;sku:string;size:string;color:string;stock:number|string};
 type Product={id:string;slug:string;nameEn:string;nameAr:string;descriptionEn:string;descriptionAr:string;price:number;compareAtPrice:number|null;active:boolean;featured:boolean;categoryId:string;category:{nameEn:string;nameAr:string};images:{url:string;alt:string;position:number}[];variants:Variant[]};
