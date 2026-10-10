@@ -31,7 +31,7 @@ const products: Product[] = [
     category: "Compression",
     price: 749,
     badge: "BESTSELLER",
-    image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1000&q=85,
+    image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1000&q=85",
     imageAlt: "Athletic black training shirt",
   },
   {
