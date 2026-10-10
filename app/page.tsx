@@ -70,24 +70,24 @@ const copy = {
     ourStandard: "Our Standard",
     search: "Search",
     bag: "Bag",
-    heroEyebrow: "ENGINEERED FOR EVERY REP",
-    heroTitleA: "NO LIMITS.",
-    heroTitleB: "JUST",
-    heroTitleC: "PROGRESS.",
-    heroDescription: "Performance essentials designed to move with you. No noise. No shortcuts. Just the work.",
+    heroEyebrow: "DESIGNED FOR EVERY DAY",
+    heroTitleA: "DISCIPLINE",
+    heroTitleB: "IN EVERY",
+    heroTitleC: "DETAIL.",
+    heroDescription: "Considered essentials. Timeless silhouettes. Made to move naturally between every part of your day.",
     shopCollection: "SHOP THE COLLECTION",
     explore: "EXPLORE THE DROP",
     collectionEyebrow: "THE STARTING LINE",
-    collectionTitle: "Made for the work.",
-    collectionDescription: "Your everyday uniform for showing up, pushing harder, and moving forward.",
+    collectionTitle: "Made for real life.",
+    collectionDescription: "Versatile essentials. Refined fits. Pieces that work with your style, wherever the day takes you.",
     all: "All products",
     add: "Add to bag",
     added: "Added",
     egp: "EGP",
     viewAll: "VIEW ALL PRODUCTS",
-    manifestoEyebrow: "LESS TALK. MORE WORK.",
-    manifestoTitle: "Show up. Every time.",
-    manifestoBody: "ZERO is built around one idea: progress is earned. Thoughtful essentials, clean design, and performance-first comfort for the days you put in the work.",
+    manifestoEyebrow: "LESS, BUT BETTER.",
+    manifestoTitle: "Your style. Your standard.",
+    manifestoBody: "ZERO is built around thoughtful design, versatile essentials, and comfort that lasts. A considered wardrobe for the way you live now—and whatever comes next.",
     manifestoCta: "OUR STANDARD",
     footerLine: "Made for movement. Built around you.",
     quickLinks: "QUICK LINKS",
@@ -117,24 +117,24 @@ const copy = {
     ourStandard: "معاييرنا",
     search: "بحث",
     bag: "السلة",
-    heroEyebrow: "مصممة لكل تكرار",
-    heroTitleA: "مفيش",
-    heroTitleB: "حدود.",
-    heroTitleC: "فيه تطوّر.",
-    heroDescription: "أساسيات رياضية تتحرك معاك. من غير دوشة، من غير اختصارات. اشتغل على نفسك.",
+    heroEyebrow: "مصممة لكل يوم",
+    heroTitleA: "التفاصيل",
+    heroTitleB: "تصنع",
+    heroTitleC: "الفرق.",
+    heroDescription: "قطع أساسية بتصميم مدروس وقصّات مريحة، تناسب يومك وتكمل معاك في كل وقت.",
     shopCollection: "تسوّق المجموعة",
     explore: "اكتشف المجموعة",
     collectionEyebrow: "خط البداية",
-    collectionTitle: "جاهز للشغل.",
-    collectionDescription: "اختياراتك اليومية علشان تبدأ، وتضغط أكتر، وتتحرك لقدّام.",
+    collectionTitle: "ستايل لكل يوم.",
+    collectionDescription: "قطع أساسية بتفاصيل متقنة وقصّات متعددة الاستخدام، تناسب أسلوبك في أي وقت.",
     all: "كل المنتجات",
     add: "أضف للسلة",
     added: "اتضاف",
     egp: "جنيه",
     viewAll: "عرض كل المنتجات",
-    manifestoEyebrow: "كلام أقل. شغل أكتر.",
-    manifestoTitle: "كل مرة. انزل واشتغل.",
-    manifestoBody: "ZERO مبنية على فكرة واحدة: التطور بتكسبه. أساسيات مدروسة، تصميم نضيف، وراحة تخدم أداءك في كل تمرينة.",
+    manifestoEyebrow: "الأقل، لكن الأفضل.",
+    manifestoTitle: "ستايلك. معاييرك.",
+    manifestoBody: "ZERO مبنية على التصميم المدروس، والقطع الأساسية متعددة الاستخدام، والراحة اللي تكمل معاك. خزانة تناسب حياتك دلوقتي وكل اللي جاي.",
     manifestoCta: "معاييرنا",
     footerLine: "مصممة للحركة. معمولة ليك.",
     quickLinks: "روابط سريعة",
@@ -244,7 +244,7 @@ export default function HomePage() {
       )}
 
       <section className="hero-section">
-        <div className="hero-image" role="img" aria-label="Athlete wearing dark performance apparel" />
+        <div className="hero-image" role="img" aria-label="Minimal monochrome clothing editorial" />
         <div className="hero-shade" />
         <div className="hero-content">
           <p className="eyebrow"><span className="eyebrow-line" />{t.heroEyebrow}</p>
@@ -255,14 +255,14 @@ export default function HomePage() {
           </a>
           <div className="hero-index"><span>01</span><span className="index-rule" /><span>04</span></div>
         </div>
-        <div className="hero-vertical-note">ZERO / PERFORMANCE DIVISION</div>
-        <div className="hero-bottom-note"><span>EST. FOR THE EVERYDAY ATHLETE</span><ArrowDownRight size={18} /></div>
+        <div className="hero-vertical-note">ZERO / EVERYDAY COLLECTION</div>
+        <div className="hero-bottom-note"><span>MADE FOR EVERYDAY</span><ArrowDownRight size={18} /></div>
       </section>
 
       <section className="ticker" aria-label="Brand statement">
         <div className="ticker-track">
           {Array.from({ length: 4 }).map((_, index) => (
-            <span key={index}>BUILT FOR PROGRESS <b>✳</b> PERFORMANCE IS A MINDSET <b>✳</b> ZERO EXCUSES <b>✳</b></span>
+            <span key={index}>MADE FOR EVERY DAY <b>✳</b> DETAILS MATTER <b>✳</b> ZERO COMPROMISE <b>✳</b></span>
           ))}
         </div>
       </section>
@@ -326,7 +326,7 @@ export default function HomePage() {
       </section>
 
       <section className="manifesto-section" id="standard">
-        <div className="manifesto-image" role="img" aria-label="Performance athlete training in a dark studio" />
+        <div className="manifesto-image" role="img" aria-label="Monochrome clothing and fabric editorial" />
         <div className="manifesto-content">
           <p className="eyebrow"><span className="eyebrow-line" />{t.manifestoEyebrow}</p>
           <h2>{t.manifestoTitle}</h2>
@@ -337,9 +337,9 @@ export default function HomePage() {
       </section>
 
       <section className="benefits-row">
-        <div><span className="benefit-number">01</span><div><strong>PERFORMANCE FIRST</strong><p>Made to move with you.</p></div></div>
+        <div><span className="benefit-number">01</span><div><strong>DESIGNED TO MOVE</strong><p>Comfort for every day.</p></div></div>
         <div><span className="benefit-number">02</span><div><strong>LESS, BUT BETTER</strong><p>Essentials without the noise.</p></div></div>
-        <div><span className="benefit-number">03</span><div><strong>BUILT FOR REPEAT</strong><p>Your everyday training kit.</p></div></div>
+        <div><span className="benefit-number">03</span><div><strong>MADE TO LAST</strong><p>Essentials you reach for.</p></div></div>
       </section>
 
       <footer className="site-footer">
