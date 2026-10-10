@@ -351,7 +351,7 @@ export default function HomePage() {
             <p>{t.footerLine}</p>
           </div>
           <div className="footer-links"><h3>{t.quickLinks}</h3><a href="#collection">{t.shop}</a><a href="#standard">{t.ourStandard}</a><a href="#collection">{t.compression}</a><a href="#collection">{t.tees}</a></div>
-          <div className="footer-links"><h3>{t.support}</h3><a href="#shipping">{t.shipping}</a><a href="#returns">{t.returns}</a><a href="mailto:hello@zeroclothing.example">{t.contact}</a></div>
+          <div className="footer-links"><h3>{t.support}</h3><a href="/track-order">{isArabic ? "تتبع طلبك" : "Track your order"}</a><a href="#shipping">{t.shipping}</a><a href="#returns">{t.returns}</a><a href="mailto:hello@zeroclothing.example">{t.contact}</a></div>
           <div className="footer-newsletter"><h3>{t.newsletter}</h3><p>{t.newsletterText}</p><form onSubmit={(event) => event.preventDefault()} className="newsletter-form"><input type="email" placeholder={t.emailPlaceholder} aria-label={t.emailPlaceholder} /><button type="submit">{t.join}<ArrowRight size={15} /></button></form></div>
         </div>
         <div className="footer-bottom"><span>{t.rights}</span><span>CAIRO, EGYPT · ZERO STANDARD</span></div>
