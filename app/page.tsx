@@ -78,7 +78,7 @@ const copy = {
     shopCollection: "SHOP THE COLLECTION",
     categoriesEyebrow: "THE MEN’S WARDROBE",
     categoriesTitle: "Built for his everyday.",
-    categoriesDescription: "Modern menswear essentials, from refined everyday tees to versatile layers and finishing pieces.",
+    categoriesDescription: "Two essentials to start with: clean everyday T-shirts and close-fit ZERO compression built for movement.",
     categoryTee: "T-SHIRTS",
     categoryCompression: "COMPRESSION",
     categoryHoodie: "HOODIES",
@@ -135,7 +135,7 @@ const copy = {
     shopCollection: "تسوّق المجموعة",
     categoriesEyebrow: "دولابك، بمعايير ZERO",
     categoriesTitle: "ستايل رجالي لكل يوم.",
-    categoriesDescription: "أساسيات رجالي عصرية، من التيشيرتات اليومية للطبقات والإكسسوارات اللي تكمل ستايلك.",
+    categoriesDescription: "هنبدأ بفئتين أساسيتين: تيشيرتات يومية بتصميم نظيف، وكومبريشن ZERO بقَصّة مظبوطة للحركة.",
     categoryTee: "تيشيرتات",
     categoryCompression: "كومبريشن",
     categoryHoodie: "هوديز",
@@ -268,7 +268,7 @@ export default function HomePage() {
         <div className="hero-shade" />
         <div className="hero-floating-products" aria-hidden="true">
           <div className="hero-garment hero-garment-back"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=90" alt="" /></div>
-          <div className="hero-garment hero-garment-front"><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1100&q=90" alt="" /></div>
+          <div className="hero-garment hero-garment-front"><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1100&q=90" alt="" /><span className="hero-garment-logo">ZERO</span></div>
           <div className="hero-orbit hero-orbit-one" /><div className="hero-orbit hero-orbit-two" />
           <div className="hero-product-caption"><span>ZERO / 001</span><span>MEN’S EVERYDAY TEE</span></div>
         </div>
@@ -296,16 +296,12 @@ export default function HomePage() {
       <section className="category-section section-pad" aria-labelledby="category-title">
         <div className="category-heading">
           <div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{t.categoriesEyebrow}</p><h2 id="category-title">{t.categoriesTitle}</h2><p>{t.categoriesDescription}</p></div>
-          <span className="category-count">01 — 05</span>
+          <span className="category-count">01 — 02</span>
         </div>
         <div className="category-grid">
-          <a href="#collection" className="category-card category-card-tee"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=85" alt="Men’s essential T-shirt" /><span className="category-index">01 / EVERYDAY</span><span className="category-title">{t.categoryTee}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
-          <a href="#collection" className="category-card category-card-compression" onClick={() => setActiveCategory("Compression")}><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=800&q=85" alt="Men’s fitted performance shirt" /><span className="category-index">02 / PERFORMANCE</span><span className="category-title">{t.categoryCompression}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
-          <a href="#collection" className="category-card category-card-hoodie"><img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800&q=85" alt="Men’s hoodie" /><span className="category-index">03 / LAYER UP</span><span className="category-title">{t.categoryHoodie}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
-          <a href="#collection" className="category-card category-card-pants"><img src="https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=800&q=85" alt="Men’s everyday pants" /><span className="category-index">04 / OFF-DUTY</span><span className="category-title">{t.categoryPants}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
-          <a href="#collection" className="category-card category-card-accessories"><img src="https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=800&q=85" alt="Men’s everyday cap" /><span className="category-index">05 / FINISHING TOUCH</span><span className="category-title">{t.categoryAccessories}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
-        </div>
-      </section>
+          <a href="#collection" className="category-card category-card-tee" onClick={() => setActiveCategory("T-Shirts")}><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1100&q=90" alt="Men’s everyday T-shirt" /><span className="category-index">01 / EVERYDAY ESSENTIALS</span><span className="category-title">{t.categoryTee}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-compression" onClick={() => setActiveCategory("Compression")}><img src="https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=1100&q=90" alt="Men’s fitted compression-style top" /><span className="category-index">02 / PERFORMANCE FIT</span><span className="category-title">{t.categoryCompression}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+        </div>   </section>
 
       <section className="collection-section section-pad" id="collection">
         <div className="section-heading">
