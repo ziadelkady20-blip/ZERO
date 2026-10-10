@@ -85,17 +85,26 @@ export async function PATCH(request: Request) {
       }
       if (Array.isArray(body.variants)) {
         for (const variant of body.variants) {
-          if (!variant || typeof variant.id !== "string") continue;
-          const variantData: Record<string, unknown> = {};
-          if (typeof variant.sku === "string" && variant.sku.trim()) variantData.sku = variant.sku.trim();
-          if (typeof variant.size === "string" && variant.size.trim()) variantData.size = variant.size.trim();
-          if (typeof variant.color === "string" && variant.color.trim()) variantData.color = variant.color.trim();
-          if (variant.stock !== undefined) {
+          if (!variant || typeof variant !== "object") continue;
+          if (typeof variant.id === "string" && variant.id) {
+            const variantData: Record<string, unknown> = {};
+            if (typeof variant.sku === "string" && variant.sku.trim()) variantData.sku = variant.sku.trim();
+            if (typeof variant.size === "string" && variant.size.trim()) variantData.size = variant.size.trim();
+            if (typeof variant.color === "string" && variant.color.trim()) variantData.color = variant.color.trim();
+            if (variant.stock !== undefined) {
+              const stock = Number(variant.stock);
+              if (!Number.isInteger(stock) || stock < 0) throw new Error("INVALID_STOCK");
+              variantData.stock = stock;
+            }
+            if (Object.keys(variantData).length) await tx.productVariant.update({ where: { id: variant.id, productId: id }, data: variantData as any });
+          } else {
+            const sku = typeof variant.sku === "string" ? variant.sku.trim() : "";
+            const size = typeof variant.size === "string" ? variant.size.trim() : "";
+            const color = typeof variant.color === "string" ? variant.color.trim() : "";
             const stock = Number(variant.stock);
-            if (!Number.isInteger(stock) || stock < 0) throw new Error("INVALID_STOCK");
-            variantData.stock = stock;
+            if (!sku || !size || !color || !Number.isInteger(stock) || stock < 0) throw new Error("INVALID_STOCK");
+            await tx.productVariant.create({ data: { productId: id, sku, size, color, stock } });
           }
-          if (Object.keys(variantData).length) await tx.productVariant.update({ where: { id: variant.id, productId: id }, data: variantData as any });
         }
       }
       return tx.product.findUniqueOrThrow({ where: { id }, include: { category: true, images: { orderBy: { position: "asc" } }, variants: true } });
