@@ -47,3 +47,63 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Could not create product. Check that its slug, SKU, and category are unique and valid." }, { status: 409 });
   }
 }
+
+
+export async function PATCH(request: Request) {
+  if (!(await isAdminSessionValid())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  let body: any;
+  try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON." }, { status: 400 }); }
+  const id = typeof body.id === "string" ? body.id : "";
+  if (!id) return NextResponse.json({ error: "Product id is required." }, { status: 400 });
+  const data: Record<string, unknown> = {};
+  for (const field of ["nameEn", "nameAr", "slug", "descriptionEn", "descriptionAr"] as const) {
+    if (typeof body[field] === "string") data[field] = body[field].trim();
+  }
+  if (typeof body.active === "boolean") data.active = body.active;
+  if (typeof body.featured === "boolean") data.featured = body.featured;
+  if (typeof body.categoryId === "string" && body.categoryId) data.categoryId = body.categoryId;
+  if (body.price !== undefined) {
+    const price = Number(body.price);
+    if (!Number.isInteger(price) || price < 0) return NextResponse.json({ error: "Price must be a non-negative whole number." }, { status: 400 });
+    data.price = price;
+  }
+  if (body.compareAtPrice !== undefined) {
+    const compareAtPrice = body.compareAtPrice === null || body.compareAtPrice === "" ? null : Number(body.compareAtPrice);
+    if (compareAtPrice !== null && (!Number.isInteger(compareAtPrice) || compareAtPrice < 0)) return NextResponse.json({ error: "Compare-at price is invalid." }, { status: 400 });
+    data.compareAtPrice = compareAtPrice;
+  }
+  try {
+    const product = await prisma.$transaction(async (tx) => {
+      const existing = await tx.product.findUnique({ where: { id } });
+      if (!existing) throw new Error("PRODUCT_NOT_FOUND");
+      await tx.product.update({ where: { id }, data: data as any });
+      if (Array.isArray(body.images)) {
+        const urls = body.images.filter((url: unknown) => typeof url === "string" && /^https?:\/\//.test(url)).slice(0, 8);
+        await tx.productImage.deleteMany({ where: { productId: id } });
+        await tx.productImage.createMany({ data: urls.map((url: string, position: number) => ({ productId: id, url, position })) });
+      }
+      if (Array.isArray(body.variants)) {
+        for (const variant of body.variants) {
+          if (!variant || typeof variant.id !== "string") continue;
+          const variantData: Record<string, unknown> = {};
+          if (typeof variant.sku === "string" && variant.sku.trim()) variantData.sku = variant.sku.trim();
+          if (typeof variant.size === "string" && variant.size.trim()) variantData.size = variant.size.trim();
+          if (typeof variant.color === "string" && variant.color.trim()) variantData.color = variant.color.trim();
+          if (variant.stock !== undefined) {
+            const stock = Number(variant.stock);
+            if (!Number.isInteger(stock) || stock < 0) throw new Error("INVALID_STOCK");
+            variantData.stock = stock;
+          }
+          if (Object.keys(variantData).length) await tx.productVariant.update({ where: { id: variant.id, productId: id }, data: variantData as any });
+        }
+      }
+      return tx.product.findUniqueOrThrow({ where: { id }, include: { category: true, images: { orderBy: { position: "asc" } }, variants: true } });
+    });
+    return NextResponse.json({ product });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "";
+    if (reason === "PRODUCT_NOT_FOUND") return NextResponse.json({ error: "Product not found." }, { status: 404 });
+    if (reason === "INVALID_STOCK") return NextResponse.json({ error: "Stock must be a non-negative whole number." }, { status: 400 });
+    return NextResponse.json({ error: "Could not update product. Check unique slug/SKU and related records." }, { status: 409 });
+  }
+}
