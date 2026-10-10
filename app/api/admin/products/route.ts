@@ -128,3 +128,23 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Could not update product. Check unique slug/SKU and related records." }, { status: 409 });
   }
 }
+
+
+export async function DELETE(request: Request) {
+  if (!(await isAdminSessionValid())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  let body: { id?: unknown };
+  try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON." }, { status: 400 }); }
+  const id = typeof body.id === "string" ? body.id.trim() : "";
+  if (!id) return NextResponse.json({ error: "Product id is required." }, { status: 400 });
+  try {
+    const product = await prisma.product.findUnique({ where: { id }, select: { id: true, nameEn: true, _count: { select: { orderItems: true } } } });
+    if (!product) return NextResponse.json({ error: "Product not found." }, { status: 404 });
+    if (product._count.orderItems > 0) {
+      return NextResponse.json({ error: "This product is linked to existing orders, so it cannot be permanently deleted. You can unpublish it instead to hide it from the storefront while preserving order history." }, { status: 409 });
+    }
+    await prisma.product.delete({ where: { id } });
+    return NextResponse.json({ success: true, id: product.id });
+  } catch {
+    return NextResponse.json({ error: "Could not delete product. If it has order history, unpublish it instead." }, { status: 409 });
+  }
+}
