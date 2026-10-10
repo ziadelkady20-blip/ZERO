@@ -1,6 +1,7 @@
 "use client";
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import "../admin.css";
 
 async function send(path:string,body:unknown){
  const response=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
