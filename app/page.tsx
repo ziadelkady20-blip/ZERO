@@ -27,46 +27,7 @@ type Product = {
   imageAlt: string;
 };
 
-const products: Product[] = [
-  {
-    id: 1,
-    slug: "core-compression-tee",
-    name: "Core Compression Tee",
-    category: "Compression",
-    price: 749,
-    badge: "BESTSELLER",
-    image: ZERO_MODEL_IMAGE,
-    imageAlt: "Men’s black fitted performance T-shirt",
-  },
-  {
-    id: 2,
-    slug: "essential-training-tee",
-    name: "Essential Training Tee",
-    category: "T-Shirts",
-    price: 599,
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=90",
-    imageAlt: "Men’s minimal white everyday T-shirt",
-  },
-  {
-    id: 3,
-    slug: "performance-long-sleeve",
-    name: "Performance Long Sleeve",
-    category: "Compression",
-    price: 899,
-    badge: "NEW DROP",
-    image: ZERO_MODEL_IMAGE,
-    imageAlt: "Men’s minimal long-sleeve performance top",
-  },
-  {
-    id: 4,
-    slug: "everyday-oversized-tee",
-    name: "Everyday Oversized Tee",
-    category: "T-Shirts",
-    price: 649,
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=90",
-    imageAlt: "Men’s neutral oversized streetwear T-shirt",
-  },
-];
+const products: Product[] = [];
 
 const copy = {
   en: {
@@ -211,11 +172,11 @@ export default function HomePage() {
   const t = copy[locale];
   const isArabic = locale === "ar";
   const cartCount = Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
-  const subtotal = products.reduce((sum, product) => sum + product.price * (cart[product.id] || 0), 0);
+  const subtotal = catalogProducts.reduce((sum, product) => sum + product.price * (cart[product.id] || 0), 0);
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    return (catalogProducts.length ? catalogProducts : products).filter((product) => {
+    return catalogProducts.filter((product) => {
       const categoryMatches = activeCategory === "All" || product.category === activeCategory;
       const searchMatches = !normalizedQuery || product.name.toLowerCase().includes(normalizedQuery) || product.category.toLowerCase().includes(normalizedQuery);
       return categoryMatches && searchMatches;
@@ -362,12 +323,12 @@ export default function HomePage() {
                 <div className="product-info">
                   <div>
                     <p className="product-category">{isArabic ? (product.category === "Compression" ? "كومبريشن" : "تيشيرتات") : product.category}</p>
-                    <h3><a className="product-name-link" href={`/product/${product.slug}`}>{catalogProducts.length ? product.name : isArabic ? ({
+                    <h3><a className="product-name-link" href={`/product/${product.slug}`}>{isArabic ? ({
                       1: "تيشيرت كومبريشن كور",
                       2: "تيشيرت التدريب الأساسي",
                       3: "تيشيرت أداء بأكمام طويلة",
                       4: "تيشيرت أوفر سايز يومي",
-                    } as Record<number, string>)[product.id] : product.name}</a></h3>
+                    } as Record<number, string>)[product.id] || product.name : product.name}</a></h3>
                   </div>
                   <p className="product-price">{product.price.toLocaleString(isArabic ? "ar-EG" : "en-EG")} <span>{t.egp}</span></p>
                 </div>
