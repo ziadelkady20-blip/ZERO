@@ -27,13 +27,14 @@ export async function POST(request: Request) {
   const slug = typeof body.slug === "string" ? body.slug.trim().toLowerCase() : "";
   const categoryId = typeof body.categoryId === "string" ? body.categoryId : "";
   const price = Number(body.price);
-  if (!nameEn || !nameAr || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !categoryId || !Number.isInteger(price) || price < 0) {
+  const compareAtPrice = body.compareAtPrice === undefined || body.compareAtPrice === null || body.compareAtPrice === "" ? null : Number(body.compareAtPrice);
+  if (!nameEn || !nameAr || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !categoryId || !Number.isInteger(price) || price < 0 || (compareAtPrice !== null && (!Number.isInteger(compareAtPrice) || compareAtPrice < price))) {
     return NextResponse.json({ error: "Name, Arabic name, valid slug, category and non-negative integer price are required." }, { status: 400 });
   }
   try {
     const product = await prisma.product.create({
       data: {
-        nameEn, nameAr, slug, categoryId, price,
+        nameEn, nameAr, slug, categoryId, price, compareAtPrice,
         descriptionEn: typeof body.descriptionEn === "string" ? body.descriptionEn : "",
         descriptionAr: typeof body.descriptionAr === "string" ? body.descriptionAr : "",
         active: body.active !== false,
