@@ -193,7 +193,20 @@ export default function HomePage() {
   const [cartOpen, setCartOpen] = useState(false);
   const [cart, setCart] = useState<Record<number, number>>({});
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [addedProduct, setAddedProduct] = useState<number | null>(null);\n  const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);\n\n  useEffect(() => {\n    fetch("/api/products").then((response) => response.json()).then((data) => {\n      if (!Array.isArray(data.products)) return;\n      setCatalogProducts(data.products.map((item: { id: string; slug: string; nameEn: string; nameAr: string; price: number; category?: { slug?: string; nameEn?: string }; images?: { url: string; alt?: string }[]; featured?: boolean }, index: number) => ({\n        id: index + 1, slug: item.slug, name: locale === "ar" ? item.nameAr : item.nameEn,\n        category: (item.category?.slug || item.category?.nameEn || "").toLowerCase().includes("compression") ? "Compression" : "T-Shirts",\n        price: item.price, badge: item.featured ? "FEATURED" : undefined, image: item.images?.[0]?.url || ZERO_MODEL_IMAGE,\n        imageAlt: item.images?.[0]?.alt || (locale === "ar" ? "موديل رجالي بملابس ZERO الرياضية" : "Male model wearing ZERO performance wear"),\n      })));\n    }).catch(() => {});\n  }, [locale]);
+  const [addedProduct, setAddedProduct] = useState<number | null>(null);
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    fetch("/api/products").then((response) => response.json()).then((data) => {
+      if (!Array.isArray(data.products)) return;
+      setCatalogProducts(data.products.map((item: { id: string; slug: string; nameEn: string; nameAr: string; price: number; category?: { slug?: string; nameEn?: string }; images?: { url: string; alt?: string }[]; featured?: boolean }, index: number) => ({
+        id: index + 1, slug: item.slug, name: locale === "ar" ? item.nameAr : item.nameEn,
+        category: (item.category?.slug || item.category?.nameEn || "").toLowerCase().includes("compression") ? "Compression" : "T-Shirts",
+        price: item.price, badge: item.featured ? "FEATURED" : undefined, image: item.images?.[0]?.url || ZERO_MODEL_IMAGE,
+        imageAlt: item.images?.[0]?.alt || (locale === "ar" ? "موديل رجالي بملابس ZERO الرياضية" : "Male model wearing ZERO performance wear"),
+      })));
+    }).catch(() => {});
+  }, [locale]);
 
   const t = copy[locale];
   const isArabic = locale === "ar";
