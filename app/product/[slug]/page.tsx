@@ -7,7 +7,7 @@ import Link from "next/link";
 type Variant = { id: string; size: string; color: string; stock: number; sku: string };
 type Product = {
   id: string; slug: string; nameEn: string; nameAr: string; descriptionEn: string; descriptionAr: string;
-  price: number; active: boolean; category: { nameEn: string; nameAr: string; slug: string };
+  price: number; compareAtPrice?: number | null; active: boolean; category: { nameEn: string; nameAr: string; slug: string };
   images: { url: string; alt: string; position: number }[]; variants: Variant[];
 };
 type CartItem = { variantId: string; productId: string; nameEn: string; nameAr: string; image: string; size: string; color: string; price: number; quantity: number; stock: number };
@@ -80,7 +80,7 @@ export default function ProductDetailPage() {
       <div className="zero-detail-info">
         <p className="zero-detail-eyebrow">{product.category?.nameEn || "ZERO CLOTHING"} / MEN’S COLLECTION</p>
         <h1>{title}</h1>
-        <p className="zero-detail-price">{product.price.toLocaleString(ar ? "ar-EG" : "en-EG")} <span>{ar ? "جنيه" : "EGP"}</span></p>
+        <p className="zero-detail-price">{product.compareAtPrice && product.compareAtPrice > product.price && <del>{product.compareAtPrice.toLocaleString(ar ? "ar-EG" : "en-EG")} </del>}{product.price.toLocaleString(ar ? "ar-EG" : "en-EG")} <span>{ar ? "جنيه" : "EGP"}</span></p>
         <p className="zero-detail-description">{description || (ar ? "تصميم رياضي بقصة دقيقة، مناسب للحركة واللبس اليومي." : "A clean athletic fit designed for movement and everyday wear.")}</p>
         <div className="zero-detail-rule" />
         <div className="zero-detail-option-head"><label>{ar ? "المقاس" : "SIZE"}</label><span>{size || (ar ? "اختار المقاس" : "SELECT SIZE")}</span></div>
