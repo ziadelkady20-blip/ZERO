@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- JSON payloads are validated before Prisma writes. */
 import { NextResponse } from "next/server";
 import { isAdminSessionValid } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
