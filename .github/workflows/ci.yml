@@ -1,0 +1,25 @@
+name: ZERO CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/zero_clothing?schema=public
+      AUTH_SECRET: ci-only-secret-value-that-is-longer-than-thirty-two-characters
+      ADMIN_EMAIL: ci@example.com
+      ADMIN_PASSWORD: ci-only-password
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install
+      - run: npx prisma generate
+      - run: npm run build
