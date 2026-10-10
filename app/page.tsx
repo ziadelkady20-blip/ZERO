@@ -213,7 +213,7 @@ export default function HomePage() {
         </a>
 
         <nav className={mobileMenuOpen ? "main-nav is-open" : "main-nav"} aria-label="Main navigation">
-          <a href="#collection" onClick={() => setMobileMenuOpen(false)}>{t.shop}</a>
+          <a href="/shop" onClick={() => setMobileMenuOpen(false)}>{t.shop}</a>
           <a href="#collection" onClick={() => { setActiveCategory("Compression"); setMobileMenuOpen(false); }}>{t.compression}</a>
           <a href="#collection" onClick={() => { setActiveCategory("T-Shirts"); setMobileMenuOpen(false); }}>{t.tees}</a>
           <a href="#standard" onClick={() => setMobileMenuOpen(false)}>{t.ourStandard}</a>
@@ -250,7 +250,7 @@ export default function HomePage() {
           <p className="eyebrow"><span className="eyebrow-line" />{t.heroEyebrow}</p>
           <h1>{t.heroTitleA}<br /><span>{t.heroTitleB}</span> <em>{t.heroTitleC}</em></h1>
           <p className="hero-description">{t.heroDescription}</p>
-          <a className="button button-light" href="#collection">
+          <a className="button button-light" href="/shop">
             {t.shopCollection}<ArrowRight size={17} />
           </a>
           <div className="hero-index"><span>01</span><span className="index-rule" /><span>04</span></div>
@@ -274,7 +274,7 @@ export default function HomePage() {
             <h2>{t.collectionTitle}</h2>
             <p className="section-description">{t.collectionDescription}</p>
           </div>
-          <a className="underlined-link desktop-view-all" href="#collection">{t.viewAll}<ArrowRight size={16} /></a>
+          <a className="underlined-link desktop-view-all" href="/shop">{t.viewAll}<ArrowRight size={16} /></a>
         </div>
 
         <div className="collection-toolbar">
@@ -322,7 +322,7 @@ export default function HomePage() {
         ) : (
           <div className="empty-results">{t.noResults}</div>
         )}
-        <a className="underlined-link mobile-view-all" href="#collection">{t.viewAll}<ArrowRight size={16} /></a>
+        <a className="underlined-link mobile-view-all" href="/shop">{t.viewAll}<ArrowRight size={16} /></a>
       </section>
 
       <section className="manifesto-section" id="standard">
