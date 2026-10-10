@@ -165,7 +165,7 @@ export default function HomePage() {
         category: item.category?.nameEn || item.category?.slug || "Performance",
         categoryAr: item.category?.nameAr || item.category?.nameEn || "ملابس رياضية",
         categorySlug: item.category?.slug || "uncategorized",
-        price: item.price, compareAtPrice: item.compareAtPrice, badge: item.featured ? "FEATURED" : undefined, image: item.images?.[0]?.url || ZERO_MODEL_IMAGE,
+        price: item.price, compareAtPrice: item.compareAtPrice, badge: item.featured ? "FEATURED" : undefined, image: item.images?.[0]?.url || "",
         imageAlt: item.images?.[0]?.alt || (locale === "ar" ? "موديل رجالي بملابس ZERO الرياضية" : "Male model wearing ZERO performance wear"),
       })));
     }).catch(() => {});
@@ -308,7 +308,7 @@ export default function HomePage() {
             {filteredProducts.map((product, index) => (
               <article className="product-card" key={product.id}>
                 <div className="product-image-wrap">
-                  <img src={product.image} alt={product.imageAlt} className="product-image" loading={index > 1 ? "lazy" : "eager"} />
+                  {product.image ? <img src={product.image} alt={product.imageAlt} className="product-image" loading={index > 1 ? "lazy" : "eager"} /> : <div className="product-image-placeholder" role="img" aria-label={isArabic ? "لا توجد صورة لهذا المنتج بعد" : "No product image added yet"}><span>ZERO.</span><small>{isArabic ? "أضف صورة من لوحة الإدارة" : "ADD IMAGE IN ADMIN"}</small></div>}
                   {product.badge && <span className="product-badge">{product.badge}</span>}
                   <button className="wishlist-button" aria-label={"Save " + product.name}><Heart size={18} strokeWidth={1.6} /></button>
                   <a className="quick-add" href={`/product/${product.slug}`}>
