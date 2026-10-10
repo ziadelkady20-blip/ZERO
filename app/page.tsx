@@ -32,7 +32,7 @@ const products: Product[] = [
     price: 749,
     badge: "BESTSELLER",
     image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1000&q=85",
-    imageAlt: "Athletic black training shirt",
+    imageAlt: "Men’s black fitted performance T-shirt",
   },
   {
     id: 2,
@@ -40,7 +40,7 @@ const products: Product[] = [
     category: "T-Shirts",
     price: 599,
     image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=85",
-    imageAlt: "Minimal white T-shirt",
+    imageAlt: "Men’s minimal white everyday T-shirt",
   },
   {
     id: 3,
@@ -49,7 +49,7 @@ const products: Product[] = [
     price: 899,
     badge: "NEW DROP",
     image: "https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=1000&q=85",
-    imageAlt: "Minimal performance apparel",
+    imageAlt: "Men’s minimal long-sleeve performance top",
   },
   {
     id: 4,
@@ -57,49 +57,49 @@ const products: Product[] = [
     category: "T-Shirts",
     price: 649,
     image: "https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=1000&q=85",
-    imageAlt: "Neutral streetwear T-shirt",
+    imageAlt: "Men’s neutral oversized streetwear T-shirt",
   },
 ];
 
 const copy = {
   en: {
-    announcement: "THE NEW EVERYDAY UNIFORM — DISCOVER THE ZERO STANDARD",
+    announcement: "ZERO MENSWEAR — EVERYDAY ESSENTIALS, REDEFINED",
     shop: "Shop",
     compression: "Compression",
     tees: "T-Shirts",
     ourStandard: "Our Standard",
     search: "Search",
     bag: "Bag",
-    heroEyebrow: "DESIGNED FOR EVERY DAY",
+    heroEyebrow: "ZERO MENSWEAR · DESIGNED FOR EVERY DAY",
     heroTitleA: "DISCIPLINE",
     heroTitleB: "IN EVERY",
     heroTitleC: "DETAIL.",
     heroDescription: "Considered essentials. Timeless silhouettes. Made to move naturally between every part of your day.",
     shopCollection: "SHOP THE COLLECTION",
-    categoriesEyebrow: "FIND YOUR FIT",
-    categoriesTitle: "The everyday rotation.",
-    categoriesDescription: "Thoughtfully made pieces. A place for every side of you.",
+    categoriesEyebrow: "THE MEN’S WARDROBE",
+    categoriesTitle: "Built for his everyday.",
+    categoriesDescription: "Modern menswear essentials, from refined everyday tees to versatile layers and finishing pieces.",
     categoryTee: "T-SHIRTS",
     categoryCompression: "COMPRESSION",
     categoryHoodie: "HOODIES",
     categoryPants: "PANTS",
-    categoryAccessories: "ACCESSORIES",
+    categoryAccessories: "MEN’S ACCESSORIES",
     categoryExplore: "EXPLORE",
     bestsellerEyebrow: "THE ZERO EDIT",
     explore: "EXPLORE THE DROP",
     collectionEyebrow: "THE STARTING LINE",
-    collectionTitle: "Made for real life.",
-    collectionDescription: "Versatile essentials. Refined fits. Pieces that work with your style, wherever the day takes you.",
+    collectionTitle: "Menswear. No excess.",
+    collectionDescription: "Versatile menswear essentials. Refined fits. Pieces that work with your style, wherever the day takes you.",
     all: "All products",
     add: "Add to bag",
     added: "Added",
     egp: "EGP",
     viewAll: "VIEW ALL PRODUCTS",
     manifestoEyebrow: "LESS, BUT BETTER.",
-    manifestoTitle: "Your style. Your standard.",
-    manifestoBody: "ZERO is built around thoughtful design, versatile essentials, and comfort that lasts. A considered wardrobe for the way you live now—and whatever comes next.",
+    manifestoTitle: "His style. His standard.",
+    manifestoBody: "ZERO is menswear built around thoughtful design, versatile essentials, and lasting comfort. A considered wardrobe for the way you live now—and whatever comes next.",
     manifestoCta: "OUR STANDARD",
-    footerLine: "Considered essentials. Your everyday standard.",
+    footerLine: "Considered menswear. Your everyday standard.",
     quickLinks: "QUICK LINKS",
     support: "SUPPORT",
     shipping: "Shipping & delivery",
@@ -120,33 +120,33 @@ const copy = {
     noResults: "No products found.",
   },
   ar: {
-    announcement: "يونيفورم يومك الجديد — اكتشف معايير ZERO",
+    announcement: "ZERO للملابس الرجالي — أساسيات يومك بمعايير مختلفة",
     shop: "تسوّق",
     compression: "كومبريشن",
     tees: "تيشيرتات",
     ourStandard: "معاييرنا",
     search: "بحث",
     bag: "السلة",
-    heroEyebrow: "مصممة لكل يوم",
+    heroEyebrow: "ZERO للملابس الرجالي · مصممة لكل يوم",
     heroTitleA: "التفاصيل",
     heroTitleB: "تصنع",
     heroTitleC: "الفرق.",
     heroDescription: "قطع أساسية بتصميم مدروس وقصّات مريحة، تناسب يومك وتكمل معاك في كل وقت.",
     shopCollection: "تسوّق المجموعة",
-    categoriesEyebrow: "اختار ستايلك",
-    categoriesTitle: "قطع أساسية لكل يوم.",
-    categoriesDescription: "تصميم مدروس وقطع تناسب كل جانب من يومك.",
+    categoriesEyebrow: "دولابك، بمعايير ZERO",
+    categoriesTitle: "ستايل رجالي لكل يوم.",
+    categoriesDescription: "أساسيات رجالي عصرية، من التيشيرتات اليومية للطبقات والإكسسوارات اللي تكمل ستايلك.",
     categoryTee: "تيشيرتات",
     categoryCompression: "كومبريشن",
     categoryHoodie: "هوديز",
     categoryPants: "بناطيل",
-    categoryAccessories: "إكسسوارات",
+    categoryAccessories: "إكسسوارات رجالي",
     categoryExplore: "اكتشف",
     bestsellerEyebrow: "اختيارات ZERO",
     explore: "اكتشف المجموعة",
     collectionEyebrow: "خط البداية",
-    collectionTitle: "ستايل لكل يوم.",
-    collectionDescription: "قطع أساسية بتفاصيل متقنة وقصّات متعددة الاستخدام، تناسب أسلوبك في أي وقت.",
+    collectionTitle: "ملابس رجالي من غير تكلف.",
+    collectionDescription: "قطع رجالي أساسية بتفاصيل متقنة وقصّات متعددة الاستخدام، تناسب أسلوبك في أي وقت.",
     all: "كل المنتجات",
     add: "أضف للسلة",
     added: "اتضاف",
@@ -154,9 +154,9 @@ const copy = {
     viewAll: "عرض كل المنتجات",
     manifestoEyebrow: "الأقل، لكن الأفضل.",
     manifestoTitle: "ستايلك. معاييرك.",
-    manifestoBody: "ZERO مبنية على التصميم المدروس، والقطع الأساسية متعددة الاستخدام، والراحة اللي تكمل معاك. خزانة تناسب حياتك دلوقتي وكل اللي جاي.",
+    manifestoBody: "ZERO للملابس الرجالي، مبنية على التصميم المدروس والقطع الأساسية متعددة الاستخدام والراحة اللي تكمل معاك. دولاب يناسب حياتك دلوقتي وكل اللي جاي.",
     manifestoCta: "معاييرنا",
-    footerLine: "قطع أساسية مدروسة. معاييرك اليومية.",
+    footerLine: "ملابس رجالي بتفاصيل مدروسة. معاييرك اليومية.",
     quickLinks: "روابط سريعة",
     support: "المساعدة",
     shipping: "الشحن والتوصيل",
@@ -270,7 +270,7 @@ export default function HomePage() {
           <div className="hero-garment hero-garment-back"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=90" alt="" /></div>
           <div className="hero-garment hero-garment-front"><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1100&q=90" alt="" /></div>
           <div className="hero-orbit hero-orbit-one" /><div className="hero-orbit hero-orbit-two" />
-          <div className="hero-product-caption"><span>ZERO / 001</span><span>THE EVERYDAY TEE</span></div>
+          <div className="hero-product-caption"><span>ZERO / 001</span><span>MEN’S EVERYDAY TEE</span></div>
         </div>
         <div className="hero-content">
           <p className="eyebrow"><span className="eyebrow-line" />{t.heroEyebrow}</p>
@@ -299,11 +299,11 @@ export default function HomePage() {
           <span className="category-count">01 — 05</span>
         </div>
         <div className="category-grid">
-          <a href="#collection" className="category-card category-card-tee"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=85" alt="Essential T-shirt" /><span className="category-index">01 / EVERYDAY</span><span className="category-title">{t.categoryTee}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
-          <a href="#collection" className="category-card category-card-compression" onClick={() => setActiveCategory("Compression")}><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=800&q=85" alt="Black fitted shirt" /><span className="category-index">02 / PERFORMANCE</span><span className="category-title">{t.categoryCompression}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
-          <a href="#collection" className="category-card category-card-hoodie"><img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800&q=85" alt="Hoodie" /><span className="category-index">03 / LAYER UP</span><span className="category-title">{t.categoryHoodie}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
-          <a href="#collection" className="category-card category-card-pants"><img src="https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=800&q=85" alt="Everyday pants" /><span className="category-index">04 / OFF-DUTY</span><span className="category-title">{t.categoryPants}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
-          <a href="#collection" className="category-card category-card-accessories"><img src="https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=800&q=85" alt="Everyday cap" /><span className="category-index">05 / FINISHING TOUCH</span><span className="category-title">{t.categoryAccessories}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-tee"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=85" alt="Men’s essential T-shirt" /><span className="category-index">01 / EVERYDAY</span><span className="category-title">{t.categoryTee}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-compression" onClick={() => setActiveCategory("Compression")}><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=800&q=85" alt="Men’s fitted performance shirt" /><span className="category-index">02 / PERFORMANCE</span><span className="category-title">{t.categoryCompression}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-hoodie"><img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800&q=85" alt="Men’s hoodie" /><span className="category-index">03 / LAYER UP</span><span className="category-title">{t.categoryHoodie}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-pants"><img src="https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=800&q=85" alt="Men’s everyday pants" /><span className="category-index">04 / OFF-DUTY</span><span className="category-title">{t.categoryPants}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-accessories"><img src="https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=800&q=85" alt="Men’s everyday cap" /><span className="category-index">05 / FINISHING TOUCH</span><span className="category-title">{t.categoryAccessories}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
         </div>
       </section>
 
