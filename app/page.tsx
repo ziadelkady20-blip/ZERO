@@ -6,8 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDownRight,
   ArrowRight,
-  Check,
-  ChevronDown,
   Heart,
   Menu,
   Search,
@@ -157,7 +155,6 @@ export default function HomePage() {
   const [cartOpen, setCartOpen] = useState(false);
   const [cart, setCart] = useState<Record<number, number>>({});
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [addedProduct, setAddedProduct] = useState<number | null>(null);
   const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -187,12 +184,6 @@ export default function HomePage() {
       return categoryMatches && searchMatches;
     });
   }, [activeCategory, query, catalogProducts]);
-
-  function addToCart(productId: number) {
-    setCart((current) => ({ ...current, [productId]: (current[productId] || 0) + 1 }));
-    setAddedProduct(productId);
-    window.setTimeout(() => setAddedProduct((current) => current === productId ? null : current), 1200);
-  }
 
   function updateQuantity(productId: number, change: number) {
     setCart((current) => {
