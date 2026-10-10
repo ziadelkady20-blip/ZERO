@@ -1,4 +1,5 @@
 "use client";
+import "./track.css";
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 
