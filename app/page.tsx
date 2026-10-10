@@ -75,7 +75,17 @@ const copy = {
     heroTitleB: "IN EVERY",
     heroTitleC: "DETAIL.",
     heroDescription: "Considered essentials. Timeless silhouettes. Made to move naturally between every part of your day.",
-    shopCollection: "SHOP THE COLLECTION",\n    categoriesEyebrow: "FIND YOUR FIT",\n    categoriesTitle: "The everyday rotation.",\n    categoriesDescription: "Thoughtfully made pieces. A place for every side of you.",\n    categoryTee: "T-SHIRTS",\n    categoryCompression: "COMPRESSION",\n    categoryHoodie: "HOODIES",\n    categoryPants: "PANTS",\n    categoryAccessories: "ACCESSORIES",\n    categoryExplore: "EXPLORE",\n    bestsellerEyebrow: "THE ZERO EDIT",
+    shopCollection: "SHOP THE COLLECTION",
+    categoriesEyebrow: "FIND YOUR FIT",
+    categoriesTitle: "The everyday rotation.",
+    categoriesDescription: "Thoughtfully made pieces. A place for every side of you.",
+    categoryTee: "T-SHIRTS",
+    categoryCompression: "COMPRESSION",
+    categoryHoodie: "HOODIES",
+    categoryPants: "PANTS",
+    categoryAccessories: "ACCESSORIES",
+    categoryExplore: "EXPLORE",
+    bestsellerEyebrow: "THE ZERO EDIT",
     explore: "EXPLORE THE DROP",
     collectionEyebrow: "THE STARTING LINE",
     collectionTitle: "Made for real life.",
@@ -122,7 +132,17 @@ const copy = {
     heroTitleB: "تصنع",
     heroTitleC: "الفرق.",
     heroDescription: "قطع أساسية بتصميم مدروس وقصّات مريحة، تناسب يومك وتكمل معاك في كل وقت.",
-    shopCollection: "تسوّق المجموعة",\n    categoriesEyebrow: "اختار ستايلك",\n    categoriesTitle: "قطع أساسية لكل يوم.",\n    categoriesDescription: "تصميم مدروس وقطع تناسب كل جانب من يومك.",\n    categoryTee: "تيشيرتات",\n    categoryCompression: "كومبريشن",\n    categoryHoodie: "هوديز",\n    categoryPants: "بناطيل",\n    categoryAccessories: "إكسسوارات",\n    categoryExplore: "اكتشف",\n    bestsellerEyebrow: "اختيارات ZERO",
+    shopCollection: "تسوّق المجموعة",
+    categoriesEyebrow: "اختار ستايلك",
+    categoriesTitle: "قطع أساسية لكل يوم.",
+    categoriesDescription: "تصميم مدروس وقطع تناسب كل جانب من يومك.",
+    categoryTee: "تيشيرتات",
+    categoryCompression: "كومبريشن",
+    categoryHoodie: "هوديز",
+    categoryPants: "بناطيل",
+    categoryAccessories: "إكسسوارات",
+    categoryExplore: "اكتشف",
+    bestsellerEyebrow: "اختيارات ZERO",
     explore: "اكتشف المجموعة",
     collectionEyebrow: "خط البداية",
     collectionTitle: "ستايل لكل يوم.",
@@ -273,7 +293,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="category-section section-pad" aria-labelledby="category-title">\n        <div className="category-heading">\n          <div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{t.categoriesEyebrow}</p><h2 id="category-title">{t.categoriesTitle}</h2><p>{t.categoriesDescription}</p></div>\n          <span className="category-count">01 — 05</span>\n        </div>\n        <div className="category-grid">\n          <a href="#collection" className="category-card category-card-tee"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=85" alt="Essential T-shirt" /><span className="category-index">01 / EVERYDAY</span><span className="category-title">{t.categoryTee}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>\n          <a href="#collection" className="category-card category-card-compression" onClick={() => setActiveCategory("Compression")}><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=800&q=85" alt="Black fitted shirt" /><span className="category-index">02 / PERFORMANCE</span><span className="category-title">{t.categoryCompression}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>\n          <a href="#collection" className="category-card category-card-hoodie"><img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800&q=85" alt="Hoodie" /><span className="category-index">03 / LAYER UP</span><span className="category-title">{t.categoryHoodie}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>\n          <a href="#collection" className="category-card category-card-pants"><img src="https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=800&q=85" alt="Everyday pants" /><span className="category-index">04 / OFF-DUTY</span><span className="category-title">{t.categoryPants}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>\n          <a href="#collection" className="category-card category-card-accessories"><img src="https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=800&q=85" alt="Everyday cap" /><span className="category-index">05 / FINISHING TOUCH</span><span className="category-title">{t.categoryAccessories}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>\n        </div>\n      </section>\n\n      <section className="collection-section section-pad" id="collection">
+      <section className="category-section section-pad" aria-labelledby="category-title">
+        <div className="category-heading">
+          <div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{t.categoriesEyebrow}</p><h2 id="category-title">{t.categoriesTitle}</h2><p>{t.categoriesDescription}</p></div>
+          <span className="category-count">01 — 05</span>
+        </div>
+        <div className="category-grid">
+          <a href="#collection" className="category-card category-card-tee"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=85" alt="Essential T-shirt" /><span className="category-index">01 / EVERYDAY</span><span className="category-title">{t.categoryTee}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-compression" onClick={() => setActiveCategory("Compression")}><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=800&q=85" alt="Black fitted shirt" /><span className="category-index">02 / PERFORMANCE</span><span className="category-title">{t.categoryCompression}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-hoodie"><img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800&q=85" alt="Hoodie" /><span className="category-index">03 / LAYER UP</span><span className="category-title">{t.categoryHoodie}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-pants"><img src="https://images.unsplash.com/photo-1552902865-b72c031ac5ea?auto=format&fit=crop&w=800&q=85" alt="Everyday pants" /><span className="category-index">04 / OFF-DUTY</span><span className="category-title">{t.categoryPants}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-accessories"><img src="https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=800&q=85" alt="Everyday cap" /><span className="category-index">05 / FINISHING TOUCH</span><span className="category-title">{t.categoryAccessories}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+        </div>
+      </section>
+
+      <section className="collection-section section-pad" id="collection">
         <div className="section-heading">
           <div>
             <p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{t.bestsellerEyebrow} · {t.collectionEyebrow}</p>
@@ -342,7 +376,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="editorial-strip">\n        <div className="editorial-image"><img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1300&q=90" alt="Minimal everyday fashion editorial" loading="lazy" /></div>\n        <div className="editorial-copy"><p className="eyebrow"><span className="eyebrow-line" />THE ZERO POINT OF VIEW</p><h2>MORE THAN<br/><span>CLOTHING.</span></h2><p>Good design doesn’t ask for attention. It earns a second look. Clean silhouettes, thoughtful details, and essentials that belong to you.</p><a href="#standard" className="button button-outline">DISCOVER OUR STANDARD <ArrowRight size={16}/></a><span className="editorial-watermark">Z.</span></div>\n      </section>\n\n      <section className="benefits-row">
+      <section className="editorial-strip">
+        <div className="editorial-image"><img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1300&q=90" alt="Minimal everyday fashion editorial" loading="lazy" /></div>
+        <div className="editorial-copy"><p className="eyebrow"><span className="eyebrow-line" />THE ZERO POINT OF VIEW</p><h2>MORE THAN<br/><span>CLOTHING.</span></h2><p>Good design doesn’t ask for attention. It earns a second look. Clean silhouettes, thoughtful details, and essentials that belong to you.</p><a href="#standard" className="button button-outline">DISCOVER OUR STANDARD <ArrowRight size={16}/></a><span className="editorial-watermark">Z.</span></div>
+      </section>
+
+      <section className="benefits-row">
         <div><span className="benefit-number">01</span><div><strong>DESIGNED TO MOVE</strong><p>Comfort for every day.</p></div></div>
         <div><span className="benefit-number">02</span><div><strong>LESS, BUT BETTER</strong><p>Essentials without the noise.</p></div></div>
         <div><span className="benefit-number">03</span><div><strong>MADE TO LAST</strong><p>Essentials you reach for.</p></div></div>
