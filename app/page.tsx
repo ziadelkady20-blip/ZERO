@@ -58,7 +58,7 @@ const products: Product[] = [
     name: "Everyday Oversized Tee",
     category: "T-Shirts",
     price: 649,
-    image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=90",
+    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=90",
     imageAlt: "Men’s neutral oversized streetwear T-shirt",
   },
 ];
