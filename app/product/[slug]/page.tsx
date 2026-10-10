@@ -33,7 +33,7 @@ export default function ProductDetailPage() {
         const firstAvailable = found.variants.find((v: Variant) => v.stock > 0) || found.variants[0];
         if (firstAvailable) { setSize(firstAvailable.size); setColor(firstAvailable.color); }
       }
-    }).catch(() => setNotice(ar ? "تعذر تحميل المنتج. حاول مرة تانية." : "Could not load this product. Please try again."))
+    }).catch(() => setNotice("Could not load this product. Please try again."))
       .finally(() => setLoading(false));
   }, [params.slug]);
 
