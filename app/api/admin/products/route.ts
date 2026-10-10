@@ -31,6 +31,11 @@ export async function POST(request: Request) {
   if (!nameEn || !nameAr || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !categoryId || !Number.isInteger(price) || price < 0 || (compareAtPrice !== null && (!Number.isInteger(compareAtPrice) || compareAtPrice < price))) {
     return NextResponse.json({ error: "Name, Arabic name, valid slug, category and non-negative integer price are required." }, { status: 400 });
   }
+  const rawImages = Array.isArray(body.images) ? body.images.map((url: unknown) => typeof url === "string" ? url.trim() : "") : [];
+  if (rawImages.some((url: string) => url && !/^https:\/\/\S+$/i.test(url))) {
+    return NextResponse.json({ error: "Product images must be direct HTTPS image URLs. Use one URL per line and check that it opens the image itself." }, { status: 400 });
+  }
+  const imageUrls = rawImages.filter(Boolean).slice(0, 8);
   try {
     const product = await prisma.product.create({
       data: {
@@ -74,6 +79,11 @@ export async function PATCH(request: Request) {
     if (compareAtPrice !== null && (!Number.isInteger(compareAtPrice) || compareAtPrice < 0)) return NextResponse.json({ error: "Compare-at price is invalid." }, { status: 400 });
     data.compareAtPrice = compareAtPrice;
   }
+  const rawImages = Array.isArray(body.images) ? body.images.map((url: unknown) => typeof url === "string" ? url.trim() : "") : null;
+  if (rawImages && rawImages.some((url: string) => url && !/^https:\/\/\S+$/i.test(url))) {
+    return NextResponse.json({ error: "Product images must be direct HTTPS image URLs. Use one URL per line and check that it opens the image itself." }, { status: 400 });
+  }
+  const imageUrls = rawImages?.filter(Boolean).slice(0, 8);
   try {
     const product = await prisma.$transaction(async (tx) => {
       const existing = await tx.product.findUnique({ where: { id } });
