@@ -44,7 +44,7 @@ export async function POST(request: Request) {
         descriptionAr: typeof body.descriptionAr === "string" ? body.descriptionAr : "",
         active: body.active !== false,
         featured: body.featured === true,
-        images: { create: Array.isArray(body.images) ? body.images.filter((url: unknown) => typeof url === "string" && /^https?:\/\//.test(url)).slice(0, 8).map((url: string, position: number) => ({ url, position })) : [] },
+        images: { create: imageUrls.map((url: string, position: number) => ({ url, position })) },
         variants: { create: Array.isArray(body.variants) ? body.variants.filter((v: any) => v && typeof v.size === "string" && typeof v.color === "string" && typeof v.sku === "string" && Number.isInteger(Number(v.stock)) && Number(v.stock) >= 0).map((v: any) => ({ size: v.size, color: v.color, sku: v.sku, stock: Number(v.stock) })) : [] },
       },
       include: { category: true, images: true, variants: true },
@@ -90,7 +90,7 @@ export async function PATCH(request: Request) {
       if (!existing) throw new Error("PRODUCT_NOT_FOUND");
       await tx.product.update({ where: { id }, data: data as any });
       if (Array.isArray(body.images)) {
-        const urls = body.images.filter((url: unknown) => typeof url === "string" && /^https?:\/\//.test(url)).slice(0, 8);
+        const urls = imageUrls || [];
         await tx.productImage.deleteMany({ where: { productId: id } });
         await tx.productImage.createMany({ data: urls.map((url: string, position: number) => ({ productId: id, url, position })) });
       }
