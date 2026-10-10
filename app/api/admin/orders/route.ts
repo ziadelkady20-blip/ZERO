@@ -26,6 +26,7 @@ export async function PATCH(request: Request) {
     const order = await prisma.$transaction(async (tx) => {
       const current = await tx.order.findUnique({ where: { code }, include: { items: true } });
       if (!current) throw new Error("NOT_FOUND");
+      if (current.status === "CANCELLED" && status !== "CANCELLED") throw new Error("CANCELLED_ORDER_LOCKED");
       if (status === "CANCELLED" && current.status !== "CANCELLED" && current.status !== "DELIVERED") {
         for (const item of current.items) {
           await tx.productVariant.update({ where: { id: item.variantId }, data: { stock: { increment: item.quantity } } });
@@ -36,6 +37,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ order });
   } catch (error) {
     if (error instanceof Error && error.message === "NOT_FOUND") return NextResponse.json({ error: "Order not found." }, { status: 404 });
+    if (error instanceof Error && error.message === "CANCELLED_ORDER_LOCKED") return NextResponse.json({ error: "A cancelled order cannot be reopened; create a new order instead." }, { status: 409 });
     return NextResponse.json({ error: "Could not update order status." }, { status: 503 });
   }
 }
