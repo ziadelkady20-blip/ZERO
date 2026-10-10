@@ -33,7 +33,7 @@ a{color:inherit;text-decoration:none}
 .search-panel{display:flex;align-items:center;gap:12px;padding:14px 5.2%;border-bottom:1px solid var(--line);background:#fff;position:relative;z-index:5}
 .search-panel input{flex:1;border:0;outline:0;font-size:14px}
 .hero-section{height:min(690px,70vw);min-height:530px;position:relative;display:flex;align-items:center;background:#161616;color:#fff;isolation:isolate}
-.hero-image{position:absolute;inset:0;background-image:url("https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=2200&q=90");background-size:cover;background-position:center 43%;z-index:-2;filter:grayscale(100%)}
+.hero-image{position:absolute;inset:0;background-image:url("https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=2200&q=90");background-size:cover;background-position:center 43%;z-index:-2;filter:grayscale(100%)}
 .hero-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.82) 0%,rgba(0,0,0,.54) 42%,rgba(0,0,0,.12) 100%);z-index:-1}
 .hero-content{padding:50px 10.4%;max-width:790px;position:relative}
 .eyebrow{display:flex;align-items:center;gap:10px;font:600 9px var(--font-en);letter-spacing:.19em;text-transform:uppercase;margin:0 0 22px}
@@ -91,7 +91,7 @@ a{color:inherit;text-decoration:none}
 .mobile-view-all{display:none}
 .empty-results{padding:60px 0;text-align:center;color:#777}
 .manifesto-section{min-height:510px;background:#111;color:#fff;display:grid;grid-template-columns:1fr 1fr}
-.manifesto-image{min-height:480px;background:url("https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=1300&q=85") center/cover;filter:grayscale(100%)}
+.manifesto-image{min-height:480px;background:url("https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1300&q=90") center/cover;filter:grayscale(100%)}
 .manifesto-content{padding:80px clamp(30px,7vw,100px);align-self:center;position:relative;overflow:hidden}
 .manifesto-content h2{font:600 clamp(39px,5vw,66px)/.98 var(--font-en);letter-spacing:-.075em;max-width:440px;margin:0 0 23px}
 .manifesto-content>p:not(.eyebrow){color:#bcbcbc;font-size:12px;line-height:1.9;max-width:390px;margin:0 0 28px}
