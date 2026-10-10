@@ -34,7 +34,7 @@ export default function AdminPage() {
   useEffect(()=>{void load();},[]);
   async function signIn(event:React.FormEvent<HTMLFormElement>) {
     event.preventDefault();setBusy(true);setError("");
-    try { await api("/api/admin/login",{method:"POST",body:JSON.stringify({email,password})});setPassword("");await load(); }
+    try { await api("/api/admin/login",{method:"POST",body:JSON.stringify({email,password})});setPassword("");const next=new URLSearchParams(window.location.search).get("next");if(next && next.startsWith("/admin/")){window.location.assign(next);return;}await load(); }
     catch(e) {setError(e instanceof Error?e.message:"Sign in failed");setBusy(false);}
   }
   async function changeStatus(code:string,status:string) {
