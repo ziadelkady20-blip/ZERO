@@ -12,7 +12,6 @@ type Product = {
 };
 type CartItem = { variantId: string; productId: string; nameEn: string; nameAr: string; image: string; size: string; color: string; price: number; quantity: number; stock: number };
 const CART_KEY = "zero-cart-v1";
-const FALLBACK_PRODUCT_IMAGE = "https://raw.githubusercontent.com/ziadelkady20-blip/ZERO/main/hero%20zero.png";
 
 export default function ProductDetailPage() {
   const params = useParams<{ slug: string }>();
@@ -41,7 +40,7 @@ export default function ProductDetailPage() {
   const sizes = useMemo(() => Array.from(new Set((product?.variants || []).map(v => v.size))), [product]);
   const colors = useMemo(() => Array.from(new Set((product?.variants || []).filter(v => v.size === size).map(v => v.color))), [product, size]);
   const variant = product?.variants.find(v => v.size === size && v.color === color);
-  const image = product?.images[0]?.url || FALLBACK_PRODUCT_IMAGE;
+  const image = product?.images[0]?.url || "";
   const title = product ? (ar ? product.nameAr : product.nameEn) : "";
   const description = product ? (ar ? product.descriptionAr : product.descriptionEn) : "";
 
@@ -75,7 +74,7 @@ export default function ProductDetailPage() {
     <div className="zero-detail-breadcrumb"><Link href="/">{ar ? "الرئيسية" : "HOME"}</Link><span>/</span><Link href="/shop">{ar ? "المتجر" : "SHOP"}</Link><span>/</span><span>{product?.category?.nameEn || "ZERO"}</span></div>
     {loading ? <div className="zero-detail-state">{ar ? "جاري تحميل المنتج…" : "LOADING PRODUCT…"}</div> : !product ? <section className="zero-detail-state"><p className="zero-detail-eyebrow">ZERO / PRODUCT</p><h1>{ar ? "المنتج مش موجود في المخزون لسه." : "This product isn't in the catalog yet."}</h1><p>{ar ? "لما تضيف المنتج من لوحة الإدارة بالصور والمقاسات والألوان، هتظهر صفحته هنا." : "Once this product is added from the admin dashboard with its images, sizes, and colors, its detail page will appear here."}</p><Link className="zero-detail-button" href="/shop">{ar ? "ارجع للمتجر" : "BACK TO SHOP"} ↗</Link></section> : <section className="zero-detail-layout">
       <div className="zero-detail-gallery">
-        {image ? <img className="zero-detail-main-image" src={image} alt={product.images[0]?.alt || title} /> : <div className="zero-detail-image-fallback">ZERO<span>.</span></div>}
+        {image ? <img className="zero-detail-main-image" src={image} alt={product.images[0]?.alt || title} onError={(event) => { event.currentTarget.style.display = "none"; }} /> : <div className="zero-detail-image-fallback">ZERO<span>.</span><small>{ar ? "أضف صورة المنتج من لوحة الإدارة" : "ADD PRODUCT IMAGE IN ADMIN"}</small></div>}
         <span className="zero-detail-image-tag">ZERO / PERFORMANCE ESSENTIALS</span>
       </div>
       <div className="zero-detail-info">
