@@ -31,7 +31,7 @@ const products: Product[] = [
     category: "Compression",
     price: 749,
     badge: "BESTSELLER",
-    image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1000&q=85",
+    image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1200&q=90",
     imageAlt: "Men’s black fitted performance T-shirt",
   },
   {
@@ -39,7 +39,7 @@ const products: Product[] = [
     name: "Essential Training Tee",
     category: "T-Shirts",
     price: 599,
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1000&q=85",
+    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=90",
     imageAlt: "Men’s minimal white everyday T-shirt",
   },
   {
@@ -48,7 +48,7 @@ const products: Product[] = [
     category: "Compression",
     price: 899,
     badge: "NEW DROP",
-    image: "https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=1000&q=85",
+    image: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1200&q=90",
     imageAlt: "Men’s minimal long-sleeve performance top",
   },
   {
@@ -56,7 +56,7 @@ const products: Product[] = [
     name: "Everyday Oversized Tee",
     category: "T-Shirts",
     price: 649,
-    image: "https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=1000&q=85",
+    image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=90",
     imageAlt: "Men’s neutral oversized streetwear T-shirt",
   },
 ];
@@ -267,8 +267,8 @@ export default function HomePage() {
         <div className="hero-image" role="img" aria-label="Minimal monochrome clothing editorial" />
         <div className="hero-shade" />
         <div className="hero-floating-products" aria-hidden="true">
-          <div className="hero-garment hero-garment-back"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=90" alt="" /></div>
-          <div className="hero-garment hero-garment-front"><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1100&q=90" alt="" /><span className="hero-garment-logo">ZERO</span></div>
+          <div className="hero-garment hero-garment-back"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=90" alt="" /></div>
+          <div className="hero-garment hero-garment-front"><img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1200&q=90" alt="" /><span className="hero-garment-logo">ZERO</span></div>
           <div className="hero-orbit hero-orbit-one" /><div className="hero-orbit hero-orbit-two" />
           <div className="hero-product-caption"><span>ZERO / 001</span><span>MEN’S EVERYDAY TEE</span></div>
         </div>
@@ -299,8 +299,8 @@ export default function HomePage() {
           <span className="category-count">01 — 02</span>
         </div>
         <div className="category-grid">
-          <a href="#collection" className="category-card category-card-tee" onClick={() => setActiveCategory("T-Shirts")}><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1100&q=90" alt="Men’s everyday T-shirt" /><span className="category-index">01 / EVERYDAY ESSENTIALS</span><span className="category-title">{t.categoryTee}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
-          <a href="#collection" className="category-card category-card-compression" onClick={() => setActiveCategory("Compression")}><img src="https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=1100&q=90" alt="Men’s fitted compression-style top" /><span className="category-index">02 / PERFORMANCE FIT</span><span className="category-title">{t.categoryCompression}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-tee" onClick={() => setActiveCategory("T-Shirts")}><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1100&q=90" alt="Male model wearing a clean everyday T-shirt" /><span className="category-index">01 / EVERYDAY ESSENTIALS</span><span className="category-title">{t.categoryTee}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-compression" onClick={() => setActiveCategory("Compression")}><img src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=1200&q=90" alt="Athletic male model wearing a fitted ZERO-style compression shirt" /><span className="category-index">02 / PERFORMANCE FIT</span><span className="category-title">{t.categoryCompression}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
         </div>   </section>
 
       <section className="collection-section section-pad" id="collection">
@@ -373,7 +373,7 @@ export default function HomePage() {
       </section>
 
       <section className="editorial-strip">
-        <div className="editorial-image"><img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1300&q=90" alt="Minimal everyday fashion editorial" loading="lazy" /></div>
+        <div className="editorial-image"><img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&q=90" alt="Male athletic model in minimalist menswear" loading="lazy" /></div>
         <div className="editorial-copy"><p className="eyebrow"><span className="eyebrow-line" />THE ZERO POINT OF VIEW</p><h2>MORE THAN<br/><span>CLOTHING.</span></h2><p>Good design doesn’t ask for attention. It earns a second look. Clean silhouettes, thoughtful details, and essentials that belong to you.</p><a href="#standard" className="button button-outline">DISCOVER OUR STANDARD <ArrowRight size={16}/></a><span className="editorial-watermark">Z.</span></div>
       </section>
 
