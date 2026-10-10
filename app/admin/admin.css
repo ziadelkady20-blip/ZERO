@@ -90,3 +90,5 @@
 .admin-category-card input{width:100%;min-width:0;padding:10px;border:1px solid #deded9;border-radius:5px;background:#fff;font:12px "DM Sans",sans-serif;color:#111}
 .admin-category-card input:focus{outline:1px solid #111;border-color:#111}
 .admin-category-save{width:100%;margin-top:12px}
+
+.admin-delete-product{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:0 10px;border:1px solid #efc8c5;background:#fff4f3;color:#a12820;font:600 9px "Space Grotesk",sans-serif;letter-spacing:.04em;cursor:pointer;border-radius:5px}.admin-delete-product:hover{background:#a12820;color:#fff;border-color:#a12820}.admin-delete-product:disabled{opacity:.5;cursor:wait}.admin-product-state-stack{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0}@media(max-width:600px){.admin-product-state-stack{align-items:flex-start}}
