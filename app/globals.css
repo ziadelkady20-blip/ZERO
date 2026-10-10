@@ -399,3 +399,6 @@ body{background:#050505;color:#f8f8f6}
 @media(max-width:680px){.zero-detail-header{height:68px;padding:0 18px}.zero-detail-header nav{gap:13px}.zero-detail-header nav a{font-size:8px}.zero-detail-logo{font-size:27px}.zero-detail-breadcrumb{padding:18px;font-size:8px}.zero-detail-layout{display:flex;flex-direction:column;padding:0 18px 55px;gap:18px}.zero-detail-gallery,.zero-detail-main-image{min-height:420px;height:420px}.zero-detail-image-fallback{min-height:420px}.zero-detail-info{position:static;padding:18px 0}.zero-detail-info h1{font-size:44px}.zero-detail-description{font-size:12px}.zero-detail-footer{padding:18px;flex-direction:column;gap:9px;font-size:8px}}
 
 .admin-order-items{display:grid;gap:4px;margin-top:7px;min-width:160px}.admin-order-items small{font-size:10px;line-height:1.5;color:#8d8d8d;white-space:normal}
+
+/* Storefront reflects an admin-set compare-at price wherever a discounted price is shown. */
+.product-price del,.live-product-title strong del,.zero-detail-price del{display:inline-block;margin-inline-end:7px;color:#999;font-size:.78em;font-weight:400;text-decoration:line-through;}
