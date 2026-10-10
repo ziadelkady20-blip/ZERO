@@ -24,6 +24,7 @@ type Product = {
   categoryAr: string;
   categorySlug: string;
   price: number;
+  compareAtPrice?: number | null;
   badge?: string;
   image: string;
   imageAlt: string;
@@ -162,12 +163,12 @@ export default function HomePage() {
   useEffect(() => {
     fetch("/api/products").then((response) => response.json()).then((data) => {
       if (!Array.isArray(data.products)) return;
-      setCatalogProducts(data.products.map((item: { id: string; slug: string; nameEn: string; nameAr: string; price: number; category?: { slug?: string; nameEn?: string; nameAr?: string }; images?: { url: string; alt?: string }[]; featured?: boolean }, index: number) => ({
+      setCatalogProducts(data.products.map((item: { id: string; slug: string; nameEn: string; nameAr: string; price: number; compareAtPrice?: number | null; category?: { slug?: string; nameEn?: string; nameAr?: string }; images?: { url: string; alt?: string }[]; featured?: boolean }, index: number) => ({
         id: index + 1, slug: item.slug, name: locale === "ar" ? item.nameAr : item.nameEn,
         category: item.category?.nameEn || item.category?.slug || "Performance",
         categoryAr: item.category?.nameAr || item.category?.nameEn || "ملابس رياضية",
         categorySlug: item.category?.slug || "uncategorized",
-        price: item.price, badge: item.featured ? "FEATURED" : undefined, image: item.images?.[0]?.url || ZERO_MODEL_IMAGE,
+        price: item.price, compareAtPrice: item.compareAtPrice, badge: item.featured ? "FEATURED" : undefined, image: item.images?.[0]?.url || ZERO_MODEL_IMAGE,
         imageAlt: item.images?.[0]?.alt || (locale === "ar" ? "موديل رجالي بملابس ZERO الرياضية" : "Male model wearing ZERO performance wear"),
       })));
     }).catch(() => {});
@@ -328,7 +329,7 @@ export default function HomePage() {
                     <p className="product-category">{isArabic ? product.categoryAr : product.category}</p>
                     <h3><a className="product-name-link" href={`/product/${product.slug}`}>{product.name}</a></h3>
                   </div>
-                  <p className="product-price">{product.price.toLocaleString(isArabic ? "ar-EG" : "en-EG")} <span>{t.egp}</span></p>
+                  <p className="product-price">{product.compareAtPrice && product.compareAtPrice > product.price && <del>{product.compareAtPrice.toLocaleString(isArabic ? "ar-EG" : "en-EG")}</del>} {product.price.toLocaleString(isArabic ? "ar-EG" : "en-EG")} <span>{t.egp}</span></p>
                 </div>
               </article>
             ))}
