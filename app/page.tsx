@@ -246,6 +246,12 @@ export default function HomePage() {
       <section className="hero-section">
         <div className="hero-image" role="img" aria-label="Minimal monochrome clothing editorial" />
         <div className="hero-shade" />
+        <div className="hero-floating-products" aria-hidden="true">
+          <div className="hero-garment hero-garment-back"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=90" alt="" /></div>
+          <div className="hero-garment hero-garment-front"><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=1100&q=90" alt="" /></div>
+          <div className="hero-orbit hero-orbit-one" /><div className="hero-orbit hero-orbit-two" />
+          <div className="hero-product-caption"><span>ZERO / 001</span><span>THE EVERYDAY TEE</span></div>
+        </div>
         <div className="hero-content">
           <p className="eyebrow"><span className="eyebrow-line" />{t.heroEyebrow}</p>
           <h1>{t.heroTitleA}<br /><span>{t.heroTitleB}</span> <em>{t.heroTitleC}</em></h1>
