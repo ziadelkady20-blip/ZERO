@@ -2,7 +2,7 @@
 
 const ZERO_MODEL_IMAGE = "/zero-model.svg";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDownRight,
   ArrowRight,
@@ -349,7 +349,7 @@ export default function HomePage() {
                 <div className="product-info">
                   <div>
                     <p className="product-category">{isArabic ? (product.category === "Compression" ? "كومبريشن" : "تيشيرتات") : product.category}</p>
-                    <h3><a className="product-name-link" href={`/product/${product.slug}`}>{isArabic ? ({
+                    <h3><a className="product-name-link" href={`/product/${product.slug}`}>{catalogProducts.length ? product.name : isArabic ? ({
                       1: "تيشيرت كومبريشن كور",
                       2: "تيشيرت التدريب الأساسي",
                       3: "تيشيرت أداء بأكمام طويلة",
