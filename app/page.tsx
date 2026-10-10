@@ -21,6 +21,8 @@ type Product = {
   slug: string;
   name: string;
   category: string;
+  categoryAr: string;
+  categorySlug: string;
   price: number;
   badge?: string;
   image: string;
@@ -160,9 +162,11 @@ export default function HomePage() {
   useEffect(() => {
     fetch("/api/products").then((response) => response.json()).then((data) => {
       if (!Array.isArray(data.products)) return;
-      setCatalogProducts(data.products.map((item: { id: string; slug: string; nameEn: string; nameAr: string; price: number; category?: { slug?: string; nameEn?: string }; images?: { url: string; alt?: string }[]; featured?: boolean }, index: number) => ({
+      setCatalogProducts(data.products.map((item: { id: string; slug: string; nameEn: string; nameAr: string; price: number; category?: { slug?: string; nameEn?: string; nameAr?: string }; images?: { url: string; alt?: string }[]; featured?: boolean }, index: number) => ({
         id: index + 1, slug: item.slug, name: locale === "ar" ? item.nameAr : item.nameEn,
-        category: (item.category?.slug || item.category?.nameEn || "").toLowerCase().includes("compression") ? "Compression" : "T-Shirts",
+        category: item.category?.nameEn || item.category?.slug || "Performance",
+        categoryAr: item.category?.nameAr || item.category?.nameEn || "ملابس رياضية",
+        categorySlug: item.category?.slug || "uncategorized",
         price: item.price, badge: item.featured ? "FEATURED" : undefined, image: item.images?.[0]?.url || ZERO_MODEL_IMAGE,
         imageAlt: item.images?.[0]?.alt || (locale === "ar" ? "موديل رجالي بملابس ZERO الرياضية" : "Male model wearing ZERO performance wear"),
       })));
@@ -177,8 +181,8 @@ export default function HomePage() {
   const filteredProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     return catalogProducts.filter((product) => {
-      const categoryMatches = activeCategory === "All" || product.category === activeCategory;
-      const searchMatches = !normalizedQuery || product.name.toLowerCase().includes(normalizedQuery) || product.category.toLowerCase().includes(normalizedQuery);
+      const categoryMatches = activeCategory === "All" || product.categorySlug === activeCategory;
+      const searchMatches = !normalizedQuery || product.name.toLowerCase().includes(normalizedQuery) || product.category.toLowerCase().includes(normalizedQuery) || product.categoryAr.toLowerCase().includes(normalizedQuery);
       return categoryMatches && searchMatches;
     });
   }, [activeCategory, query, catalogProducts]);
@@ -215,8 +219,8 @@ export default function HomePage() {
 
         <nav className={mobileMenuOpen ? "main-nav is-open" : "main-nav"} aria-label="Main navigation">
           <a href="/shop" onClick={() => setMobileMenuOpen(false)}>{t.shop}</a>
-          <a href="#collection" onClick={() => { setActiveCategory("Compression"); setMobileMenuOpen(false); }}>{t.compression}</a>
-          <a href="#collection" onClick={() => { setActiveCategory("T-Shirts"); setMobileMenuOpen(false); }}>{t.tees}</a>
+          <a href="#collection" onClick={() => { setActiveCategory("compression"); setMobileMenuOpen(false); }}>{t.compression}</a>
+          <a href="#collection" onClick={() => { setActiveCategory("training-tees"); setMobileMenuOpen(false); }}>{t.tees}</a>
           <a href="#standard" onClick={() => setMobileMenuOpen(false)}>{t.ourStandard}</a>
         </nav>
 
@@ -279,8 +283,8 @@ export default function HomePage() {
           <span className="category-count">01 — 02</span>
         </div>
         <div className="category-grid">
-          <a href="#collection" className="category-card category-card-tee" onClick={() => setActiveCategory("T-Shirts")}><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1100&q=90" alt="Male model wearing a clean everyday T-shirt" /><span className="category-index">01 / EVERYDAY ESSENTIALS</span><span className="category-title">{t.categoryTee}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
-          <a href="#collection" className="category-card category-card-compression" onClick={() => setActiveCategory("Compression")}><img src={ZERO_MODEL_IMAGE} alt="Male model wearing a white ZERO compression shirt" /><span className="category-index">02 / PERFORMANCE FIT</span><span className="category-title">{t.categoryCompression}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-tee" onClick={() => setActiveCategory("training-tees")}><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1100&q=90" alt="Male model wearing a clean everyday T-shirt" /><span className="category-index">01 / EVERYDAY ESSENTIALS</span><span className="category-title">{t.categoryTee}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-compression" onClick={() => setActiveCategory("compression")}><img src={ZERO_MODEL_IMAGE} alt="Male model wearing a white ZERO compression shirt" /><span className="category-index">02 / PERFORMANCE FIT</span><span className="category-title">{t.categoryCompression}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
         </div>   </section>
 
       <section className="collection-section section-pad" id="collection">
@@ -297,8 +301,7 @@ export default function HomePage() {
           <div className="filter-list" aria-label="Filter products">
             {[
               { value: "All", label: t.all },
-              { value: "Compression", label: t.compression },
-              { value: "T-Shirts", label: t.tees },
+              ...Array.from(new Map(catalogProducts.map((product) => [product.categorySlug, { value: product.categorySlug, label: isArabic ? product.categoryAr : product.category }])).values()),
             ].map((filter) => (
               <button key={filter.value} className={activeCategory === filter.value ? "filter-chip active" : "filter-chip"} onClick={() => setActiveCategory(filter.value)}>
                 {filter.label}
@@ -322,13 +325,8 @@ export default function HomePage() {
                 </div>
                 <div className="product-info">
                   <div>
-                    <p className="product-category">{isArabic ? (product.category === "Compression" ? "كومبريشن" : "تيشيرتات") : product.category}</p>
-                    <h3><a className="product-name-link" href={`/product/${product.slug}`}>{isArabic ? ({
-                      1: "تيشيرت كومبريشن كور",
-                      2: "تيشيرت التدريب الأساسي",
-                      3: "تيشيرت أداء بأكمام طويلة",
-                      4: "تيشيرت أوفر سايز يومي",
-                    } as Record<number, string>)[product.id] || product.name : product.name}</a></h3>
+                    <p className="product-category">{isArabic ? product.categoryAr : product.category}</p>
+                    <h3><a className="product-name-link" href={`/product/${product.slug}`}>{product.name}</a></h3>
                   </div>
                   <p className="product-price">{product.price.toLocaleString(isArabic ? "ar-EG" : "en-EG")} <span>{t.egp}</span></p>
                 </div>
