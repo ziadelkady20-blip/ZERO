@@ -1,50 +1,32 @@
 # ZERO CLOTHING
 
-A premium black-and-white sportswear e-commerce platform built with Next.js, TypeScript, and React.
+Premium performance-wear storefront built with Next.js, TypeScript, and Prisma.
 
-## Current stage
+## Stack
+- Next.js App Router / React / TypeScript
+- PostgreSQL + Prisma
+- Cash on delivery only
+- Arabic / English storefront
+- Independent inventory for each size + color variant
+- Order tracking by order code and phone
+- Admin dashboard at `/admin`, protected by a signed HTTP-only session cookie
 
-The repository currently contains the initial storefront foundation:
-- Responsive ZERO CLOTHING landing page
-- Arabic/English interface toggle with RTL/LTR layout handling
-- Product collection filters and search
-- Interactive client-side shopping bag preview
-- Brand manifesto, benefits, and footer sections
+## Environment
+Copy `.env.example` to `.env.local` and set `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and a random `AUTH_SECRET` of at least 32 characters. Never commit production credentials.
 
-**Important:** the product catalog and shopping bag are currently frontend demo data. Checkout, database persistence, admin authentication, inventory, delivery-area rates, and order tracking have not yet been implemented. The product imagery is temporary stock imagery and must be replaced with approved ZERO CLOTHING product photos.
+## Database setup
+Run `npm install`, `npx prisma generate`, `npx prisma db push`, then `npm run dev`.
 
-The original logo file was not present in the repository when the initial scaffold was created. The wordmark in the header is a temporary text treatment, not a replacement for the official logo. Add the supplied master logo asset before production.
+Create categories and shipping rates in the admin dashboard before publishing products and accepting orders.
 
-## Requirements
+## API routes
+- `GET /api/products` — active catalog
+- `POST /api/orders` — server-side price, shipping, and stock validation; creates COD order and reserves inventory
+- `POST /api/orders/track` — track with order code + phone
+- `POST /api/admin/login` and `POST /api/admin/logout` — admin session
+- `GET/POST /api/admin/products` — list/create products
+- `POST /api/admin/categories` — create categories
+- `GET/POST /api/admin/shipping` — list/upsert delivery rates by governorate and city/area
+- `GET/PATCH /api/admin/orders` — list orders and update status
 
-- Node.js 20 or later
-- npm
-
-## Local development
-
-```bash
-npm install
-npm run dev
-```
-
-Open http://localhost:3000.
-
-## Production build
-
-```bash
-npm run build
-npm start
-```
-
-## Planned next stages
-
-1. Add the official ZERO CLOTHING logo and approved product photography.
-2. Create the PostgreSQL schema and migrations.
-3. Implement product/category/variation management.
-4. Implement secure admin authentication and dashboard.
-5. Implement server-validated cart and guest checkout with Cash on Delivery.
-6. Add Egyptian governorates, delivery areas, and admin-configurable shipping rates.
-7. Add unique order references and privacy-protected order tracking.
-8. Add automated tests, production environment configuration, and deployment documentation.
-
-Never commit production secrets to this repository.
+The storefront checkout and catalog still need to be connected to these endpoints. Configure database and environment variables before expecting live data or accepting real orders.
