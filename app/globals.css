@@ -416,3 +416,13 @@ body{background:#050505;color:#f8f8f6}
 .hero-model-frame{background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important}
 .hero-model-frame img{background:transparent!important;object-fit:contain!important;object-position:center bottom!important;mix-blend-mode:normal!important;filter:none!important}
 @media(max-width:760px){.hero-model-frame{background:transparent!important;box-shadow:none!important}}
+
+
+/* Scale up the transparent hero model so it balances the headline on desktop and mobile. */
+.hero-model-frame{width:min(100%,540px)!important;height:100%!important;}
+.hero-model-frame img{transform:scale(1.18)!important;transform-origin:center bottom!important;}
+@media(max-width:760px){
+ .hero-floating-products{width:100%!important;}
+ .hero-model-frame{width:min(88%,430px)!important;height:100%!important;}
+ .hero-model-frame img{transform:scale(1.1)!important;}
+}
