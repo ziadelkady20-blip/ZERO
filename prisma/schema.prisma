@@ -85,6 +85,8 @@ model Order {
   address        String
   notes          String?
   subtotal       Int
+  discountAmount Int         @default(0)
+  couponCode     String?
   shippingCost   Int
   total          Int
   paymentMethod  String      @default("COD")
@@ -121,4 +123,15 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+}
+
+model Coupon {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  discountType  String   @default("PERCENT")
+  discountValue Int
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  @@index([active, code])
 }
