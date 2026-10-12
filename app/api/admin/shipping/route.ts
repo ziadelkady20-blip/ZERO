@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hasSameOrigin } from "@/lib/security";
 import { isAdminSessionValid } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
@@ -8,6 +9,7 @@ export async function GET() {
  catch { return NextResponse.json({error:"Database is not configured."},{status:503}); }
 }
 export async function POST(request:Request) {
+ if (!hasSameOrigin(request)) return NextResponse.json({error:"Invalid request origin."},{status:403});
  if (!(await isAdminSessionValid())) return NextResponse.json({error:"Unauthorized."},{status:401});
  let body:{governorate?:unknown;city?:unknown;price?:unknown;active?:unknown};
  try { body=await request.json(); } catch { return NextResponse.json({error:"Invalid JSON."},{status:400}); }
