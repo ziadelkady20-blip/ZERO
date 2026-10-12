@@ -410,3 +410,9 @@ body{background:#050505;color:#f8f8f6}
 .product-image-placeholder small{font-size:10px;letter-spacing:.12em;color:#777;}
 .zero-detail-image-fallback{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:500px;width:100%;height:100%;background:#e9e7e2;color:#111;font-size:54px;font-weight:800;}
 .zero-detail-image-fallback small{font-size:10px;letter-spacing:.12em;color:#777;font-weight:500;}
+
+
+/* Transparent cut-out hero portrait */
+.hero-model-frame{background:transparent!important;border:0!important;box-shadow:none!important;overflow:visible!important}
+.hero-model-frame img{background:transparent!important;object-fit:contain!important;object-position:center bottom!important;mix-blend-mode:normal!important;filter:none!important}
+@media(max-width:760px){.hero-model-frame{background:transparent!important;box-shadow:none!important}}
