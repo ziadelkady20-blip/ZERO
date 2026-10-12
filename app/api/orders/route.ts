@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { fingerprint, hasSameOrigin, rateLimit, rateLimitedResponse, requestIp } from "@/lib/security";
 
 type IncomingItem = { variantId?: unknown; quantity?: unknown };
-type CheckoutBody = { customerName?: unknown; phone?: unknown; email?: unknown; governorate?: unknown; city?: unknown; address?: unknown; notes?: unknown; items?: unknown; paymentMethod?: unknown };
+type CheckoutBody = { customerName?: unknown; phone?: unknown; email?: unknown; governorate?: unknown; city?: unknown; address?: unknown; notes?: unknown; items?: unknown; paymentMethod?: unknown; couponCode?: unknown };
 const text = (v: unknown) => typeof v === "string" ? v.trim() : "";
 
 export const runtime = "nodejs";
@@ -27,6 +27,8 @@ export async function POST(request: Request) {
   const city = text(body.city).slice(0, 100);
   const address = text(body.address).slice(0, 500);
   const notes = text(body.notes).slice(0, 1000) || null;
+  const couponCode = text(body.couponCode).toUpperCase().slice(0, 32) || null;
+  if (couponCode && !/^[A-Z0-9_-]{2,32}$/.test(couponCode)) return NextResponse.json({ error: "Promo code format is invalid." }, { status: 400 });
   if (!customerName || phone.length < 8 || !governorate || !city || address.length < 5) {
     return NextResponse.json({ error: "Please complete your name, phone, governorate, city / area, and address." }, { status: 400 });
   }
@@ -78,6 +80,15 @@ export async function POST(request: Request) {
         };
       });
 
+      let discountAmount = 0;
+      if (couponCode) {
+        const coupon = await tx.coupon.findUnique({ where: { code: couponCode } });
+        if (!coupon || !coupon.active) throw new Error("COUPON_INVALID");
+        discountAmount = coupon.discountType === "PERCENT"
+          ? Math.min(subtotal, Math.round(subtotal * coupon.discountValue / 100))
+          : Math.min(subtotal, coupon.discountValue);
+      }
+
       for (const item of orderItems) {
         const updated = await tx.productVariant.updateMany({
           where: { id: item.variantId, stock: { gte: item.quantity } },
@@ -90,7 +101,7 @@ export async function POST(request: Request) {
       return tx.order.create({
         data: {
           code, customerName, phone, email, governorate, city, address, notes,
-          subtotal, shippingCost: rate.price, total: subtotal + rate.price, paymentMethod: "COD",
+          subtotal, discountAmount, couponCode, shippingCost: rate.price, total: subtotal - discountAmount + rate.price, paymentMethod: "COD",
           items: { create: orderItems },
         },
         select: { code: true, subtotal: true, shippingCost: true, total: true, status: true, createdAt: true },
@@ -99,6 +110,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ order }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     const reason = error instanceof Error ? error.message : "";
+    if (reason === "COUPON_INVALID") return NextResponse.json({ error: "This promo code is invalid or inactive. Remove it and try again." }, { status: 422 });
     if (reason === "SHIPPING_UNAVAILABLE") return NextResponse.json({ error: "Shipping is not configured for this governorate yet." }, { status: 422 });
     if (reason === "ITEM_UNAVAILABLE") return NextResponse.json({ error: "One or more products are no longer available." }, { status: 409 });
     if (reason === "INSUFFICIENT_STOCK") return NextResponse.json({ error: "There is not enough stock for one or more selected variants." }, { status: 409 });
