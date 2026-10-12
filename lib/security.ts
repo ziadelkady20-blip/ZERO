@@ -10,20 +10,20 @@ let calls = 0;
  */
 export function rateLimit(key: string, limit: number, windowMs: number) {
   const now = Date.now();
-  const current = buckets.get(key);
-  if (!current || current.resetAt <= now) {
-    buckets.set(key, { count: 1, resetAt: now + windowMs });
-    return { allowed: true, retryAfterSeconds: 0 };
-  }
-
-  current.count += 1;
   calls += 1;
   if (calls % 100 === 0 || buckets.size > 10_000) {
     for (const [bucketKey, bucket] of buckets) {
       if (bucket.resetAt <= now) buckets.delete(bucketKey);
     }
   }
+  const effectiveKey = buckets.size >= 10_000 && !buckets.has(key) ? "__overflow__" : key;
+  const current = buckets.get(effectiveKey);
+  if (!current || current.resetAt <= now) {
+    buckets.set(effectiveKey, { count: 1, resetAt: now + windowMs });
+    return { allowed: true, retryAfterSeconds: 0 };
+  }
 
+  current.count += 1;
   return {
     allowed: current.count <= limit,
     retryAfterSeconds: Math.max(1, Math.ceil((current.resetAt - now) / 1000)),
