@@ -1,6 +1,6 @@
 "use client";
 
-const ZERO_MODEL_IMAGE = "https://raw.githubusercontent.com/ziadelkady20-blip/ZERO/main/hero%20zero.png";
+const ZERO_MODEL_IMAGE = "https://raw.githubusercontent.com/ziadelkady20-blip/ZERO/main/hero-zero.png";
 
 import { useEffect, useMemo, useState } from "react";
 import {
