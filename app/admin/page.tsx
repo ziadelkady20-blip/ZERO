@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownUp, ArrowRight, Box, ClipboardList, ExternalLink, LogOut, PackagePlus, RefreshCw, Search, Settings2, Truck } from "lucide-react";
+import { ArrowDownUp, ArrowRight, Box, ClipboardList, ExternalLink, LogOut, PackagePlus, RefreshCw, Search, Settings2, Ticket, Truck } from "lucide-react";
 import "./admin.css";
 
 type OrderItem = { id:string; productNameEn:string; productNameAr:string; size:string; color:string; quantity:number; unitPrice:number; lineTotal:number };
@@ -95,7 +95,7 @@ export default function AdminPage() {
       <button className={tab==="shipping"?"admin-nav active":"admin-nav"} onClick={()=>setTab("shipping")}><Truck size={16}/> Delivery rates <span>{rates.length}</span></button>
       <button className={tab==="categories"?"admin-nav active":"admin-nav"} onClick={()=>setTab("categories")}><Settings2 size={16}/> Categories <span>{categories.length}</span></button>
       <div className="admin-sidebar-bottom">
-        <Link href="/admin/setup"><PackagePlus size={15}/> Add product / setup <ArrowRight size={13}/></Link>
+        <Link href="/admin/coupons"><Ticket size={15}/> Promo codes <ArrowRight size={13}/></Link>\n        <Link href="/admin/setup"><PackagePlus size={15}/> Add product / setup <ArrowRight size={13}/></Link>
         <Link href="/admin/products"><ArrowDownUp size={15}/> Full product editor <ArrowRight size={13}/></Link>
         <Link href="/"><ExternalLink size={15}/> View storefront <ArrowRight size={13}/></Link>
         <button onClick={()=>void signOut()}><LogOut size={15}/> Sign out</button>
