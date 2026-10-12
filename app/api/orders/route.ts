@@ -104,7 +104,7 @@ export async function POST(request: Request) {
           subtotal, discountAmount, couponCode, shippingCost: rate.price, total: subtotal - discountAmount + rate.price, paymentMethod: "COD",
           items: { create: orderItems },
         },
-        select: { code: true, subtotal: true, shippingCost: true, total: true, status: true, createdAt: true },
+        select: { code: true, subtotal: true, discountAmount: true, couponCode: true, shippingCost: true, total: true, status: true, createdAt: true },
       });
     }, { isolationLevel: "Serializable" });
     return NextResponse.json({ order }, { status: 201, headers: { "Cache-Control": "no-store" } });
