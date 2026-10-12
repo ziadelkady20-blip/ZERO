@@ -451,3 +451,15 @@ body{background:#050505;color:#f8f8f6}
 .admin-coupon-delete{color:#a12820}
 @media(max-width:1050px){.admin-coupon-form{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-coupon-form>.admin-primary{width:100%}}
 @media(max-width:620px){.live-promo-box{grid-template-columns:minmax(0,1fr) auto;padding:10px;gap:7px}.live-promo-apply{padding:0 12px}.admin-coupon-form{grid-template-columns:1fr;padding:18px}.admin-coupon-form>.admin-primary{width:100%}.admin-coupon-actions{align-items:stretch}.admin-coupon-actions button{flex:1}}
+
+
+/* ZERO social media links */
+.zero-socials{display:flex;align-items:center;gap:10px}
+.zero-socials a{width:36px;height:36px;display:grid;place-items:center;border:1px solid #424242;color:#f5f5f5;transition:background .2s,color .2s,border-color .2s,transform .2s}
+.zero-socials a:hover{background:#fff;color:#080808;border-color:#fff;transform:translateY(-2px)}
+.zero-socials svg{width:17px;height:17px;display:block}
+.site-footer>.zero-socials{margin:0 0 20px}
+.live-shop-footer{align-items:center}
+.zero-socials-shop a{width:32px;height:32px;border-color:#d6d6d1;color:#111}
+.zero-socials-shop a:hover{background:#111;color:#fff;border-color:#111}
+@media(max-width:700px){.site-footer>.zero-socials{margin-bottom:18px}.live-shop-footer{flex-wrap:wrap}.zero-socials-shop{order:3;width:100%;justify-content:flex-start}}
