@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { fingerprint, rateLimit, rateLimitedResponse, requestIp } from "@/lib/security";
+import { fingerprint, hasSameOrigin, rateLimit, rateLimitedResponse, requestIp } from "@/lib/security";
 
 export async function POST(request: Request) {
+  if (!hasSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
+  const contentLength = Number(request.headers.get("content-length") || "0");
+  if (contentLength > 8_000) return NextResponse.json({ error: "Request is too large." }, { status: 413 });
   const ipLimit = rateLimit(`order-track:ip:${fingerprint(requestIp(request))}`, 12, 10 * 60 * 1000);
   if (!ipLimit.allowed) return rateLimitedResponse(ipLimit.retryAfterSeconds);
   let body: { code?: unknown; phone?: unknown };
