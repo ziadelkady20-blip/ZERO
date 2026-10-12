@@ -13,7 +13,7 @@ export async function GET() {
       prisma.product.findMany({ include: { category: true, images: { orderBy: { position: "asc" } }, variants: true }, orderBy: { createdAt: "desc" } }),
       prisma.category.findMany({ orderBy: { nameEn: "asc" } }),
     ]);
-    return NextResponse.json({ products, categories });
+    return NextResponse.json({ products, categories }, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return NextResponse.json({ error: "Database is not configured." }, { status: 503 });
   }
