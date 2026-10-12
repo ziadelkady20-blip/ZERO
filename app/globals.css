@@ -426,3 +426,28 @@ body{background:#050505;color:#f8f8f6}
  .hero-model-frame{width:min(88%,430px)!important;height:100%!important;}
  .hero-model-frame img{transform:scale(1.1)!important;}
 }
+
+
+/* Checkout promo code controls */
+.live-promo-box{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:end;margin:4px 0 20px;padding:14px;border:1px solid #deddd7;background:#f9f8f5}
+.live-promo-box label{display:grid;gap:8px;font-size:9px;font-weight:700;letter-spacing:.08em;color:#555}
+.live-promo-box input{width:100%;min-width:0;height:43px;padding:0 12px;border:1px solid #d7d5ce;background:#fff;color:#111;font:12px var(--font-body,Arial,sans-serif);text-transform:uppercase;outline:none}
+.live-promo-box input:focus{border-color:#111}
+.live-promo-apply{height:43px;padding:0 16px;background:#080808;color:#fff;border:1px solid #080808;font-size:9px;font-weight:700;letter-spacing:.1em;cursor:pointer}
+.live-promo-apply:disabled{opacity:.45;cursor:not-allowed}
+.live-promo-feedback{grid-column:1/-1;margin:0;font-size:10px;line-height:1.6}
+.live-promo-feedback.error{color:#a12820}
+.live-promo-feedback.success{color:#327440}
+.live-promo-discount{color:#327440}
+.admin-coupon-form{padding:22px 24px;display:grid;grid-template-columns:1.3fr 1fr .8fr auto auto;align-items:end;gap:13px}
+.admin-coupon-form label{display:flex;flex-direction:column;gap:8px;font-size:10px;font-weight:600;color:#555;min-width:0}
+.admin-coupon-form input:not([type=checkbox]),.admin-coupon-form select{width:100%;min-width:0;height:42px;padding:0 11px;border:1px solid #deded9;background:#fff;color:#111;font:12px "DM Sans",sans-serif}
+.admin-coupon-form small{font-size:9px;line-height:1.4;color:#999;font-weight:400}
+.admin-coupon-form .admin-coupon-active{display:flex;flex-direction:row;align-items:center;gap:8px;white-space:nowrap;min-height:42px}
+.admin-coupon-active input{width:15px;height:15px;accent-color:#111}
+.admin-coupon-form>.admin-primary{white-space:nowrap}
+.admin-coupon-code{font-family:"Space Grotesk",sans-serif;letter-spacing:.08em}
+.admin-coupon-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.admin-coupon-delete{color:#a12820}
+@media(max-width:1050px){.admin-coupon-form{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-coupon-form>.admin-primary{width:100%}}
+@media(max-width:620px){.live-promo-box{grid-template-columns:minmax(0,1fr) auto;padding:10px;gap:7px}.live-promo-apply{padding:0 12px}.admin-coupon-form{grid-template-columns:1fr;padding:18px}.admin-coupon-form>.admin-primary{width:100%}.admin-coupon-actions{align-items:stretch}.admin-coupon-actions button{flex:1}}
