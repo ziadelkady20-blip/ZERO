@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- JSON payloads are validated before Prisma writes. */
 import { NextResponse } from "next/server";
+import { hasSameOrigin } from "@/lib/security";
 import { isAdminSessionValid } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 
@@ -19,6 +20,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!hasSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
   if (!(await isAdminSessionValid())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   let body: any;
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON." }, { status: 400 }); }
@@ -57,6 +59,7 @@ export async function POST(request: Request) {
 
 
 export async function PATCH(request: Request) {
+  if (!hasSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
   if (!(await isAdminSessionValid())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   let body: any;
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON." }, { status: 400 }); }
@@ -131,6 +134,7 @@ export async function PATCH(request: Request) {
 
 
 export async function DELETE(request: Request) {
+  if (!hasSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
   if (!(await isAdminSessionValid())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   let body: { id?: unknown };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON." }, { status: 400 }); }
