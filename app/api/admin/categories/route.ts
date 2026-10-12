@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { hasSameOrigin } from "@/lib/security";
 import { isAdminSessionValid } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 export async function POST(request: Request) {
+ if (!hasSameOrigin(request)) return NextResponse.json({error:"Invalid request origin."},{status:403});
  if (!(await isAdminSessionValid())) return NextResponse.json({error:"Unauthorized."},{status:401});
  let body: {slug?:unknown;nameEn?:unknown;nameAr?:unknown};
  try { body=await request.json(); } catch { return NextResponse.json({error:"Invalid JSON."},{status:400}); }
@@ -14,6 +16,7 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
+ if (!hasSameOrigin(request)) return NextResponse.json({error:"Invalid request origin."},{status:403});
  if (!(await isAdminSessionValid())) return NextResponse.json({error:"Unauthorized."},{status:401});
  let body:{id?:unknown;slug?:unknown;nameEn?:unknown;nameAr?:unknown};
  try { body=await request.json(); } catch { return NextResponse.json({error:"Invalid JSON."},{status:400}); }
