@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 export async function GET() {
  if (!(await isAdminSessionValid())) return NextResponse.json({error:"Unauthorized."},{status:401});
- try { return NextResponse.json({rates:await prisma.shippingRate.findMany({orderBy:[{governorate:"asc"},{city:"asc"}]})}); }
+ try { return NextResponse.json({rates:await prisma.shippingRate.findMany({orderBy:[{governorate:"asc"},{city:"asc"}]})}, { headers: { "Cache-Control": "no-store" } }); }
  catch { return NextResponse.json({error:"Database is not configured."},{status:503}); }
 }
 export async function POST(request:Request) {
