@@ -13,6 +13,8 @@ function equalSecret(a: string, b: string) {
 
 export async function POST(request: Request) {
   if (!hasSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403, headers: { "Cache-Control": "no-store" } });
+  const contentLength = Number(request.headers.get("content-length") || "0");
+  if (contentLength > 8_000) return NextResponse.json({ error: "Request is too large." }, { status: 413, headers: { "Cache-Control": "no-store" } });
 
   const ipLimit = rateLimit(`admin-login:ip:${fingerprint(requestIp(request))}`, 10, 15 * 60 * 1000);
   if (!ipLimit.allowed) return rateLimitedResponse(ipLimit.retryAfterSeconds);
