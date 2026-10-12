@@ -360,6 +360,11 @@ export default function HomePage() {
           <div className="footer-links"><h3>{t.support}</h3><a href="/track-order">{isArabic ? "تتبع طلبك" : "Track your order"}</a><a href="#shipping">{t.shipping}</a><a href="#returns">{t.returns}</a><a href="mailto:hello@zeroclothing.example">{t.contact}</a></div>
           <div className="footer-newsletter"><h3>{t.newsletter}</h3><p>{t.newsletterText}</p><form onSubmit={(event) => event.preventDefault()} className="newsletter-form"><input type="email" placeholder={t.emailPlaceholder} aria-label={t.emailPlaceholder} /><button type="submit">{t.join}<ArrowRight size={15} /></button></form></div>
         </div>
+        <div className="zero-socials" aria-label="ZERO CLOTHING social media">
+  <a href="https://www.facebook.com/share/1F759crQPj/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.4 21v-8h2.7l.4-3.1h-3.1v-2c0-.9.3-1.5 1.6-1.5h1.7V3.6c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.1H7.2V13H10v8h3.4Z" fill="currentColor"/></svg></a>
+  <a href="https://www.instagram.com/zero.sportswear_?srtk=cmx0Z3BiNnFhN2ps" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" strokeWidth="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="1.8"/><circle cx="17.7" cy="6.7" r="1.1" fill="currentColor"/></svg></a>
+  <a href="https://www.tiktok.com/@zero.sportwear?_r=1&_t=ZS-9AUciyEp0cC" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.7 3h-3.2v12.1a2.7 2.7 0 1 1-2.7-2.7c.4 0 .8.1 1.1.2V9.3a6 6 0 1 0 4.8 5.8V9a8.1 8.1 0 0 0 4.1 1.1V6.9c-2.3-.1-4.1-1.8-4.1-3.9Z" fill="currentColor"/></svg></a>
+</div>
         <div className="footer-bottom"><span>{t.rights}</span><span>CAIRO, EGYPT · ZERO STANDARD</span></div>
       </footer>
 
