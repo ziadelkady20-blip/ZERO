@@ -314,8 +314,8 @@ body{background:#050505;color:#f8f8f6}
 .hero-model-frame img{display:block;width:100%;height:100%;object-fit:contain;object-position:center center;filter:none;background:#f8f8f6}
 .hero-orbit{z-index:-1}
 .hero-product-caption{z-index:4}
-.manifesto-image{background:none!important;filter:none!important;overflow:hidden;background-color:#f8f8f6}
-.manifesto-image img{display:block;width:100%;height:100%;min-height:480px;object-fit:contain;object-position:center center;background:#f8f8f6;filter:none}
+.manifesto-image{background:#111!important;filter:none!important;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;isolation:isolate}
+.manifesto-image img{display:block;width:100%;height:100%;min-height:480px;object-fit:contain;object-position:center bottom;background:transparent!important;filter:none;transform:scale(1.18);transform-origin:center bottom}
 .category-card-compression img{object-fit:contain;background:#f8f8f6;filter:none}
 .editorial-image{background:#f8f8f6}
 .editorial-image img{object-fit:contain;object-position:center center;background:#f8f8f6;filter:none}
@@ -323,7 +323,7 @@ body{background:#050505;color:#f8f8f6}
  .hero-floating-products{top:360px;bottom:20px;right:0;width:100%;height:400px;opacity:1}
  .hero-model-frame{width:min(74%,370px);height:94%;margin-inline:auto}
  .hero-orbit{z-index:-1}
- .manifesto-image img{min-height:300px}
+ .manifesto-image img{min-height:300px;transform:scale(1.1);transform-origin:center bottom}
  .editorial-image img{min-height:310px;height:310px}
 }
 
