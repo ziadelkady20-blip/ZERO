@@ -24,6 +24,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [notice, setNotice] = useState("");
   const [selectedImage, setSelectedImage] = useState(0);
+  const [showSizeChart, setShowSizeChart] = useState(false);
   const ar = locale === "ar";
 
   useEffect(() => {
@@ -88,7 +89,7 @@ export default function ProductDetailPage() {
         <p className="zero-detail-price">{product.compareAtPrice && product.compareAtPrice > product.price && <del>{product.compareAtPrice.toLocaleString(ar ? "ar-EG" : "en-EG")} </del>}{product.price.toLocaleString(ar ? "ar-EG" : "en-EG")} <span>{ar ? "جنيه" : "EGP"}</span></p>
         <p className="zero-detail-description">{description || (ar ? "تصميم رياضي بقصة دقيقة، مناسب للحركة واللبس اليومي." : "A clean athletic fit designed for movement and everyday wear.")}</p>
         <div className="zero-detail-rule" />
-        {product.sizeChartUrl && <section className="zero-size-chart"><h2>{ar ? "جدول المقاسات" : "SIZE CHART"}</h2><button type="button" className="zero-size-chart-image-button" onClick={() => window.open(product.sizeChartUrl!, "_blank", "noopener,noreferrer")} aria-label={ar ? "عرض جدول المقاسات بحجم كامل" : "Open full size chart"}><img src={product.sizeChartUrl} alt={ar ? "جدول مقاسات المنتج" : "Product size chart"} loading="lazy"/></button></section>}
+        {product.sizeChartUrl && <div className="zero-size-chart-trigger"><button type="button" className="zero-size-chart-button" onClick={() => setShowSizeChart(true)}>{ar ? "عرض جدول المقاسات" : "VIEW SIZE CHART"} <span aria-hidden="true">↗</span></button></div>}
         <div className="zero-detail-option-head"><label>{ar ? "المقاس" : "SIZE"}</label><span>{size || (ar ? "اختار المقاس" : "SELECT SIZE")}</span></div>
         <div className="zero-detail-size-grid">{sizes.map(s => {
           const hasStock = product.variants.some(v => v.size === s && v.stock > 0);
@@ -105,6 +106,7 @@ export default function ProductDetailPage() {
         <div className="zero-detail-perks"><p><span>01</span>{ar ? "الدفع عند الاستلام" : "CASH ON DELIVERY"}</p><p><span>02</span>{ar ? "المقاس واللون بيتأكدوا في الطلب" : "YOUR SIZE & COLOR ARE SAVED WITH THE ORDER"}</p></div>
       </div>
     </section>}
+    {showSizeChart && product?.sizeChartUrl && <div className="zero-size-chart-overlay" role="presentation" onClick={() => setShowSizeChart(false)}><section className="zero-size-chart-modal" role="dialog" aria-modal="true" aria-label={ar ? "جدول المقاسات" : "Size chart"} onClick={event => event.stopPropagation()}><div className="zero-size-chart-modal-head"><h2>{ar ? "جدول المقاسات" : "SIZE CHART"}</h2><button type="button" onClick={() => setShowSizeChart(false)} aria-label={ar ? "إغلاق" : "Close"}>×</button></div><img src={product.sizeChartUrl} alt={ar ? "جدول مقاسات المنتج" : "Product size chart"} /><button type="button" className="zero-size-chart-close" onClick={() => setShowSizeChart(false)}>{ar ? "إغلاق" : "CLOSE"}</button></section></div>}
     <footer className="zero-detail-footer">ZERO CLOTHING <span>MEN’S PERFORMANCE WEAR · CAIRO, EGYPT</span></footer>
   </main>;
 }
