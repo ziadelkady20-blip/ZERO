@@ -23,6 +23,7 @@ export default function ProductDetailPage() {
   const [color, setColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [notice, setNotice] = useState("");
+  const [selectedImage, setSelectedImage] = useState(0);
   const ar = locale === "ar";
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function ProductDetailPage() {
       const found = (data.products || []).find((p: Product) => p.slug === params.slug);
       if (found) {
         setProduct(found);
+        setSelectedImage(0);
         const firstAvailable = found.variants.find((v: Variant) => v.stock > 0) || found.variants[0];
         if (firstAvailable) { setSize(firstAvailable.size); setColor(firstAvailable.color); }
       }
@@ -40,7 +42,7 @@ export default function ProductDetailPage() {
   const sizes = useMemo(() => Array.from(new Set((product?.variants || []).map(v => v.size))), [product]);
   const colors = useMemo(() => Array.from(new Set((product?.variants || []).filter(v => v.size === size).map(v => v.color))), [product, size]);
   const variant = product?.variants.find(v => v.size === size && v.color === color);
-  const image = product?.images[0]?.url || "";
+  const image = product?.images[selectedImage]?.url || product?.images[0]?.url || "";
   const title = product ? (ar ? product.nameAr : product.nameEn) : "";
   const description = product ? (ar ? product.descriptionAr : product.descriptionEn) : "";
 
@@ -73,9 +75,12 @@ export default function ProductDetailPage() {
     </header>
     <div className="zero-detail-breadcrumb"><Link href="/">{ar ? "الرئيسية" : "HOME"}</Link><span>/</span><Link href="/shop">{ar ? "المتجر" : "SHOP"}</Link><span>/</span><span>{product?.category?.nameEn || "ZERO"}</span></div>
     {loading ? <div className="zero-detail-state">{ar ? "جاري تحميل المنتج…" : "LOADING PRODUCT…"}</div> : !product ? <section className="zero-detail-state"><p className="zero-detail-eyebrow">ZERO / PRODUCT</p><h1>{ar ? "المنتج مش موجود في المخزون لسه." : "This product isn't in the catalog yet."}</h1><p>{ar ? "لما تضيف المنتج من لوحة الإدارة بالصور والمقاسات والألوان، هتظهر صفحته هنا." : "Once this product is added from the admin dashboard with its images, sizes, and colors, its detail page will appear here."}</p><Link className="zero-detail-button" href="/shop">{ar ? "ارجع للمتجر" : "BACK TO SHOP"} ↗</Link></section> : <section className="zero-detail-layout">
+      <div className="zero-detail-gallery-wrap">
       <div className="zero-detail-gallery">
-        {image ? <img className="zero-detail-main-image" src={image} alt={product.images[0]?.alt || title} onError={(event) => { event.currentTarget.style.display = "none"; }} /> : <div className="zero-detail-image-fallback">ZERO<span>.</span><small>{ar ? "أضف صورة المنتج من لوحة الإدارة" : "ADD PRODUCT IMAGE IN ADMIN"}</small></div>}
+        {image ? <img key={image} className="zero-detail-main-image" src={image} alt={product.images[selectedImage]?.alt || title} onError={(event) => { event.currentTarget.style.display = "none"; }} /> : <div className="zero-detail-image-fallback">ZERO<span>.</span><small>{ar ? "أضف صورة المنتج من لوحة الإدارة" : "ADD PRODUCT IMAGE IN ADMIN"}</small></div>}
         <span className="zero-detail-image-tag">ZERO / PERFORMANCE ESSENTIALS</span>
+      </div>
+      {product.images.length > 1 && <div className="zero-detail-thumbnails" aria-label={ar ? "صور المنتج" : "Product images"}>{product.images.map((item,index)=><button type="button" key={item.url+index} className={selectedImage===index?"active":""} onClick={()=>setSelectedImage(index)} aria-label={ar?`عرض الصورة ${index+1}`:`Show image ${index+1}`}><img src={item.url} alt={item.alt||`${title} ${index+1}`}/></button>)}</div>}
       </div>
       <div className="zero-detail-info">
         <p className="zero-detail-eyebrow">{product.category?.nameEn || "ZERO CLOTHING"} / MEN’S COLLECTION</p>
