@@ -73,7 +73,7 @@ export async function PATCH(request: Request) {
   if (typeof body.featured === "boolean") data.featured = body.featured;
   if (body.sizeChartUrl !== undefined) {
     const url = typeof body.sizeChartUrl === "string" ? body.sizeChartUrl.trim() : "";
-    if (url && !/^https:\/\/\\S+$/i.test(url)) return NextResponse.json({ error: "Size chart must be a direct HTTPS image URL." }, { status: 400 });
+    if (url && !/^https:\/\/\S+$/i.test(url)) return NextResponse.json({ error: "Size chart must be a direct HTTPS image URL." }, { status: 400 });
     data.sizeChartUrl = url || null;
   }
   if (typeof body.categoryId === "string" && body.categoryId) data.categoryId = body.categoryId;
