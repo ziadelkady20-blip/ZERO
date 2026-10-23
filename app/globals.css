@@ -478,3 +478,9 @@ body{background:#050505;color:#f8f8f6}
 .zero-detail-thumbnails button:hover{opacity:1}
 .zero-detail-thumbnails img{display:block;width:100%;height:100%;object-fit:contain}
 @media(max-width:680px){.zero-detail-thumbnails{gap:7px;margin-top:9px}.zero-detail-thumbnails button{width:60px;height:72px}}
+
+
+/* Free-third-tee notice: keep the heading and explanatory copy readable inside checkout. */
+.live-promo-box.live-free-tee-notice{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-width:0;padding:16px 18px;margin:4px 0 20px;line-height:1.5;overflow-wrap:anywhere;}
+.live-promo-box.live-free-tee-notice strong{display:block;max-width:100%;font-size:14px;line-height:1.45;letter-spacing:0;white-space:normal;word-break:normal;}
+.live-promo-box.live-free-tee-notice p{display:block;max-width:100%;margin:0;font-size:12px;line-height:1.7;letter-spacing:0;white-space:normal;overflow-wrap:anywhere;}
