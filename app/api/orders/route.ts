@@ -70,7 +70,7 @@ export async function POST(request: Request) {
         subtotal += variant.product.price * quantity;
         const category = variant.product.category;
         const isTshirt = category.slug === "training-tees"
-          || /t-?shirts?|tees|تيشيرت/i.test(category.nameEn + " " + category.nameAr + " " + variant.product.nameEn + " " + variant.product.nameAr);
+          || /t-?shirts?|tees|compression|تيشيرت|كمبريشن|كومبريشن/i.test(category.nameEn + " " + category.nameAr + " " + variant.product.nameEn + " " + variant.product.nameAr);
         if (isTshirt) for (let i = 0; i < quantity; i++) teePrices.push(variant.product.price);
         return {
           productId: variant.productId,
