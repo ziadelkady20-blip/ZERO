@@ -58,15 +58,20 @@ export async function POST(request: Request) {
 
       const variants = await tx.productVariant.findMany({
         where: { id: { in: [...requested.keys()] }, product: { active: true } },
-        include: { product: true },
+        include: { product: { include: { category: true } } },
       });
       if (variants.length !== requested.size) throw new Error("ITEM_UNAVAILABLE");
 
       let subtotal = 0;
+      const teePrices: number[] = [];
       const orderItems = variants.map(variant => {
         const quantity = requested.get(variant.id)!;
         if (variant.stock < quantity) throw new Error("INSUFFICIENT_STOCK");
         subtotal += variant.product.price * quantity;
+        const category = variant.product.category;
+        const isTshirt = category.slug === "training-tees"
+          || /t-?shirts?|tees|تيشيرت/i.test(category.nameEn + " " + category.nameAr + " " + variant.product.nameEn + " " + variant.product.nameAr);
+        if (isTshirt) for (let i = 0; i < quantity; i++) teePrices.push(variant.product.price);
         return {
           productId: variant.productId,
           variantId: variant.id,
@@ -80,13 +85,18 @@ export async function POST(request: Request) {
         };
       });
 
-      let discountAmount = 0;
+      teePrices.sort((a, b) => a - b);
+      const freeTeeCount = Math.floor(teePrices.length / 3);
+      const freeTeeDiscount = teePrices.slice(0, freeTeeCount).reduce((sum, price) => sum + price, 0);
+      if (couponCode && freeTeeCount > 0) throw new Error("FREE_TEE_PROMO_CONFLICT");
+
+      let discountAmount = freeTeeDiscount;
       if (couponCode) {
         const coupon = await tx.coupon.findUnique({ where: { code: couponCode } });
         if (!coupon || !coupon.active) throw new Error("COUPON_INVALID");
-        discountAmount = coupon.discountType === "PERCENT"
-          ? Math.min(subtotal, Math.round(subtotal * coupon.discountValue / 100))
-          : Math.min(subtotal, coupon.discountValue);
+        discountAmount += coupon.discountType === "PERCENT"
+          ? Math.min(subtotal - discountAmount, Math.round(subtotal * coupon.discountValue / 100))
+          : Math.min(subtotal - discountAmount, coupon.discountValue);
       }
 
       for (const item of orderItems) {
@@ -110,6 +120,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ order }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     const reason = error instanceof Error ? error.message : "";
+    if (reason === "FREE_TEE_PROMO_CONFLICT") return NextResponse.json({ error: "The free third T-shirt offer cannot be combined with a promo code. Remove the promo code to continue." }, { status: 422 });
     if (reason === "COUPON_INVALID") return NextResponse.json({ error: "This promo code is invalid or inactive. Remove it and try again." }, { status: 422 });
     if (reason === "SHIPPING_UNAVAILABLE") return NextResponse.json({ error: "Shipping is not configured for this governorate yet." }, { status: 422 });
     if (reason === "ITEM_UNAVAILABLE") return NextResponse.json({ error: "One or more products are no longer available." }, { status: 409 });
