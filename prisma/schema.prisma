@@ -26,6 +26,7 @@ model Product {
   descriptionAr String         @default("")
   price       Int
   compareAtPrice Int?
+  sizeChartUrl String?
   active      Boolean          @default(true)
   featured    Boolean          @default(false)
   categoryId  String
