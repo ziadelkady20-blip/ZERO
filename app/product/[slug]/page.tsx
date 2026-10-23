@@ -7,7 +7,7 @@ import Link from "next/link";
 type Variant = { id: string; size: string; color: string; stock: number; sku: string };
 type Product = {
   id: string; slug: string; nameEn: string; nameAr: string; descriptionEn: string; descriptionAr: string;
-  price: number; compareAtPrice?: number | null; active: boolean; category: { nameEn: string; nameAr: string; slug: string };
+  price: number; compareAtPrice?: number | null; sizeChartUrl?: string | null; active: boolean; category: { nameEn: string; nameAr: string; slug: string };
   images: { url: string; alt: string; position: number }[]; variants: Variant[];
 };
 type CartItem = { variantId: string; productId: string; nameEn: string; nameAr: string; image: string; size: string; color: string; price: number; quantity: number; stock: number };
