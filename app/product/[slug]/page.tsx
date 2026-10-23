@@ -88,6 +88,7 @@ export default function ProductDetailPage() {
         <p className="zero-detail-price">{product.compareAtPrice && product.compareAtPrice > product.price && <del>{product.compareAtPrice.toLocaleString(ar ? "ar-EG" : "en-EG")} </del>}{product.price.toLocaleString(ar ? "ar-EG" : "en-EG")} <span>{ar ? "جنيه" : "EGP"}</span></p>
         <p className="zero-detail-description">{description || (ar ? "تصميم رياضي بقصة دقيقة، مناسب للحركة واللبس اليومي." : "A clean athletic fit designed for movement and everyday wear.")}</p>
         <div className="zero-detail-rule" />
+        {product.sizeChartUrl && <section className="zero-size-chart"><h2>{ar ? "جدول المقاسات" : "SIZE CHART"}</h2><button type="button" className="zero-size-chart-image-button" onClick={() => window.open(product.sizeChartUrl!, "_blank", "noopener,noreferrer")} aria-label={ar ? "عرض جدول المقاسات بحجم كامل" : "Open full size chart"}><img src={product.sizeChartUrl} alt={ar ? "جدول مقاسات المنتج" : "Product size chart"} loading="lazy"/></button></section>}
         <div className="zero-detail-option-head"><label>{ar ? "المقاس" : "SIZE"}</label><span>{size || (ar ? "اختار المقاس" : "SELECT SIZE")}</span></div>
         <div className="zero-detail-size-grid">{sizes.map(s => {
           const hasStock = product.variants.some(v => v.size === s && v.stock > 0);
