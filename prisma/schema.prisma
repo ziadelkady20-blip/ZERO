@@ -165,6 +165,7 @@ model BundleProduct {
   id        String  @id @default(cuid())
   bundleId  String
   productId String
+  variantId String?
   quantity  Int     @default(1)
   bundle    Bundle  @relation(fields: [bundleId], references: [id], onDelete: Cascade)
   product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
