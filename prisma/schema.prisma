@@ -31,6 +31,8 @@ model Product {
   featured    Boolean          @default(false)
   bestSeller  Boolean          @default(false)
   newArrival  Boolean          @default(false)
+  promotionType String         @default("NONE")
+  promotionValue Int           @default(0)
   categoryId  String
   category    Category         @relation(fields: [categoryId], references: [id])
   images      ProductImage[]
