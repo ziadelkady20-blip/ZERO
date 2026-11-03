@@ -96,6 +96,7 @@ export async function POST(request: Request) {
       for (const item of bundleRequests) {
         const bundle = bundleById.get(item.bundleId)!;
         const expected = new Map(bundle.items.map(entry => [entry.productId, entry.quantity]));
+         const fixedVariants = new Map(bundle.items.map(entry => [entry.productId, entry.variantId]));
         const actual = new Map<string, number>();
         const components: { productId: string; variantId: string; quantity: number }[] = [];
         for (const component of item.components) {
