@@ -46,6 +46,8 @@ export async function POST(request: Request) {
         descriptionAr: typeof body.descriptionAr === "string" ? body.descriptionAr : "",
         active: body.active !== false,
         featured: body.featured === true,
+        promotionType: ["NONE","PERCENT","BUY2GET1"].includes(body.promotionType) ? body.promotionType : "NONE",
+        promotionValue: body.promotionType === "PERCENT" && Number.isInteger(Number(body.promotionValue)) ? Math.min(90,Math.max(1,Number(body.promotionValue))) : 0,
         images: { create: imageUrls.map((url: string, position: number) => ({ url, position })) },
         variants: { create: Array.isArray(body.variants) ? body.variants.filter((v: any) => v && typeof v.size === "string" && typeof v.color === "string" && typeof v.sku === "string" && Number.isInteger(Number(v.stock)) && Number(v.stock) >= 0).map((v: any) => ({ size: v.size, color: v.color, sku: v.sku, stock: Number(v.stock) })) : [] },
       },
@@ -73,6 +75,13 @@ export async function PATCH(request: Request) {
   if (typeof body.featured === "boolean") data.featured = body.featured;
   if (typeof body.bestSeller === "boolean") data.bestSeller = body.bestSeller;
   if (typeof body.newArrival === "boolean") data.newArrival = body.newArrival;
+  if (body.promotionType !== undefined) {
+    if (!["NONE","PERCENT","BUY2GET1"].includes(body.promotionType)) return NextResponse.json({ error: "Invalid promotion type." }, { status: 400 });
+    const value = Number(body.promotionValue ?? 0);
+    if (body.promotionType === "PERCENT" && (!Number.isInteger(value) || value < 1 || value > 90)) return NextResponse.json({ error: "Discount must be between 1% and 90%." }, { status: 400 });
+    data.promotionType = body.promotionType;
+    data.promotionValue = body.promotionType === "PERCENT" ? value : 0;
+  }
   if (body.sizeChartUrl !== undefined) {
     const url = typeof body.sizeChartUrl === "string" ? body.sizeChartUrl.trim() : "";
     if (url && !/^https:\/\/\S+$/i.test(url)) return NextResponse.json({ error: "Size chart must be a direct HTTPS image URL." }, { status: 400 });
