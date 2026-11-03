@@ -41,7 +41,7 @@ export async function PATCH(request:Request) {
   if(!current)return NextResponse.json({error:"Bundle not found."},{status:404});
   const fixedItems: {productId:string;variantId:string}[] | undefined = body.fixedItems===undefined ? undefined : Array.isArray(body.fixedItems) ? body.fixedItems.filter((item:any)=>item&&typeof item.productId==="string"&&typeof item.variantId==="string").map((item:any)=>({productId:item.productId.trim(),variantId:item.variantId.trim()})) : [];
    const productIds=fixedItems?.map(item=>item.productId);
-  if(productIds!==undefined&&(productIds.length===0||productIds.length>20||new Set(productIds).size!==fixedItems.length))return NextResponse.json({error:"Select between 1 and 20 fixed products."},{status:400});
+  if(productIds!==undefined&&(productIds.length===0||productIds.length>20||new Set(productIds).size!==(fixedItems?.length??0)))return NextResponse.json({error:"Select between 1 and 20 fixed products."},{status:400});
   const selectedProducts=productIds!==undefined?await prisma.product.findMany({where:{id:{in:productIds},active:true},select:{id:true,price:true,variants:{select:{id:true}}}}):current.items.map(item=>({id:item.productId,price:item.product.price,variants:[]}));
   if(selectedProducts.length!==(productIds?.length??current.items.length)||fixedItems?.some(item=>!selectedProducts.find(p=>p.id===item.productId)?.variants.some(v=>v.id===item.variantId)))return NextResponse.json({error:"One or more selected products are unavailable."},{status:400});
   const nextTotalPrice=data.totalPrice??current.totalPrice;
