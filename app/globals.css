@@ -550,3 +550,9 @@ body{background:#050505;color:#f8f8f6}
 .curated-products-section .product-grid{margin-top:32px}
 .curated-products-section .product-badge{z-index:2}
 @media(max-width:680px){.curated-products-section{padding-top:48px;padding-bottom:48px}.curated-products-section .product-grid{margin-top:22px}}
+
+/* ZERO campaign hero artwork */
+.hero-section{height:auto;min-height:0;aspect-ratio:2/1;display:block;background:#101010;overflow:hidden}
+.hero-section .hero-image{inset:0;background-image:url("/%D8%A7%D9%95%D8%B9%D9%84%D8%A7%D9%86%20%D8%A7%D9%94%D8%B2%D9%8A%D8%A7%D8%A1%20%D8%B1%D9%8A%D8%A7%D8%B6%D9%8A%D8%A9%20%D8%A8%D8%B1%D9%8A%D9%85%D9%8A%D9%88%D9%85%20%D9%85%D9%86%20%D8%B2%D9%8A%D8%B1%D9%88.png");background-size:contain;background-repeat:no-repeat;background-position:center;filter:none;z-index:0}
+.hero-section .hero-shade,.hero-section .hero-floating-products,.hero-section .hero-content,.hero-section .hero-vertical-note,.hero-section .hero-bottom-note{display:none}
+@media(max-width:680px){.hero-section{aspect-ratio:2/1;min-height:0;height:auto}.hero-section .hero-image{background-size:contain;background-position:center}}
