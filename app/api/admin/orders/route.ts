@@ -26,7 +26,7 @@ export async function PATCH(request: Request) {
   if (!code || !allowed.includes(status)) return NextResponse.json({ error: "Valid order code and status are required." }, { status: 400 });
   try {
     const order = await prisma.$transaction(async (tx) => {
-      const current = await tx.order.findUnique({ where: { code }, include: { items: true } });
+      const current = await tx.order.findUnique({ where: { code }, include: { items: { include: { components: true } } } });
       if (!current) throw new Error("NOT_FOUND");
       if (current.status === "CANCELLED" && status !== "CANCELLED") throw new Error("CANCELLED_ORDER_LOCKED");
       if (status === "CANCELLED" && current.status !== "CANCELLED" && current.status !== "DELIVERED") {
