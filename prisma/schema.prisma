@@ -153,7 +153,6 @@ model CustomerReview {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  items          BundleProduct[]
   @@index([active, position])
 }
 
@@ -181,6 +180,7 @@ model Bundle {
   position       Int      @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  items          BundleProduct[]
 
   @@index([active, position])
 }
