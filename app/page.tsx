@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 type Locale = "en" | "ar";
+type CustomerReview = { id:string; imageUrl:string; customerName:string; caption:string };
 type Product = {
   id: number;
   slug: string;
@@ -156,6 +157,11 @@ export default function HomePage() {
   const [cart, setCart] = useState<Record<number, number>>({});
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
+  const [customerReviews, setCustomerReviews] = useState<CustomerReview[]>([]);
+
+  useEffect(() => {
+    fetch("/api/reviews").then(response => response.json()).then(data => { if (Array.isArray(data.reviews)) setCustomerReviews(data.reviews); }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch("/api/products").then((response) => response.json()).then((data) => {
@@ -347,6 +353,17 @@ export default function HomePage() {
         <div><span className="benefit-number">02</span><div><strong>LESS, BUT BETTER</strong><p>Essentials without the noise.</p></div></div>
         <div><span className="benefit-number">03</span><div><strong>MADE TO LAST</strong><p>Essentials you reach for.</p></div></div>
       </section>
+
+      {customerReviews.length>0&&<section className="reviews-section section-pad" id="reviews">
+        <div className="section-heading">
+          <div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{isArabic?"آراء عملائنا":"REAL CUSTOMER REVIEWS"}</p><h2>{isArabic?"تجارب حقيقية مع ZERO.":"Worn. Loved. Reviewed."}</h2><p className="section-description">{isArabic?"آراء وتجارب عملائنا مع منتجات ZERO.":"A look at what our customers are saying about ZERO."}</p></div>
+          <span className="category-count">{String(customerReviews.length).padStart(2,"0")} · REVIEWS</span>
+        </div>
+        <div className="reviews-gallery">{customerReviews.map((review,index)=><article className="review-image-card" key={review.id}>
+          <img src={review.imageUrl} alt={review.customerName?((isArabic?"رأي العميل ":"Customer review by ")+review.customerName):(isArabic?"صورة من آراء العملاء":"Customer review")} loading={index>2?"lazy":"eager"}/>
+          {(review.customerName||review.caption)&&<div className="review-image-caption">{review.customerName&&<strong>{review.customerName}</strong>}{review.caption&&<p>{review.caption}</p>}</div>}
+        </article>)}</div>
+      </section>}
 
       <footer className="site-footer">
         <div className="footer-top">
