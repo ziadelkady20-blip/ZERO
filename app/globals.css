@@ -543,3 +543,10 @@ body{background:#050505;color:#f8f8f6}
 .rtl .bundle-card-content h3,.rtl .bundle-card-content>p{font-family:var(--font-ar)}
 .rtl .bundle-total>span{letter-spacing:0}
 @media(max-width:680px){.bundles-grid{grid-template-columns:1fr;gap:14px}.bundle-card-content{padding:16px}.bundle-card-content h3{font-size:18px}.bundle-total strong{font-size:18px}}
+
+/* Curated storefront product collections: best sellers and new arrivals */
+.curated-products-section{background:#f7f6f2}
+.curated-products-section:nth-of-type(even){background:#fff}
+.curated-products-section .product-grid{margin-top:32px}
+.curated-products-section .product-badge{z-index:2}
+@media(max-width:680px){.curated-products-section{padding-top:48px;padding-bottom:48px}.curated-products-section .product-grid{margin-top:22px}}
