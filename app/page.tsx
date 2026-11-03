@@ -28,6 +28,8 @@ type Product = {
   badge?: string;
   image: string;
   imageAlt: string;
+  bestSeller?: boolean;
+  newArrival?: boolean;
 };
 
 const products: Product[] = [];
@@ -172,16 +174,19 @@ export default function HomePage() {
   useEffect(() => {
     fetch("/api/products").then((response) => response.json()).then((data) => {
       if (!Array.isArray(data.products)) return;
-      setCatalogProducts(data.products.map((item: { id: string; slug: string; nameEn: string; nameAr: string; price: number; compareAtPrice?: number | null; category?: { slug?: string; nameEn?: string; nameAr?: string }; images?: { url: string; alt?: string }[]; featured?: boolean }, index: number) => ({
+      setCatalogProducts(data.products.map((item: { id: string; slug: string; nameEn: string; nameAr: string; price: number; compareAtPrice?: number | null; category?: { slug?: string; nameEn?: string; nameAr?: string }; images?: { url: string; alt?: string }[]; featured?: boolean; bestSeller?: boolean; newArrival?: boolean }, index: number) => ({
         id: index + 1, slug: item.slug, name: locale === "ar" ? item.nameAr : item.nameEn,
         category: item.category?.nameEn || item.category?.slug || "Performance",
         categoryAr: item.category?.nameAr || item.category?.nameEn || "ملابس رياضية",
         categorySlug: item.category?.slug || "uncategorized",
-        price: item.price, compareAtPrice: item.compareAtPrice, badge: item.featured ? "FEATURED" : undefined, image: item.images?.[0]?.url || "",
+        price: item.price, compareAtPrice: item.compareAtPrice, badge: item.featured ? "FEATURED" : undefined, bestSeller: item.bestSeller === true, newArrival: item.newArrival === true, image: item.images?.[0]?.url || "",
         imageAlt: item.images?.[0]?.alt || (locale === "ar" ? "موديل رجالي بملابس ZERO الرياضية" : "Male model wearing ZERO performance wear"),
       })));
     }).catch(() => {});
   }, [locale]);
+
+  const bestSellerProducts = catalogProducts.filter((product) => product.bestSeller);
+  const newArrivalProducts = catalogProducts.filter((product) => product.newArrival);
 
   const t = copy[locale];
   const isArabic = locale === "ar";
@@ -290,6 +295,16 @@ export default function HomePage() {
           <a href="#collection" className="category-card category-card-tee" onClick={() => setActiveCategory("training-tees")}><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1100&q=90" alt="Male model wearing a clean everyday T-shirt" /><span className="category-index">01 / EVERYDAY ESSENTIALS</span><span className="category-title">{t.categoryTee}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
           <a href="#collection" className="category-card category-card-compression" onClick={() => setActiveCategory("compression")}><img src={ZERO_MODEL_IMAGE} alt="Male model wearing a white ZERO compression shirt" /><span className="category-index">02 / PERFORMANCE FIT</span><span className="category-title">{t.categoryCompression}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
         </div>   </section>
+
+      {bestSellerProducts.length>0&&<section className="curated-products-section section-pad" id="best-sellers">
+        <div className="section-heading"><div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{isArabic?"اختيارات ZERO":"ZERO SELECTION"}</p><h2>{isArabic?"الأكثر مبيعًا":"Best Sellers"}</h2><p className="section-description">{isArabic?"اختيارات عملائنا المفضلة.":"Customer favourites, selected for you."}</p></div><span className="category-count">{String(bestSellerProducts.length).padStart(2,"0")} · BEST SELLERS</span></div>
+        <div className="product-grid">{bestSellerProducts.map((product,index)=><article className="product-card" key={product.id}><div className="product-image-wrap">{product.image?<img src={product.image} alt={product.imageAlt} className="product-image" loading={index>1?"lazy":"eager"}/>:<div className="product-image-placeholder" role="img"><span>ZERO.</span></div>}<span className="product-badge">BEST SELLER</span><button className="wishlist-button" aria-label={"Save "+product.name}><Heart size={18} strokeWidth={1.6}/></button><a className="quick-add" href={`/product/${product.slug}`}>{isArabic?"عرض المنتج":"VIEW PRODUCT"}<ArrowRight size={15}/></a></div><div className="product-info"><div><p className="product-category">{isArabic?product.categoryAr:product.category}</p><h3><a className="product-name-link" href={`/product/${product.slug}`}>{product.name}</a></h3></div><p className="product-price">{product.compareAtPrice&&product.compareAtPrice>product.price&&<del>{product.compareAtPrice.toLocaleString(isArabic?"ar-EG":"en-EG")}</del>} {product.price.toLocaleString(isArabic?"ar-EG":"en-EG")} <span>{t.egp}</span></p></div></article>)}</div>
+      </section>}
+
+      {newArrivalProducts.length>0&&<section className="curated-products-section section-pad" id="new-arrivals">
+        <div className="section-heading"><div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{isArabic?"اختيارات ZERO":"ZERO SELECTION"}</p><h2>{isArabic?"وصل حديثًا":"New Arrivals"}</h2><p className="section-description">{isArabic?"اكتشف أحدث قطع ZERO.":"The latest additions to the ZERO collection."}</p></div><span className="category-count">{String(newArrivalProducts.length).padStart(2,"0")} · NEW ARRIVALS</span></div>
+        <div className="product-grid">{newArrivalProducts.map((product,index)=><article className="product-card" key={product.id}><div className="product-image-wrap">{product.image?<img src={product.image} alt={product.imageAlt} className="product-image" loading={index>1?"lazy":"eager"}/>:<div className="product-image-placeholder" role="img"><span>ZERO.</span></div>}<span className="product-badge">NEW ARRIVAL</span><button className="wishlist-button" aria-label={"Save "+product.name}><Heart size={18} strokeWidth={1.6}/></button><a className="quick-add" href={`/product/${product.slug}`}>{isArabic?"عرض المنتج":"VIEW PRODUCT"}<ArrowRight size={15}/></a></div><div className="product-info"><div><p className="product-category">{isArabic?product.categoryAr:product.category}</p><h3><a className="product-name-link" href={`/product/${product.slug}`}>{product.name}</a></h3></div><p className="product-price">{product.compareAtPrice&&product.compareAtPrice>product.price&&<del>{product.compareAtPrice.toLocaleString(isArabic?"ar-EG":"en-EG")}</del>} {product.price.toLocaleString(isArabic?"ar-EG":"en-EG")} <span>{t.egp}</span></p></div></article>)}</div>
+      </section>}
 
       <section className="collection-section section-pad" id="collection">
         <div className="section-heading">
