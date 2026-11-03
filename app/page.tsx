@@ -15,7 +15,7 @@ import {
 
 type Locale = "en" | "ar";
 type CustomerReview = { id:string; imageUrl:string; customerName:string; caption:string };
-type StoreBundle = { id:string; titleEn:string; titleAr:string; descriptionEn:string; descriptionAr:string; imageUrl:string; totalPrice:number };
+type StoreBundle = { id:string; titleEn:string; titleAr:string; descriptionEn:string; descriptionAr:string; imageUrl:string; totalPrice:number; items?:{productId:string;quantity:number;product:{id:string;nameEn:string;nameAr:string;price:number;images:{url:string}[];variants:{id:string;size:string;color:string;stock:number}[]}}[] };
 type Product = {
   id: number;
   slug: string;
@@ -366,7 +366,7 @@ export default function HomePage() {
         </div>
         <div className="bundles-grid">{storeBundles.map(bundle=><article className="bundle-card" key={bundle.id}>
           <div className="bundle-card-image"><img src={bundle.imageUrl} alt={isArabic?(bundle.titleAr||bundle.titleEn):bundle.titleEn} loading="lazy"/><span>{isArabic?"عرض خاص":"BUNDLE OFFER"}</span></div>
-          <div className="bundle-card-content"><h3>{isArabic?(bundle.titleAr||bundle.titleEn):bundle.titleEn}</h3><p>{isArabic?(bundle.descriptionAr||bundle.descriptionEn):bundle.descriptionEn}</p><div className="bundle-total"><span>{isArabic?"السعر الإجمالي":"TOTAL PRICE"}</span><strong>{new Intl.NumberFormat(isArabic?"ar-EG":"en-EG",{maximumFractionDigits:0}).format(bundle.totalPrice)} {isArabic?"جنيه":"EGP"}</strong></div></div>
+          <div className="bundle-card-content"><h3>{isArabic?(bundle.titleAr||bundle.titleEn):bundle.titleEn}</h3><p>{isArabic?(bundle.descriptionAr||bundle.descriptionEn):bundle.descriptionEn}</p>{bundle.items&&bundle.items.length>0&&<p className="bundle-included-products">{isArabic?"تشمل: ":"INCLUDES: "}{bundle.items.map(item=>isArabic?(item.product.nameAr||item.product.nameEn):item.product.nameEn).join(" · ")}</p>}<div className="bundle-total"><span>{isArabic?"السعر الإجمالي":"TOTAL PRICE"}</span><strong>{new Intl.NumberFormat(isArabic?"ar-EG":"en-EG",{maximumFractionDigits:0}).format(bundle.totalPrice)} {isArabic?"جنيه":"EGP"}</strong></div><a className="bundle-add-button" href={"/shop?bundle="+encodeURIComponent(bundle.id)}>{isArabic?"اختار المقاسات وأضف الباقة للسلة":"CHOOSE OPTIONS & ADD BUNDLE"} <ArrowRight size={15}/></a></div>
         </article>)}</div>
       </section>}
 
