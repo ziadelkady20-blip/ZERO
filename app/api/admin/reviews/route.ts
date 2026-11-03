@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- Request payloads are validated before Prisma writes. */
 import { NextResponse } from "next/server";
 import { hasSameOrigin } from "@/lib/security";
 import { isAdminSessionValid } from "@/lib/admin-auth";
