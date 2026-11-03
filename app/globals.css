@@ -643,3 +643,93 @@ body{background:#050505;color:#f8f8f6}
 .admin-promotion-editor>strong{display:block;margin-bottom:6px}
 .admin-promotion-editor .admin-form-grid{margin-top:12px}
 @media(max-width:680px){.live-product-promo-badge,.product-promo-badge{top:48px;left:9px;padding:7px 9px;font-size:9px}}
+
+ 
+/* ZERO storefront contrast fix: bundles and customer reviews */
+.bundles-section,
+.reviews-section{
+  background:#f3f2ee!important;
+  color:#111!important;
+}
+.bundles-section .section-heading h2,
+.reviews-section .section-heading h2{
+  color:#111!important;
+  font-family:var(--font-en)!important;
+  font-size:clamp(38px,4.8vw,62px)!important;
+  font-weight:650!important;
+  line-height:1.04!important;
+  letter-spacing:-.055em!important;
+  opacity:1!important;
+  text-shadow:none!important;
+  margin:12px 0 14px!important;
+}
+.bundles-section .section-heading .eyebrow,
+.reviews-section .section-heading .eyebrow,
+.bundles-section .category-count,
+.reviews-section .category-count{
+  color:#555!important;
+  opacity:1!important;
+}
+.bundles-section .section-description,
+.reviews-section .section-description{
+  color:#555!important;
+  font-size:14px!important;
+  line-height:1.75!important;
+  opacity:1!important;
+}
+.bundles-section .bundle-card{
+  background:#fff!important;
+  color:#111!important;
+  border:1px solid #deddd8!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.045);
+}
+.bundles-section .bundle-card-content h3{
+  color:#111!important;
+  font-size:clamp(19px,2vw,24px)!important;
+  line-height:1.3!important;
+  font-weight:650!important;
+  opacity:1!important;
+}
+.bundles-section .bundle-card-content>p{
+  color:#555!important;
+  font-size:14px!important;
+  line-height:1.75!important;
+  opacity:1!important;
+}
+.bundles-section .bundle-total>span{color:#666!important;font-size:10px!important}
+.bundles-section .bundle-total strong{color:#111!important;font-size:clamp(19px,2vw,23px)!important}
+.bundles-section .bundle-card-image>span{
+  color:#fff!important;background:#080808!important;
+  font-size:10px!important;padding:9px 12px!important;
+}
+.reviews-section .review-image-card{
+  background:#fff!important;color:#111!important;
+  border:1px solid #deddd8!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.04);
+}
+.reviews-section .review-image-caption strong{
+  color:#111!important;font-size:12px!important;
+  line-height:1.5!important;opacity:1!important;
+}
+.reviews-section .review-image-caption p{
+  color:#555!important;font-size:14px!important;
+  line-height:1.75!important;opacity:1!important;
+}
+.rtl .bundles-section .section-heading h2,
+.rtl .reviews-section .section-heading h2,
+.rtl .bundles-section .bundle-card-content h3,
+.rtl .bundles-section .bundle-card-content>p{
+  font-family:var(--font-ar)!important;
+  letter-spacing:0!important;
+  line-height:1.65!important;
+}
+.rtl .reviews-section .review-image-caption{direction:rtl;text-align:right}
+@media(max-width:760px){
+  .bundles-section .section-heading h2,
+  .reviews-section .section-heading h2{font-size:clamp(32px,9vw,42px)!important}
+  .bundles-section .section-description,
+  .reviews-section .section-description{font-size:13px!important}
+  .bundles-section .bundle-card-content h3{font-size:19px!important}
+  .bundles-section .bundle-card-content>p,
+  .reviews-section .review-image-caption p{font-size:13px!important}
+}
