@@ -118,9 +118,9 @@ export async function POST(request: Request) {
       const freeItemCount = Math.floor(buy2Get1Prices.length / 3);
       const buy2Get1Discount = buy2Get1Prices.slice(0, freeItemCount).reduce((sum, price) => sum + price, 0);
       const automaticDiscount = percentageDiscount + buy2Get1Discount;
-      if (couponCode && automaticDiscount + bundleDiscount > 0) throw new Error("AUTO_PROMO_CONFLICT");
+      if (couponCode && automaticDiscount > 0) throw new Error("AUTO_PROMO_CONFLICT");
 
-      let discountAmount = automaticDiscount + bundleDiscount;
+      let discountAmount = automaticDiscount;
       if (couponCode) {
         const coupon = await tx.coupon.findUnique({ where: { code: couponCode } });
         if (!coupon || !coupon.active) throw new Error("COUPON_INVALID");
