@@ -38,6 +38,7 @@ model Product {
   images      ProductImage[]
   variants    ProductVariant[]
   orderItems  OrderItem[]
+  bundleItems BundleProduct[]
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   @@index([categoryId, active])
@@ -152,7 +153,19 @@ model CustomerReview {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  items          BundleProduct[]
   @@index([active, position])
+}
+
+model BundleProduct {
+  id        String  @id @default(cuid())
+  bundleId  String
+  productId String
+  quantity  Int     @default(1)
+  bundle    Bundle  @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  @@unique([bundleId, productId])
+  @@index([productId])
 }
 
 
