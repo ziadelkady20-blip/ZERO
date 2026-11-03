@@ -17,7 +17,7 @@ export async function POST(request:Request) {
   if (!validImage(body.imageUrl)) return NextResponse.json({error:"Enter a direct HTTPS image URL."},{status:400});
   const titleEn=typeof body.titleEn==="string"?body.titleEn.trim().slice(0,120):"";
   const totalPrice=Number(body.totalPrice);
-  const productIds=Array.isArray(body.productIds)?[...new Set(body.productIds.filter((id:unknown)=>typeof id==="string"&&id.trim()).map((id:string)=>id.trim()))]:[];
+  const productIds: string[]=Array.isArray(body.productIds)?Array.from(new Set<string>((body.productIds as unknown[]).filter((id):id is string=>typeof id==="string"&&id.trim().length>0).map(id=>id.trim()))):[];
   if (!titleEn || !Number.isInteger(totalPrice) || totalPrice<0 || productIds.length===0 || productIds.length>20) return NextResponse.json({error:"Enter a title, valid total price, and select at least one fixed product."},{status:400});
   const products=await prisma.product.findMany({where:{id:{in:productIds},active:true},select:{id:true,price:true}});
   if(products.length!==productIds.length)return NextResponse.json({error:"One or more selected products are unavailable."},{status:400});
@@ -38,11 +38,14 @@ export async function PATCH(request:Request) {
   if(Number.isInteger(Number(body.position)))data.position=Number(body.position);
   const current=await prisma.bundle.findUnique({where:{id:body.id},include:{items:{include:{product:{select:{price:true}}}}}});
   if(!current)return NextResponse.json({error:"Bundle not found."},{status:404});
-  const selectedProducts=productIds?await prisma.product.findMany({where:{id:{in:productIds},active:true},select:{id:true,price:true}}):current.items.map(item=>({id:item.productId,price:item.product.price}));
+  const productIds: string[] | undefined = body.productIds===undefined ? undefined : Array.isArray(body.productIds) ? Array.from(new Set<string>((body.productIds as unknown[]).filter((id):id is string=>typeof id==="string"&&id.trim().length>0).map(id=>id.trim()))) : [];
+  if(productIds!==undefined&&(productIds.length===0||productIds.length>20))return NextResponse.json({error:"Select between 1 and 20 fixed products."},{status:400});
+  const selectedProducts=productIds!==undefined?await prisma.product.findMany({where:{id:{in:productIds},active:true},select:{id:true,price:true}}):current.items.map(item=>({id:item.productId,price:item.product.price}));
+  if(selectedProducts.length!==(productIds?.length??current.items.length))return NextResponse.json({error:"One or more selected products are unavailable."},{status:400});
   const nextTotalPrice=data.totalPrice??current.totalPrice;
   if(nextTotalPrice>selectedProducts.reduce((sum,product)=>sum+product.price,0))return NextResponse.json({error:"Bundle price must not exceed the combined price of its fixed products."},{status:400});
   const bundle=await prisma.$transaction(async tx=>{
-    if(productIds){await tx.bundleProduct.deleteMany({where:{bundleId:body.id}});await tx.bundleProduct.createMany({data:productIds.map(productId=>({bundleId:body.id,productId,quantity:1}))});}
+    if(productIds!==undefined){await tx.bundleProduct.deleteMany({where:{bundleId:body.id}});await tx.bundleProduct.createMany({data:productIds.map(productId=>({bundleId:body.id,productId,quantity:1}))});}
     return tx.bundle.update({where:{id:body.id},data,include:{items:{include:{product:{select:{id:true,nameEn:true,nameAr:true,price:true,active:true}}}}}});
   });
   return NextResponse.json({bundle});
