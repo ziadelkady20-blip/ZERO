@@ -15,6 +15,7 @@ import {
 
 type Locale = "en" | "ar";
 type CustomerReview = { id:string; imageUrl:string; customerName:string; caption:string };
+type StoreBundle = { id:string; titleEn:string; titleAr:string; descriptionEn:string; descriptionAr:string; imageUrl:string; totalPrice:number };
 type Product = {
   id: number;
   slug: string;
@@ -158,6 +159,7 @@ export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
   const [customerReviews, setCustomerReviews] = useState<CustomerReview[]>([]);
+  const [storeBundles, setStoreBundles] = useState<StoreBundle[]>([]);
 
   useEffect(() => {
     fetch("/api/reviews").then(response => response.json()).then(data => { if (Array.isArray(data.reviews)) setCustomerReviews(data.reviews); }).catch(() => {});
@@ -353,6 +355,17 @@ export default function HomePage() {
         <div><span className="benefit-number">02</span><div><strong>LESS, BUT BETTER</strong><p>Essentials without the noise.</p></div></div>
         <div><span className="benefit-number">03</span><div><strong>MADE TO LAST</strong><p>Essentials you reach for.</p></div></div>
       </section>
+
+      {storeBundles.length>0&&<section className="bundles-section section-pad" id="bundles">
+        <div className="section-heading">
+          <div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{isArabic?"عروض ZERO":"ZERO BUNDLES"}</p><h2>{isArabic?"عروض متجمعة. سعر أوفر.":"More together. Better value."}</h2><p className="section-description">{isArabic?"اختيارات مجمعة بعناية وبسعر إجمالي مميز.":"Curated combinations, one special total price."}</p></div>
+          <span className="category-count">{String(storeBundles.length).padStart(2,"0")} · BUNDLES</span>
+        </div>
+        <div className="bundles-grid">{storeBundles.map(bundle=><article className="bundle-card" key={bundle.id}>
+          <div className="bundle-card-image"><img src={bundle.imageUrl} alt={isArabic?(bundle.titleAr||bundle.titleEn):bundle.titleEn} loading="lazy"/><span>{isArabic?"عرض خاص":"BUNDLE OFFER"}</span></div>
+          <div className="bundle-card-content"><h3>{isArabic?(bundle.titleAr||bundle.titleEn):bundle.titleEn}</h3><p>{isArabic?(bundle.descriptionAr||bundle.descriptionEn):bundle.descriptionEn}</p><div className="bundle-total"><span>{isArabic?"السعر الإجمالي":"TOTAL PRICE"}</span><strong>{new Intl.NumberFormat(isArabic?"ar-EG":"en-EG",{maximumFractionDigits:0}).format(bundle.totalPrice)} {isArabic?"جنيه":"EGP"}</strong></div></div>
+        </article>)}</div>
+      </section>}
 
       {customerReviews.length>0&&<section className="reviews-section section-pad" id="reviews">
         <div className="section-heading">
