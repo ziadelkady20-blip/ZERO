@@ -71,6 +71,8 @@ export async function PATCH(request: Request) {
   }
   if (typeof body.active === "boolean") data.active = body.active;
   if (typeof body.featured === "boolean") data.featured = body.featured;
+  if (typeof body.bestSeller === "boolean") data.bestSeller = body.bestSeller;
+  if (typeof body.newArrival === "boolean") data.newArrival = body.newArrival;
   if (body.sizeChartUrl !== undefined) {
     const url = typeof body.sizeChartUrl === "string" ? body.sizeChartUrl.trim() : "";
     if (url && !/^https:\/\/\S+$/i.test(url)) return NextResponse.json({ error: "Size chart must be a direct HTTPS image URL." }, { status: 400 });
