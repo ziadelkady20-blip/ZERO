@@ -29,6 +29,8 @@ model Product {
   sizeChartUrl String?
   active      Boolean          @default(true)
   featured    Boolean          @default(false)
+  bestSeller  Boolean          @default(false)
+  newArrival  Boolean          @default(false)
   categoryId  String
   category    Category         @relation(fields: [categoryId], references: [id])
   images      ProductImage[]
