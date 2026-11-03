@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   if (!(await isAdminSessionValid())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   try {
-    const orders = await prisma.order.findMany({ include: { items: { include: { components: true } } }, orderBy: { createdAt: "desc" }, take: 200 });
+    const orders = await prisma.order.findMany({ include: { items: { include: { components: { include: { product: true, variant: true } } } } }, orderBy: { createdAt: "desc" }, take: 200 });
     return NextResponse.json({ orders }, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return NextResponse.json({ error: "Database is not configured." }, { status: 503 });
