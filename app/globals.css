@@ -632,3 +632,14 @@ body{background:#050505;color:#f8f8f6}
   .curated-products-section .product-grid{grid-template-columns:1fr!important}
   .curated-products-section .product-card{width:100%;max-width:330px}
 }
+
+/* Product promotion labels */
+.live-product-promo-badge{position:absolute;top:54px;left:14px;z-index:3;background:#e91f2b;color:#fff;padding:9px 12px;font-size:11px;font-weight:800;letter-spacing:.12em;line-height:1.2}
+.live-product-promo-badge.buy-two{background:#111;color:#fff}
+.product-promo-badge{position:absolute;top:54px;left:14px;z-index:4;background:#e91f2b;color:#fff;padding:9px 12px;font-size:10px;font-weight:800;letter-spacing:.1em}
+.zero-product-promo-badge{display:inline-flex;align-items:center;margin:0 0 18px;padding:9px 13px;background:#e91f2b;color:#fff;font-size:11px;font-weight:800;letter-spacing:.12em}
+.zero-product-promo-badge:empty{display:none}
+.admin-promotion-editor{border:1px solid #deded9;padding:18px;margin-top:10px;background:#fafaf8}
+.admin-promotion-editor>strong{display:block;margin-bottom:6px}
+.admin-promotion-editor .admin-form-grid{margin-top:12px}
+@media(max-width:680px){.live-product-promo-badge,.product-promo-badge{top:48px;left:9px;padding:7px 9px;font-size:9px}}
