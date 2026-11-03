@@ -158,7 +158,7 @@ export default function AdminPage() {
           <label>Total bundle price (EGP)<input type="number" min="0" step="1" required value={bundleDraft.totalPrice} onChange={e=>setBundleDraft(v=>({...v,totalPrice:e.target.value}))} placeholder="750"/></label>
           <label>Display order<input type="number" step="1" value={bundleDraft.position} onChange={e=>setBundleDraft(v=>({...v,position:e.target.value}))}/></label>
           {bundleDraft.imageUrl&&<div className="admin-review-preview"><img src={bundleDraft.imageUrl} alt="Bundle preview"/></div>}
-          <button className="admin-primary" disabled={busy||!bundleDraft.titleEn.trim()||!/^https:\/\/\S+$/i.test(bundleDraft.imageUrl.trim())||bundleDraft.totalPrice===""||!Number.isInteger(Number(bundleDraft.totalPrice))}>+ Add bundle</button>
+          <button className="admin-primary" disabled={busy||!bundleDraft.titleEn.trim()||bundleDraft.productIds.length===0||!/^https:\/\/\S+$/i.test(bundleDraft.imageUrl.trim())||bundleDraft.totalPrice===""||!Number.isInteger(Number(bundleDraft.totalPrice))}>+ Add bundle</button>
         </form>
         <div className="admin-review-grid">{bundles.map(bundle=><article className="admin-review-card" key={bundle.id}>
           <img src={bundle.imageUrl} alt={bundle.titleEn}/>
