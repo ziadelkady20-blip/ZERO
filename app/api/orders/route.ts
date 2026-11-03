@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { fingerprint, hasSameOrigin, rateLimit, rateLimitedResponse, requestIp } from "@/lib/security";
 
-type IncomingItem = { variantId?: unknown; quantity?: unknown; bundleId?: unknown; bundleGroupId?: unknown };
+type IncomingItem = { variantId?: unknown; quantity?: unknown; bundleId?: unknown; components?: unknown };
 type CheckoutBody = { customerName?: unknown; phone?: unknown; email?: unknown; governorate?: unknown; city?: unknown; address?: unknown; notes?: unknown; items?: unknown; paymentMethod?: unknown; couponCode?: unknown };
 const text = (v: unknown) => typeof v === "string" ? v.trim() : "";
 
@@ -40,26 +40,29 @@ export async function POST(request: Request) {
 
   const incomingItems = body.items as IncomingItem[];
   const requested = new Map<string, number>();
-  const bundleGroups = new Map<string,{bundleId:string;items:Map<string,number>}>();
+  const bundleRequests: { bundleId: string; quantity: number; components: { variantId: string; quantity: number }[] }[] = [];
+  const normalItems: { variantId: string; quantity: number }[] = [];
   for (const raw of incomingItems) {
-    const variantId = text(raw?.variantId);
+    const bundleId = text(raw?.bundleId);
     const quantity = Number(raw?.quantity);
-    if (!variantId || variantId.length > 100 || !Number.isInteger(quantity) || quantity < 1 || quantity > 20) {
-      return NextResponse.json({ error: "One or more cart items are invalid." }, { status: 400 });
-    }
-    const totalQuantity = (requested.get(variantId) || 0) + quantity;
-    if (totalQuantity > 20) return NextResponse.json({ error: "Maximum quantity per variant is 20." }, { status: 400 });
-    requested.set(variantId, totalQuantity);
-    const bundleId=text(raw?.bundleId), bundleGroupId=text(raw?.bundleGroupId);
-    if(Boolean(bundleId)!==Boolean(bundleGroupId))return NextResponse.json({error:"Bundle cart information is incomplete."},{status:400});
-    if(bundleId){
-      if(bundleId.length>100||bundleGroupId.length>100)return NextResponse.json({error:"Bundle selection is invalid."},{status:400});
-      const group=bundleGroups.get(bundleGroupId)||{bundleId,items:new Map<string,number>()};
-      if(group.bundleId!==bundleId)return NextResponse.json({error:"Bundle selection is invalid."},{status:400});
-      group.items.set(variantId,(group.items.get(variantId)||0)+quantity);
-      bundleGroups.set(bundleGroupId,group);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 20) return NextResponse.json({ error: "One or more cart items are invalid." }, { status: 400 });
+    if (bundleId) {
+      if (!Array.isArray(raw.components) || raw.components.length === 0 || raw.components.length > 20) return NextResponse.json({ error: "Bundle contents are invalid." }, { status: 400 });
+      const components = raw.components.map((entry: unknown) => {
+        const value = entry as { variantId?: unknown; quantity?: unknown };
+        return { variantId: text(value?.variantId), quantity: Number(value?.quantity) };
+      });
+      if (components.some(item => !item.variantId || item.variantId.length > 100 || !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 20)) return NextResponse.json({ error: "Bundle contents are invalid." }, { status: 400 });
+      bundleRequests.push({ bundleId, quantity, components });
+      for (const component of components) requested.set(component.variantId, (requested.get(component.variantId) || 0) + component.quantity * quantity);
+    } else {
+      const variantId = text(raw?.variantId);
+      if (!variantId || variantId.length > 100) return NextResponse.json({ error: "One or more cart items are invalid." }, { status: 400 });
+      normalItems.push({ variantId, quantity });
+      requested.set(variantId, (requested.get(variantId) || 0) + quantity);
     }
   }
+  if ([...requested.values()].some(quantity => quantity > 20)) return NextResponse.json({ error: "Maximum quantity per variant is 20." }, { status: 400 });
 
   try {
     const order = await prisma.$transaction(async tx => {
@@ -73,40 +76,39 @@ export async function POST(request: Request) {
       });
       if (variants.length !== requested.size) throw new Error("ITEM_UNAVAILABLE");
 
-      const variantById=new Map(variants.map(variant=>[variant.id,variant]));
-      const bundleIds=[...new Set([...bundleGroups.values()].map(group=>group.bundleId))];
-      const bundles=bundleIds.length?await tx.bundle.findMany({where:{id:{in:bundleIds},active:true},include:{items:true}}):[];
-      if(bundles.length!==bundleIds.length)throw new Error("BUNDLE_UNAVAILABLE");
-      const bundleById=new Map(bundles.map(bundle=>[bundle.id,bundle]));
+      const variantById = new Map(variants.map(variant => [variant.id, variant]));
+      const bundleIds = [...new Set(bundleRequests.map(item => item.bundleId))];
+      const bundles = bundleIds.length ? await tx.bundle.findMany({ where: { id: { in: bundleIds }, active: true }, include: { items: true } }) : [];
+      if (bundles.length !== bundleIds.length) throw new Error("BUNDLE_UNAVAILABLE");
+      const bundleById = new Map(bundles.map(bundle => [bundle.id, bundle]));
       let subtotal = 0;
-      let bundleDiscount = 0;
-      const bundledVariantIds=new Set<string>();
-      for(const group of bundleGroups.values()){
-        const bundle=bundleById.get(group.bundleId)!;
-        const expected=new Map(bundle.items.map(item=>[item.productId,item.quantity]));
-        const actual=new Map<string,number>();
-        let groupSubtotal=0;
-        for(const [variantId,quantity] of group.items){
-          const variant=variantById.get(variantId);
-          if(!variant)throw new Error("ITEM_UNAVAILABLE");
-          actual.set(variant.productId,(actual.get(variant.productId)||0)+quantity);
-          groupSubtotal+=variant.product.price*quantity;
-          bundledVariantIds.add(variantId);
-        }
-        if(actual.size!==expected.size||[...expected].some(([productId,quantity])=>actual.get(productId)!==quantity))throw new Error("BUNDLE_ITEMS_MISMATCH");
-        if(bundle.totalPrice>groupSubtotal)throw new Error("BUNDLE_PRICE_INVALID");
-        bundleDiscount+=groupSubtotal-bundle.totalPrice;
-      }
       let percentageDiscount = 0;
       const buy2Get1Prices: number[] = [];
-      const orderItems = incomingItems.map(raw=>{
-        const variant=variantById.get(text(raw.variantId))!;
-        const quantity=Number(raw.quantity);
-        subtotal+=variant.product.price*quantity;
-        if(!text(raw.bundleId)&&variant.product.promotionType==="PERCENT"&&variant.product.promotionValue>0)percentageDiscount+=Math.round(variant.product.price*variant.product.promotionValue/100)*quantity;
-        if(!text(raw.bundleId)&&variant.product.promotionType==="BUY2GET1")for(let i=0;i<quantity;i++)buy2Get1Prices.push(variant.product.price);
-        return {productId:variant.productId,variantId:variant.id,productNameEn:variant.product.nameEn,productNameAr:variant.product.nameAr,size:variant.size,color:variant.color,unitPrice:variant.product.price,quantity,lineTotal:variant.product.price*quantity};
-      });
+      const orderItems: { productId: string | null; variantId: string | null; bundleId: string | null; productNameEn: string; productNameAr: string; size: string; color: string; unitPrice: number; quantity: number; lineTotal: number; components?: { productId: string; variantId: string; quantity: number }[] }[] = [];
+      for (const item of normalItems) {
+        const variant = variantById.get(item.variantId)!;
+        const lineTotal = variant.product.price * item.quantity;
+        subtotal += lineTotal;
+        if (variant.product.promotionType === "PERCENT" && variant.product.promotionValue > 0) percentageDiscount += Math.round(variant.product.price * variant.product.promotionValue / 100) * item.quantity;
+        if (variant.product.promotionType === "BUY2GET1") for (let i = 0; i < item.quantity; i++) buy2Get1Prices.push(variant.product.price);
+        orderItems.push({ productId: variant.productId, variantId: variant.id, bundleId: null, productNameEn: variant.product.nameEn, productNameAr: variant.product.nameAr, size: variant.size, color: variant.color, unitPrice: variant.product.price, quantity: item.quantity, lineTotal });
+      }
+      for (const item of bundleRequests) {
+        const bundle = bundleById.get(item.bundleId)!;
+        const expected = new Map(bundle.items.map(entry => [entry.productId, entry.quantity]));
+        const actual = new Map<string, number>();
+        const components: { productId: string; variantId: string; quantity: number }[] = [];
+        for (const component of item.components) {
+          const variant = variantById.get(component.variantId);
+          if (!variant) throw new Error("ITEM_UNAVAILABLE");
+          actual.set(variant.productId, (actual.get(variant.productId) || 0) + component.quantity);
+          components.push({ productId: variant.productId, variantId: variant.id, quantity: component.quantity * item.quantity });
+        }
+        if (actual.size !== expected.size || [...expected].some(([productId, quantity]) => actual.get(productId) !== quantity)) throw new Error("BUNDLE_ITEMS_MISMATCH");
+        const lineTotal = bundle.totalPrice * item.quantity;
+        subtotal += lineTotal;
+        orderItems.push({ productId: null, variantId: null, bundleId: bundle.id, productNameEn: bundle.titleEn, productNameAr: bundle.titleAr || bundle.titleEn, size: "", color: "", unitPrice: bundle.totalPrice, quantity: item.quantity, lineTotal, components });
+      }
       for(const [variantId,quantity] of requested){
         const variant=variantById.get(variantId)!;
         if(variant.stock<quantity)throw new Error("INSUFFICIENT_STOCK");
@@ -127,11 +129,8 @@ export async function POST(request: Request) {
           : Math.min(subtotal - discountAmount, coupon.discountValue);
       }
 
-      for (const item of orderItems) {
-        const updated = await tx.productVariant.updateMany({
-          where: { id: item.variantId, stock: { gte: item.quantity } },
-          data: { stock: { decrement: item.quantity } },
-        });
+      for (const [variantId, quantity] of requested) {
+        const updated = await tx.productVariant.updateMany({ where: { id: variantId, stock: { gte: quantity } }, data: { stock: { decrement: quantity } } });
         if (updated.count !== 1) throw new Error("INSUFFICIENT_STOCK");
       }
 
@@ -140,7 +139,7 @@ export async function POST(request: Request) {
         data: {
           code, customerName, phone, email, governorate, city, address, notes,
           subtotal, discountAmount, couponCode, shippingCost: rate.price, total: subtotal - discountAmount + rate.price, paymentMethod: "COD",
-          items: { create: orderItems },
+          items: { create: orderItems.map(({ components, ...item }) => ({ ...item, ...(components ? { components: { create: components } } : {}) })) },
         },
         select: { code: true, subtotal: true, discountAmount: true, couponCode: true, shippingCost: true, total: true, status: true, createdAt: true },
       });
