@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   if (!(await isAdminSessionValid())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   try {
-    const orders = await prisma.order.findMany({ include: { items: true }, orderBy: { createdAt: "desc" }, take: 200 });
+    const orders = await prisma.order.findMany({ include: { items: { include: { components: true } } }, orderBy: { createdAt: "desc" }, take: 200 });
     return NextResponse.json({ orders }, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return NextResponse.json({ error: "Database is not configured." }, { status: 503 });
@@ -31,7 +31,11 @@ export async function PATCH(request: Request) {
       if (current.status === "CANCELLED" && status !== "CANCELLED") throw new Error("CANCELLED_ORDER_LOCKED");
       if (status === "CANCELLED" && current.status !== "CANCELLED" && current.status !== "DELIVERED") {
         for (const item of current.items) {
-          await tx.productVariant.update({ where: { id: item.variantId }, data: { stock: { increment: item.quantity } } });
+          if (item.bundleId) {
+            for (const component of item.components) await tx.productVariant.update({ where: { id: component.variantId }, data: { stock: { increment: component.quantity } } });
+          } else if (item.variantId) {
+            await tx.productVariant.update({ where: { id: item.variantId }, data: { stock: { increment: item.quantity } } });
+          }
         }
       }
       return tx.order.update({ where: { code }, data: { status: status as "PENDING" | "CONFIRMED" | "PREPARING" | "SHIPPED" | "DELIVERED" | "CANCELLED" } });
