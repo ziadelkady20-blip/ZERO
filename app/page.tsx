@@ -232,7 +232,6 @@ export default function HomePage() {
           <a href="/shop" onClick={() => setMobileMenuOpen(false)}>{t.shop}</a>
           <a href="#collection" onClick={() => { setActiveCategory("compression"); setMobileMenuOpen(false); }}>{t.compression}</a>
           <a href="#collection" onClick={() => { setActiveCategory("training-tees"); setMobileMenuOpen(false); }}>{t.tees}</a>
-          <a href="#standard" onClick={() => setMobileMenuOpen(false)}>{t.ourStandard}</a>
         </nav>
 
         <div className="header-actions">
@@ -360,23 +359,6 @@ export default function HomePage() {
         <a className="underlined-link mobile-view-all" href="/shop">{t.viewAll}<ArrowRight size={16} /></a>
       </section>
 
-      <section className="manifesto-section" id="standard">
-        <div className="manifesto-image"><img src={ZERO_MODEL_IMAGE} alt="Male model wearing a white ZERO compression shirt" loading="lazy" /></div>
-        <div className="manifesto-content">
-          <p className="eyebrow"><span className="eyebrow-line" />{t.manifestoEyebrow}</p>
-          <h2>{t.manifestoTitle}</h2>
-          <p>{t.manifestoBody}</p>
-          <a href="#collection" className="button button-outline">{t.manifestoCta}<ArrowRight size={17} /></a>
-          <span className="manifesto-mark">Z.</span>
-        </div>
-      </section>
-
-      <section className="benefits-row">
-        <div><span className="benefit-number">01</span><div><strong>DESIGNED TO MOVE</strong><p>Comfort for every day.</p></div></div>
-        <div><span className="benefit-number">02</span><div><strong>LESS, BUT BETTER</strong><p>Essentials without the noise.</p></div></div>
-        <div><span className="benefit-number">03</span><div><strong>MADE TO LAST</strong><p>Essentials you reach for.</p></div></div>
-      </section>
-
       {storeBundles.length>0&&<section className="bundles-section section-pad" id="bundles">
         <div className="section-heading">
           <div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{isArabic?"عروض ZERO":"ZERO BUNDLES"}</p><h2>{isArabic?"عروض متجمعة. سعر أوفر.":"More together. Better value."}</h2><p className="section-description">{isArabic?"اختيارات مجمعة بعناية وبسعر إجمالي مميز.":"Curated combinations, one special total price."}</p></div>
@@ -407,7 +389,7 @@ export default function HomePage() {
             </a>
             <p>{t.footerLine}</p>
           </div>
-          <div className="footer-links"><h3>{t.quickLinks}</h3><a href="#collection">{t.shop}</a><a href="#standard">{t.ourStandard}</a><a href="#collection">{t.compression}</a><a href="#collection">{t.tees}</a></div>
+          <div className="footer-links"><h3>{t.quickLinks}</h3><a href="#collection">{t.shop}</a><a href="#collection">{t.compression}</a><a href="#collection">{t.tees}</a></div>
           <div className="footer-links"><h3>{t.support}</h3><a href="/track-order">{isArabic ? "تتبع طلبك" : "Track your order"}</a><a href="#shipping">{t.shipping}</a><a href="#returns">{t.returns}</a><a href="https://wa.me/201098256906?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7%D8%8C%20%D9%85%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D8%A8%D8%AE%D8%B5%D9%88%D8%B5%20ZERO%20CLOTHING" target="_blank" rel="noopener noreferrer">{t.contact}</a></div>
           <div className="footer-newsletter"><h3>{t.newsletter}</h3><p>{t.newsletterText}</p><form onSubmit={(event) => event.preventDefault()} className="newsletter-form"><input type="email" placeholder={t.emailPlaceholder} aria-label={t.emailPlaceholder} /><button type="submit">{t.join}<ArrowRight size={15} /></button></form></div>
         </div>
