@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowDownUp, ArrowRight, Box, ClipboardList, ExternalLink, LogOut, PackagePlus, RefreshCw, Search, Settings2, Ticket, Truck } from "lucide-react";
+import { ArrowDownUp, ArrowRight, Box, ClipboardList, ExternalLink, ImagePlus, LogOut, PackagePlus, RefreshCw, Search, Settings2, Ticket, Truck } from "lucide-react";
 import "./admin.css";
 
 type OrderItem = { id:string; productNameEn:string; productNameAr:string; size:string; color:string; quantity:number; unitPrice:number; lineTotal:number };
@@ -10,6 +10,7 @@ type Order = { id:string; code:string; customerName:string; phone:string; email?
 type Product = { id:string; slug:string; nameEn:string; nameAr:string; price:number; active:boolean; featured:boolean; categoryId:string; variants:{id:string;size:string;color:string;stock:number}[] };
 type Rate = { id:string; governorate:string; city:string; price:number; active:boolean };
 type Category = { id:string; nameEn:string; nameAr:string; slug:string };
+type Review = { id:string; imageUrl:string; customerName:string; caption:string; active:boolean; position:number };
 const STATUSES=["PENDING","CONFIRMED","PREPARING","SHIPPED","DELIVERED","CANCELLED"];
 const STATUS_LABEL:Record<string,string>={PENDING:"Pending",CONFIRMED:"Confirmed",PREPARING:"Preparing",SHIPPED:"Shipped",DELIVERED:"Delivered",CANCELLED:"Cancelled"};
 const money=(value:number)=>new Intl.NumberFormat("en-EG",{maximumFractionDigits:0}).format(value)+" EGP";
@@ -22,7 +23,9 @@ export default function AdminPage() {
   const [products,setProducts]=useState<Product[]>([]);
   const [rates,setRates]=useState<Rate[]>([]);
   const [categories,setCategories]=useState<Category[]>([]),[categoryDrafts,setCategoryDrafts]=useState<Record<string,{slug:string;nameEn:string;nameAr:string}>>({});
-  const [tab,setTab]=useState<"orders"|"products"|"shipping"|"categories">("orders");
+  const [tab,setTab]=useState<"orders"|"products"|"shipping"|"categories"|"reviews">("orders");
+  const [reviews,setReviews]=useState<Review[]>([]);
+  const [reviewDraft,setReviewDraft]=useState({imageUrl:"",customerName:"",caption:""});
   const [error,setError]=useState("");
   const [notice,setNotice]=useState("");
   const [busy,setBusy]=useState(false);
@@ -41,8 +44,8 @@ export default function AdminPage() {
     if(showSpinner)setBusy(true);
     setError("");
     try {
-      const [o,p,s]=await Promise.all([api("/api/admin/orders"),api("/api/admin/products"),api("/api/admin/shipping")]);
-      setOrders(o.orders||[]);setProducts(p.products||[]);setCategories(p.categories||[]);const nextCategories:Record<string,{slug:string;nameEn:string;nameAr:string}>={};(p.categories||[]).forEach((category:Category)=>nextCategories[category.id]={slug:category.slug,nameEn:category.nameEn,nameAr:category.nameAr});setCategoryDrafts(nextCategories);setRates(s.rates||[]);
+      const [o,p,s,r]=await Promise.all([api("/api/admin/orders"),api("/api/admin/products"),api("/api/admin/shipping"),api("/api/admin/reviews")]);
+      setOrders(o.orders||[]);setProducts(p.products||[]);setCategories(p.categories||[]);setReviews(r.reviews||[]);const nextCategories:Record<string,{slug:string;nameEn:string;nameAr:string}>={};(p.categories||[]).forEach((category:Category)=>nextCategories[category.id]={slug:category.slug,nameEn:category.nameEn,nameAr:category.nameAr});setCategoryDrafts(nextCategories);setRates(s.rates||[]);
       const drafts:Record<string,{price:string;active:boolean}>={};
       (s.rates||[]).forEach((r:Rate)=>drafts[r.id]={price:String(r.price),active:r.active});
       setShippingDrafts(drafts);setSignedIn(true);
@@ -94,6 +97,7 @@ export default function AdminPage() {
       <button className={tab==="products"?"admin-nav active":"admin-nav"} onClick={()=>setTab("products")}><Box size={16}/> Products & stock <span>{products.length}</span></button>
       <button className={tab==="shipping"?"admin-nav active":"admin-nav"} onClick={()=>setTab("shipping")}><Truck size={16}/> Delivery rates <span>{rates.length}</span></button>
       <button className={tab==="categories"?"admin-nav active":"admin-nav"} onClick={()=>setTab("categories")}><Settings2 size={16}/> Categories <span>{categories.length}</span></button>
+      <button className={tab==="reviews"?"admin-nav active":"admin-nav"} onClick={()=>setTab("reviews")}><ImagePlus size={16}/> Customer reviews <span>{reviews.length}</span></button>
       <div className="admin-sidebar-bottom">
         <Link href="/admin/coupons"><Ticket size={15}/> Promo codes <ArrowRight size={13}/></Link>\n        <Link href="/admin/setup"><PackagePlus size={15}/> Add product / setup <ArrowRight size={13}/></Link>
         <Link href="/admin/products"><ArrowDownUp size={15}/> Full product editor <ArrowRight size={13}/></Link>
@@ -103,7 +107,7 @@ export default function AdminPage() {
       </div>
     </aside>
     <section className="admin-main">
-      <header className="admin-topbar"><div><p className="admin-kicker">ZERO CLOTHING / CONTROL CENTER</p><h1>{tab==="orders"?"Orders":tab==="products"?"Products & inventory":tab==="shipping"?"Delivery rates":"Categories"}</h1><p className="admin-page-subtitle">Changes are saved to the store database and used by the live storefront.</p></div><button className="admin-secondary" onClick={()=>void load()} disabled={busy}><RefreshCw size={14} className={busy?"admin-spin":""}/> Refresh data</button></header>
+      <header className="admin-topbar"><div><p className="admin-kicker">ZERO CLOTHING / CONTROL CENTER</p><h1>{tab==="orders"?"Orders":tab==="products"?"Products & inventory":tab==="shipping"?"Delivery rates":tab==="categories"?"Categories":"Customer reviews"}</h1><p className="admin-page-subtitle">Changes are saved to the store database and used by the live storefront.</p></div><button className="admin-secondary" onClick={()=>void load()} disabled={busy}><RefreshCw size={14} className={busy?"admin-spin":""}/> Refresh data</button></header>
       {error&&<p className="admin-alert error" role="alert">{error}</p>}{notice&&<p className="admin-alert success" role="status">{notice}</p>}
       <div className="admin-stats">
         <button onClick={()=>{setTab("orders");setStatusFilter("ALL");}}><span>TOTAL ORDERS</span><strong>{orders.length}</strong><small>Latest 200 orders</small></button>
@@ -122,6 +126,22 @@ export default function AdminPage() {
       {tab==="products"&&<section className="admin-panel"><div className="admin-panel-heading"><div><h2>Product catalog</h2><p>Published products are visible in the store. Prices, photos, variants and stock come from the database.</p></div><div className="admin-actions"><Link className="admin-secondary" href="/admin/products">Edit products</Link><Link className="admin-primary" href="/admin/setup">+ Add product</Link></div></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>PRODUCT</th><th>PRICE</th><th>VISIBILITY</th><th>VARIANTS / STOCK</th><th>ACTION</th></tr></thead><tbody>{products.map(p=><tr key={p.id}><td><strong>{p.nameEn}</strong><small>{p.nameAr}</small><small>/{p.slug}</small></td><td>{money(p.price)}</td><td><span className={p.active?"admin-pill active":"admin-pill"}>{p.active?"Published":"Hidden"}</span>{p.featured&&<small>Featured</small>}</td><td>{p.variants.length} combinations<small>{p.variants.reduce((n,v)=>n+v.stock,0)} pieces in stock</small></td><td><Link className="admin-text-button" href="/admin/products">Edit <ArrowRight size={13}/></Link><small><Link href={"/product/"+p.slug} target="_blank">View product ↗</Link></small></td></tr>)}{products.length===0&&<tr><td colSpan={5} className="admin-empty">No products yet. Add the first product with its photos, sizes, colors and stock.<p><Link className="admin-primary" href="/admin/setup">Add first product</Link></p></td></tr>}</tbody></table></div></section>}
       {tab==="shipping"&&<section className="admin-panel"><div className="admin-panel-heading"><div><h2>Delivery rates</h2><p>Edit a price or deactivate an area. Checkout immediately uses active rates only.</p></div><Link className="admin-primary" href="/admin/setup">+ Add delivery area</Link></div><div className="admin-table-wrap"><table className="admin-table admin-shipping-table"><thead><tr><th>GOVERNORATE</th><th>CITY / AREA</th><th>DELIVERY PRICE (EGP)</th><th>ACTIVE AT CHECKOUT</th><th>ACTION</th></tr></thead><tbody>{rates.map(r=><tr key={r.id}><td>{r.governorate}</td><td>{r.city}</td><td><input className="admin-inline-input" type="number" min="0" step="1" aria-label={"Delivery price for "+r.city} value={shippingDrafts[r.id]?.price??String(r.price)} onChange={e=>setShippingDrafts(old=>({...old,[r.id]:{...old[r.id],price:e.target.value}}))}/></td><td><label className="admin-toggle"><input type="checkbox" checked={shippingDrafts[r.id]?.active??r.active} onChange={e=>setShippingDrafts(old=>({...old,[r.id]:{...old[r.id],active:e.target.checked}}))}/><span>{(shippingDrafts[r.id]?.active??r.active)?"Active":"Inactive"}</span></label></td><td><button className="admin-secondary" disabled={busy||!shippingDrafts[r.id]||!Number.isInteger(Number(shippingDrafts[r.id].price))||Number(shippingDrafts[r.id].price)<0} onClick={()=>void saveRate(r)}>Save rate</button></td></tr>)}{rates.length===0&&<tr><td colSpan={5} className="admin-empty">No delivery zones yet. Add governorate and city/area to enable checkout.</td></tr>}</tbody></table></div></section>}
       {tab==="categories"&&<section className="admin-panel"><div className="admin-panel-heading"><div><h2>Store categories</h2><p>Categories are retained when products are removed. Choose a category while creating or editing a product.</p></div><Link className="admin-primary" href="/admin/setup">+ Add category</Link></div><div className="admin-category-grid">{categories.map(category=>{const draft=categoryDrafts[category.id]||{slug:category.slug,nameEn:category.nameEn,nameAr:category.nameAr};const changed=JSON.stringify(draft)!==JSON.stringify({slug:category.slug,nameEn:category.nameEn,nameAr:category.nameAr});return <article key={category.id} className="admin-category-card"><span className="admin-category-slug">{category.slug}</span><label>English name<input value={draft.nameEn} onChange={e=>setCategoryDrafts(old=>({...old,[category.id]:{...draft,nameEn:e.target.value}}))}/></label><label>الاسم بالعربي<input dir="rtl" value={draft.nameAr} onChange={e=>setCategoryDrafts(old=>({...old,[category.id]:{...draft,nameAr:e.target.value}}))}/></label><label>URL slug<input value={draft.slug} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" onChange={e=>setCategoryDrafts(old=>({...old,[category.id]:{...draft,slug:e.target.value}}))}/></label><small>{products.filter(p=>p.categoryId===category.id).length} product(s) assigned to this category</small><button className="admin-secondary admin-category-save" disabled={busy||!changed||!draft.nameEn.trim()||!draft.nameAr.trim()||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(draft.slug)} onClick={()=>void saveCategory(category)}>{busy?"Saving…":"Save category"}</button></article>})}{categories.length===0&&<p className="admin-empty">No categories have been created yet.</p>}</div></section>}
+      {tab==="reviews"&&<section className="admin-panel">
+        <div className="admin-panel-heading"><div><h2>Customer reviews gallery</h2><p>Add customer review screenshots or photos. Active images appear in the Reviews section on the storefront.</p></div><span className="admin-result-count">{reviews.length} reviews</span></div>
+        <form className="admin-review-form" onSubmit={async e=>{e.preventDefault();setBusy(true);setError("");setNotice("");try{await api("/api/admin/reviews",{method:"POST",body:JSON.stringify(reviewDraft)});setReviewDraft({imageUrl:"",customerName:"",caption:""});setNotice("Customer review added to the storefront.");await load(false);}catch(err){setError(err instanceof Error?err.message:"Could not add review.");}finally{setBusy(false);}}}>
+          <label>Review image URL<input type="url" required placeholder="https://.../customer-review.jpg" value={reviewDraft.imageUrl} onChange={e=>setReviewDraft(v=>({...v,imageUrl:e.target.value}))}/></label>
+          <label>Customer name (optional)<input value={reviewDraft.customerName} placeholder="Customer name" onChange={e=>setReviewDraft(v=>({...v,customerName:e.target.value}))}/></label>
+          <label>Review caption (optional)<textarea rows={2} value={reviewDraft.caption} placeholder="Short customer feedback..." onChange={e=>setReviewDraft(v=>({...v,caption:e.target.value}))}/></label>
+          {reviewDraft.imageUrl&&<div className="admin-review-preview"><img src={reviewDraft.imageUrl} alt="Review preview" onError={e=>{e.currentTarget.style.opacity="0.25";}}/></div>}
+          <button className="admin-primary" disabled={busy||!/^https:\/\/\S+$/i.test(reviewDraft.imageUrl.trim())}>+ Add customer review</button>
+        </form>
+        <div className="admin-review-grid">{reviews.map(review=><article className="admin-review-card" key={review.id}>
+          <img src={review.imageUrl} alt={review.customerName||"Customer review"} />
+          <div><strong>{review.customerName||"Customer review"}</strong>{review.caption&&<p>{review.caption}</p>}<small>Position: {review.position}</small></div>
+          <label className="admin-toggle"><input type="checkbox" checked={review.active} onChange={async e=>{try{await api("/api/admin/reviews",{method:"PATCH",body:JSON.stringify({id:review.id,active:e.target.checked})});await load(false);}catch(err){setError(err instanceof Error?err.message:"Update failed.");}}}/><span>{review.active?"Visible on site":"Hidden"}</span></label>
+          <button className="admin-secondary" onClick={async()=>{if(!window.confirm("Delete this customer review image?"))return;try{await api("/api/admin/reviews",{method:"DELETE",body:JSON.stringify({id:review.id})});setNotice("Review deleted.");await load(false);}catch(err){setError(err instanceof Error?err.message:"Delete failed.");}}}>Delete</button>
+        </article>)}{reviews.length===0&&<p className="admin-empty">No customer reviews yet. Add the first review image above.</p>}</div>
+      </section>}
       <footer className="admin-footer"><span>ZERO CLOTHING · STORE OPERATIONS</span><span>PRODUCTS, INVENTORY & SHIPPING ARE DATABASE-DRIVEN</span></footer>
     </section>
   </main>;
