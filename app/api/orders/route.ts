@@ -95,19 +95,23 @@ export async function POST(request: Request) {
       }
       for (const item of bundleRequests) {
         const bundle = bundleById.get(item.bundleId)!;
-        const expected = new Map(bundle.items.map(entry => [entry.productId, { quantity: entry.quantity, variantId: entry.variantId }]));
-        const actual = new Map<string, { quantity: number; variantId: string }>();
+        const anchorIds = bundle.items.map(entry => entry.variantId).filter((id): id is string => Boolean(id));
+        const anchors = await tx.productVariant.findMany({ where: { id: { in: anchorIds } }, select: { id: true, color: true, productId: true } });
+        const anchorByProduct = new Map(anchors.map(anchor => [anchor.productId, anchor]));
+        const expected = new Map(bundle.items.map(entry => [entry.productId, { quantity: entry.quantity, color: anchorByProduct.get(entry.productId)?.color }]));
+        if (expected.size !== bundle.items.length || [...expected.values()].some(entry => !entry.color)) throw new Error("BUNDLE_ITEMS_MISMATCH");
+        const actual = new Map<string, { quantity: number; color: string }>();
         const components: { productId: string; variantId: string; quantity: number }[] = [];
         for (const component of item.components) {
           const variant = variantById.get(component.variantId);
           if (!variant) throw new Error("ITEM_UNAVAILABLE");
           const fixed = expected.get(variant.productId);
-          if (!fixed || fixed.variantId !== variant.id) throw new Error("BUNDLE_ITEMS_MISMATCH");
+          if (!fixed || fixed.color !== variant.color) throw new Error("BUNDLE_ITEMS_MISMATCH");
           const previous = actual.get(variant.productId);
-          actual.set(variant.productId, { quantity: (previous?.quantity || 0) + component.quantity, variantId: variant.id });
+          actual.set(variant.productId, { quantity: (previous?.quantity || 0) + component.quantity, color: variant.color });
           components.push({ productId: variant.productId, variantId: variant.id, quantity: component.quantity * item.quantity });
         }
-        if (actual.size !== expected.size || [...expected].some(([productId, fixed]) => actual.get(productId)?.quantity !== fixed.quantity || actual.get(productId)?.variantId !== fixed.variantId)) throw new Error("BUNDLE_ITEMS_MISMATCH");
+        if (actual.size !== expected.size || [...expected].some(([productId, fixed]) => actual.get(productId)?.quantity !== fixed.quantity || actual.get(productId)?.color !== fixed.color)) throw new Error("BUNDLE_ITEMS_MISMATCH");
         const lineTotal = bundle.totalPrice * item.quantity;
         subtotal += lineTotal;
         orderItems.push({ productId: null, variantId: null, bundleId: bundle.id, productNameEn: bundle.titleEn, productNameAr: bundle.titleAr || bundle.titleEn, size: "", color: "", unitPrice: bundle.totalPrice, quantity: item.quantity, lineTotal, components });
