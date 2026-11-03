@@ -526,3 +526,20 @@ body{background:#050505;color:#f8f8f6}
 .admin-review-card .admin-secondary{align-self:flex-start}
 @media(max-width:760px){.reviews-gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.admin-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-review-form{grid-template-columns:1fr}.admin-review-form label:nth-child(3){grid-column:auto}}
 @media(max-width:480px){.reviews-gallery{grid-template-columns:1fr}.admin-review-grid{grid-template-columns:1fr}}
+
+/* ZERO bundle offers */
+.bundles-section{background:#f5f4f0}
+.bundles-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:34px;align-items:start}
+.bundle-card{min-width:0;background:#fff;border:1px solid #e1e0dc}
+.bundle-card-image{position:relative;aspect-ratio:1.35/1;background:#e9e8e4;overflow:hidden}
+.bundle-card-image img{display:block;width:100%;height:100%;object-fit:cover}
+.bundle-card-image>span{position:absolute;top:16px;left:16px;padding:8px 11px;background:#080808;color:#fff;font-size:9px;font-weight:700;letter-spacing:.12em}
+.bundle-card-content{padding:20px 22px 22px}
+.bundle-card-content h3{margin:0;font-family:var(--font-en);font-size:21px;line-height:1.2}
+.bundle-card-content>p{min-height:42px;margin:10px 0 20px;color:#686868;font-size:13px;line-height:1.65}
+.bundle-total{display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:15px;border-top:1px solid #e5e4df}
+.bundle-total>span{font-size:9px;font-weight:700;letter-spacing:.12em;color:#777}
+.bundle-total strong{font-family:var(--font-en);font-size:20px}
+.rtl .bundle-card-content h3,.rtl .bundle-card-content>p{font-family:var(--font-ar)}
+.rtl .bundle-total>span{letter-spacing:0}
+@media(max-width:680px){.bundles-grid{grid-template-columns:1fr;gap:14px}.bundle-card-content{padding:16px}.bundle-card-content h3{font-size:18px}.bundle-total strong{font-size:18px}}
