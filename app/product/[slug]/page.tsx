@@ -7,7 +7,7 @@ import Link from "next/link";
 type Variant = { id: string; size: string; color: string; stock: number; sku: string };
 type Product = {
   id: string; slug: string; nameEn: string; nameAr: string; descriptionEn: string; descriptionAr: string;
-  price: number; compareAtPrice?: number | null; sizeChartUrl?: string | null; active: boolean; category: { nameEn: string; nameAr: string; slug: string };
+  price: number; compareAtPrice?: number | null; promotionType?:"NONE"|"PERCENT"|"BUY2GET1"; promotionValue?:number; sizeChartUrl?: string | null; active: boolean; category: { nameEn: string; nameAr: string; slug: string };
   images: { url: string; alt: string; position: number }[]; variants: Variant[];
 };
 type CartItem = { variantId: string; productId: string; nameEn: string; nameAr: string; image: string; size: string; color: string; price: number; quantity: number; stock: number };
@@ -86,7 +86,7 @@ export default function ProductDetailPage() {
       <div className="zero-detail-info">
         <p className="zero-detail-eyebrow">{product.category?.nameEn || "ZERO CLOTHING"} / MEN’S COLLECTION</p>
         <h1>{title}</h1>
-        <p className="zero-detail-price">{product.compareAtPrice && product.compareAtPrice > product.price && <del>{product.compareAtPrice.toLocaleString(ar ? "ar-EG" : "en-EG")} </del>}{product.price.toLocaleString(ar ? "ar-EG" : "en-EG")} <span>{ar ? "جنيه" : "EGP"}</span></p>
+        <p className="zero-detail-price">{product.promotionType==="PERCENT"&&product.promotionValue?<><del>{product.price.toLocaleString(ar?"ar-EG":"en-EG")} </del>{Math.round(product.price*(100-product.promotionValue)/100).toLocaleString(ar?"ar-EG":"en-EG")}</>:<>{product.compareAtPrice&&product.compareAtPrice>product.price&&<del>{product.compareAtPrice.toLocaleString(ar?"ar-EG":"en-EG")} </del>}{product.price.toLocaleString(ar?"ar-EG":"en-EG")}</>} <span>{ar?"جنيه":"EGP"}</span></p>{product.promotionType==="PERCENT"&&product.promotionValue?<span className="zero-product-promo-badge">{product.promotionValue}% OFF</span>:product.promotionType==="BUY2GET1"?<span className="zero-product-promo-badge">BUY 2 GET 1 FREE</span>:null}
         <p className="zero-detail-description">{description || (ar ? "تصميم رياضي بقصة دقيقة، مناسب للحركة واللبس اليومي." : "A clean athletic fit designed for movement and everyday wear.")}</p>
         <div className="zero-detail-rule" />
         {product.sizeChartUrl && <div className="zero-size-chart-trigger"><button type="button" className="zero-size-chart-button" onClick={() => setShowSizeChart(true)}>{ar ? "عرض جدول المقاسات" : "VIEW SIZE CHART"} <span aria-hidden="true">↗</span></button></div>}
