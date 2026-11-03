@@ -95,17 +95,19 @@ export async function POST(request: Request) {
       }
       for (const item of bundleRequests) {
         const bundle = bundleById.get(item.bundleId)!;
-        const expected = new Map(bundle.items.map(entry => [entry.productId, entry.quantity]));
-         const fixedVariants = new Map(bundle.items.map(entry => [entry.productId, entry.variantId]));
-        const actual = new Map<string, number>();
+        const expected = new Map(bundle.items.map(entry => [entry.productId, { quantity: entry.quantity, variantId: entry.variantId }]));
+        const actual = new Map<string, { quantity: number; variantId: string }>();
         const components: { productId: string; variantId: string; quantity: number }[] = [];
         for (const component of item.components) {
           const variant = variantById.get(component.variantId);
           if (!variant) throw new Error("ITEM_UNAVAILABLE");
-          actual.set(variant.productId, (actual.get(variant.productId) || 0) + component.quantity);
+          const fixed = expected.get(variant.productId);
+          if (!fixed || fixed.variantId !== variant.id) throw new Error("BUNDLE_ITEMS_MISMATCH");
+          const previous = actual.get(variant.productId);
+          actual.set(variant.productId, { quantity: (previous?.quantity || 0) + component.quantity, variantId: variant.id });
           components.push({ productId: variant.productId, variantId: variant.id, quantity: component.quantity * item.quantity });
         }
-        if (actual.size !== expected.size || [...expected].some(([productId, quantity]) => actual.get(productId) !== quantity)) throw new Error("BUNDLE_ITEMS_MISMATCH");
+        if (actual.size !== expected.size || [...expected].some(([productId, fixed]) => actual.get(productId)?.quantity !== fixed.quantity || actual.get(productId)?.variantId !== fixed.variantId)) throw new Error("BUNDLE_ITEMS_MISMATCH");
         const lineTotal = bundle.totalPrice * item.quantity;
         subtotal += lineTotal;
         orderItems.push({ productId: null, variantId: null, bundleId: bundle.id, productNameEn: bundle.titleEn, productNameAr: bundle.titleAr || bundle.titleEn, size: "", color: "", unitPrice: bundle.totalPrice, quantity: item.quantity, lineTotal, components });
