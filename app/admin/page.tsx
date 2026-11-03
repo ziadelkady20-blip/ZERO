@@ -11,6 +11,7 @@ type Product = { id:string; slug:string; nameEn:string; nameAr:string; price:num
 type Rate = { id:string; governorate:string; city:string; price:number; active:boolean };
 type Category = { id:string; nameEn:string; nameAr:string; slug:string };
 type Review = { id:string; imageUrl:string; customerName:string; caption:string; active:boolean; position:number };
+type Bundle = { id:string; titleEn:string; titleAr:string; descriptionEn:string; descriptionAr:string; imageUrl:string; totalPrice:number; active:boolean; position:number };
 const STATUSES=["PENDING","CONFIRMED","PREPARING","SHIPPED","DELIVERED","CANCELLED"];
 const STATUS_LABEL:Record<string,string>={PENDING:"Pending",CONFIRMED:"Confirmed",PREPARING:"Preparing",SHIPPED:"Shipped",DELIVERED:"Delivered",CANCELLED:"Cancelled"};
 const money=(value:number)=>new Intl.NumberFormat("en-EG",{maximumFractionDigits:0}).format(value)+" EGP";
@@ -23,8 +24,10 @@ export default function AdminPage() {
   const [products,setProducts]=useState<Product[]>([]);
   const [rates,setRates]=useState<Rate[]>([]);
   const [categories,setCategories]=useState<Category[]>([]),[categoryDrafts,setCategoryDrafts]=useState<Record<string,{slug:string;nameEn:string;nameAr:string}>>({});
-  const [tab,setTab]=useState<"orders"|"products"|"shipping"|"categories"|"reviews">("orders");
+  const [tab,setTab]=useState<"orders"|"products"|"shipping"|"categories"|"reviews"|"bundles">("orders");
   const [reviews,setReviews]=useState<Review[]>([]);
+  const [bundles,setBundles]=useState<Bundle[]>([]);
+  const [bundleDraft,setBundleDraft]=useState({titleEn:"",titleAr:"",descriptionEn:"",descriptionAr:"",imageUrl:"",totalPrice:"",position:"0"});
   const [reviewDraft,setReviewDraft]=useState({imageUrl:"",customerName:"",caption:""});
   const [error,setError]=useState("");
   const [notice,setNotice]=useState("");
@@ -44,8 +47,8 @@ export default function AdminPage() {
     if(showSpinner)setBusy(true);
     setError("");
     try {
-      const [o,p,s,r]=await Promise.all([api("/api/admin/orders"),api("/api/admin/products"),api("/api/admin/shipping"),api("/api/admin/reviews")]);
-      setOrders(o.orders||[]);setProducts(p.products||[]);setCategories(p.categories||[]);setReviews(r.reviews||[]);const nextCategories:Record<string,{slug:string;nameEn:string;nameAr:string}>={};(p.categories||[]).forEach((category:Category)=>nextCategories[category.id]={slug:category.slug,nameEn:category.nameEn,nameAr:category.nameAr});setCategoryDrafts(nextCategories);setRates(s.rates||[]);
+      const [o,p,s,r,b]=await Promise.all([api("/api/admin/orders"),api("/api/admin/products"),api("/api/admin/shipping"),api("/api/admin/reviews"),api("/api/admin/bundles")]);
+      setOrders(o.orders||[]);setProducts(p.products||[]);setCategories(p.categories||[]);setReviews(r.reviews||[]);setBundles(b.bundles||[]);const nextCategories:Record<string,{slug:string;nameEn:string;nameAr:string}>={};(p.categories||[]).forEach((category:Category)=>nextCategories[category.id]={slug:category.slug,nameEn:category.nameEn,nameAr:category.nameAr});setCategoryDrafts(nextCategories);setRates(s.rates||[]);
       const drafts:Record<string,{price:string;active:boolean}>={};
       (s.rates||[]).forEach((r:Rate)=>drafts[r.id]={price:String(r.price),active:r.active});
       setShippingDrafts(drafts);setSignedIn(true);
@@ -98,6 +101,7 @@ export default function AdminPage() {
       <button className={tab==="shipping"?"admin-nav active":"admin-nav"} onClick={()=>setTab("shipping")}><Truck size={16}/> Delivery rates <span>{rates.length}</span></button>
       <button className={tab==="categories"?"admin-nav active":"admin-nav"} onClick={()=>setTab("categories")}><Settings2 size={16}/> Categories <span>{categories.length}</span></button>
       <button className={tab==="reviews"?"admin-nav active":"admin-nav"} onClick={()=>setTab("reviews")}><ImagePlus size={16}/> Customer reviews <span>{reviews.length}</span></button>
+      <button className={tab==="bundles"?"admin-nav active":"admin-nav"} onClick={()=>setTab("bundles")}><PackagePlus size={16}/> Bundles <span>{bundles.length}</span></button>
       <div className="admin-sidebar-bottom">
         <Link href="/admin/coupons"><Ticket size={15}/> Promo codes <ArrowRight size={13}/></Link>\n        <Link href="/admin/setup"><PackagePlus size={15}/> Add product / setup <ArrowRight size={13}/></Link>
         <Link href="/admin/products"><ArrowDownUp size={15}/> Full product editor <ArrowRight size={13}/></Link>
@@ -107,7 +111,7 @@ export default function AdminPage() {
       </div>
     </aside>
     <section className="admin-main">
-      <header className="admin-topbar"><div><p className="admin-kicker">ZERO CLOTHING / CONTROL CENTER</p><h1>{tab==="orders"?"Orders":tab==="products"?"Products & inventory":tab==="shipping"?"Delivery rates":tab==="categories"?"Categories":"Customer reviews"}</h1><p className="admin-page-subtitle">Changes are saved to the store database and used by the live storefront.</p></div><button className="admin-secondary" onClick={()=>void load()} disabled={busy}><RefreshCw size={14} className={busy?"admin-spin":""}/> Refresh data</button></header>
+      <header className="admin-topbar"><div><p className="admin-kicker">ZERO CLOTHING / CONTROL CENTER</p><h1>{tab==="orders"?"Orders":tab==="products"?"Products & inventory":tab==="shipping"?"Delivery rates":tab==="categories"?"Categories":tab==="reviews"?"Customer reviews":"Bundles"}</h1><p className="admin-page-subtitle">Changes are saved to the store database and used by the live storefront.</p></div><button className="admin-secondary" onClick={()=>void load()} disabled={busy}><RefreshCw size={14} className={busy?"admin-spin":""}/> Refresh data</button></header>
       {error&&<p className="admin-alert error" role="alert">{error}</p>}{notice&&<p className="admin-alert success" role="status">{notice}</p>}
       <div className="admin-stats">
         <button onClick={()=>{setTab("orders");setStatusFilter("ALL");}}><span>TOTAL ORDERS</span><strong>{orders.length}</strong><small>Latest 200 orders</small></button>
@@ -141,6 +145,26 @@ export default function AdminPage() {
           <label className="admin-toggle"><input type="checkbox" checked={review.active} onChange={async e=>{try{await api("/api/admin/reviews",{method:"PATCH",body:JSON.stringify({id:review.id,active:e.target.checked})});await load(false);}catch(err){setError(err instanceof Error?err.message:"Update failed.");}}}/><span>{review.active?"Visible on site":"Hidden"}</span></label>
           <button className="admin-secondary" onClick={async()=>{if(!window.confirm("Delete this customer review image?"))return;try{await api("/api/admin/reviews",{method:"DELETE",body:JSON.stringify({id:review.id})});setNotice("Review deleted.");await load(false);}catch(err){setError(err instanceof Error?err.message:"Delete failed.");}}}>Delete</button>
         </article>)}{reviews.length===0&&<p className="admin-empty">No customer reviews yet. Add the first review image above.</p>}</div>
+      </section>}
+      {tab==="bundles"&&<section className="admin-panel">
+        <div className="admin-panel-heading"><div><h2>Bundle offers</h2><p>Create a bundle using one combined product image, one description and a single total price.</p></div><span className="admin-result-count">{bundles.length} bundles</span></div>
+        <form className="admin-review-form" onSubmit={async e=>{e.preventDefault();setBusy(true);setError("");setNotice("");try{await api("/api/admin/bundles",{method:"POST",body:JSON.stringify({...bundleDraft,totalPrice:Number(bundleDraft.totalPrice),position:Number(bundleDraft.position)})});setBundleDraft({titleEn:"",titleAr:"",descriptionEn:"",descriptionAr:"",imageUrl:"",totalPrice:"",position:"0"});setNotice("Bundle added to the storefront.");await load(false);}catch(err){setError(err instanceof Error?err.message:"Could not add bundle.");}finally{setBusy(false);}}}>
+          <label>Bundle title (English)<input required value={bundleDraft.titleEn} onChange={e=>setBundleDraft(v=>({...v,titleEn:e.target.value}))} placeholder="2 T-Shirts Bundle"/></label>
+          <label>اسم العرض بالعربي<input dir="rtl" value={bundleDraft.titleAr} onChange={e=>setBundleDraft(v=>({...v,titleAr:e.target.value}))} placeholder="عرض التيشيرتين"/></label>
+          <label>Bundle description (English)<textarea rows={2} value={bundleDraft.descriptionEn} onChange={e=>setBundleDraft(v=>({...v,descriptionEn:e.target.value}))} placeholder="Choose any two everyday essentials."/></label>
+          <label>وصف العرض بالعربي<textarea dir="rtl" rows={2} value={bundleDraft.descriptionAr} onChange={e=>setBundleDraft(v=>({...v,descriptionAr:e.target.value}))} placeholder="اختار أي تيشيرتين بسعر مميز."/></label>
+          <label>Combined bundle image URL<input type="url" required value={bundleDraft.imageUrl} onChange={e=>setBundleDraft(v=>({...v,imageUrl:e.target.value}))} placeholder="https://.../bundle.jpg"/></label>
+          <label>Total bundle price (EGP)<input type="number" min="0" step="1" required value={bundleDraft.totalPrice} onChange={e=>setBundleDraft(v=>({...v,totalPrice:e.target.value}))} placeholder="750"/></label>
+          <label>Display order<input type="number" step="1" value={bundleDraft.position} onChange={e=>setBundleDraft(v=>({...v,position:e.target.value}))}/></label>
+          {bundleDraft.imageUrl&&<div className="admin-review-preview"><img src={bundleDraft.imageUrl} alt="Bundle preview"/></div>}
+          <button className="admin-primary" disabled={busy||!bundleDraft.titleEn.trim()||!/^https:\/\/\S+$/i.test(bundleDraft.imageUrl.trim())||bundleDraft.totalPrice===""||!Number.isInteger(Number(bundleDraft.totalPrice))}>+ Add bundle</button>
+        </form>
+        <div className="admin-review-grid">{bundles.map(bundle=><article className="admin-review-card" key={bundle.id}>
+          <img src={bundle.imageUrl} alt={bundle.titleEn}/>
+          <div><strong>{bundle.titleEn}</strong><p>{bundle.descriptionEn}</p><strong>{money(bundle.totalPrice)}</strong><small>Display order: {bundle.position}</small></div>
+          <label className="admin-toggle"><input type="checkbox" checked={bundle.active} onChange={async e=>{try{await api("/api/admin/bundles",{method:"PATCH",body:JSON.stringify({id:bundle.id,active:e.target.checked})});await load(false);}catch(err){setError(err instanceof Error?err.message:"Update failed.");}}}/><span>{bundle.active?"Visible on site":"Hidden"}</span></label>
+          <button className="admin-secondary" onClick={async()=>{if(!window.confirm("Delete this bundle?"))return;try{await api("/api/admin/bundles",{method:"DELETE",body:JSON.stringify({id:bundle.id})});setNotice("Bundle deleted.");await load(false);}catch(err){setError(err instanceof Error?err.message:"Delete failed.");}}}>Delete</button>
+        </article>)}{bundles.length===0&&<p className="admin-empty">No bundles yet. Add your first bundle above.</p>}</div>
       </section>}
       <footer className="admin-footer"><span>ZERO CLOTHING · STORE OPERATIONS</span><span>PRODUCTS, INVENTORY & SHIPPING ARE DATABASE-DRIVEN</span></footer>
     </section>
