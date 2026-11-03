@@ -162,6 +162,10 @@ export default function HomePage() {
   const [storeBundles, setStoreBundles] = useState<StoreBundle[]>([]);
 
   useEffect(() => {
+    fetch("/api/bundles").then(response => response.json()).then(data => { if (Array.isArray(data.bundles)) setStoreBundles(data.bundles); }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     fetch("/api/reviews").then(response => response.json()).then(data => { if (Array.isArray(data.reviews)) setCustomerReviews(data.reviews); }).catch(() => {});
   }, []);
 
