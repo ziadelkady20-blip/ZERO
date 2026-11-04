@@ -891,3 +891,54 @@ body{background:#050505;color:#f8f8f6}
 @media(prefers-reduced-motion:reduce){
   .hero-section .hero-image{animation:none!important}
 }
+
+
+/* Full-bleed hero artwork with visible continuous floating motion */
+.hero-section{
+  position:relative!important;
+  overflow:hidden!important;
+  width:100%!important;
+  aspect-ratio:auto!important;
+  height:clamp(560px, min(58vw, 820px), 820px)!important;
+  min-height:560px!important;
+  background:#050505!important;
+}
+.hero-section .hero-image{
+  position:absolute!important;
+  inset:0!important;
+  z-index:0!important;
+  background:none!important;
+  overflow:hidden!important;
+}
+.hero-section .hero-image::before{
+  content:"";
+  position:absolute;
+  inset:-3% 0;
+  background-image:url("/hero%20zeros.png");
+  background-repeat:no-repeat;
+  background-position:center center;
+  background-size:cover;
+  transform:translate3d(0,0,0) scale(1.015);
+  animation:zero-garments-hover 5.5s ease-in-out infinite!important;
+  will-change:transform;
+}
+.hero-section .hero-shade{
+  z-index:1!important;
+  pointer-events:none;
+  background:linear-gradient(90deg,rgba(0,0,0,.12),transparent 28%,transparent 72%,rgba(0,0,0,.12))!important;
+}
+@keyframes zero-garments-hover{
+  0%,100%{transform:translate3d(0,0,0) scale(1.015)}
+  50%{transform:translate3d(0,-16px,0) scale(1.035)}
+}
+@media(max-width:760px){
+  .hero-section{height:clamp(420px,118vw,650px)!important;min-height:420px!important}
+  .hero-section .hero-image::before{background-size:cover;background-position:center center}
+  @keyframes zero-garments-hover{
+    0%,100%{transform:translate3d(0,0,0) scale(1.025)}
+    50%{transform:translate3d(0,-10px,0) scale(1.045)}
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-section .hero-image::before{animation:none!important}
+}
