@@ -1037,7 +1037,3 @@ body{background:#050505;color:#f8f8f6}
   .hero-section .hero-image::before{animation:none!important}
 }
 
-
-/* Match each product color swatch to its actual color name. */
-.zero-detail-colors .zero-color-swatch.black{background-color:#111111!important;border-color:#111111!important}
-.zero-detail-colors .zero-color-swatch.blue{background-color:#173b78!important;border-color:#173b78!important}
