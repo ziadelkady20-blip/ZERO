@@ -157,14 +157,38 @@ export async function DELETE(request: Request) {
   const id = typeof body.id === "string" ? body.id.trim() : "";
   if (!id) return NextResponse.json({ error: "Product id is required." }, { status: 400 });
   try {
-    const product = await prisma.product.findUnique({ where: { id }, select: { id: true, nameEn: true, _count: { select: { orderItems: true } } } });
-    if (!product) return NextResponse.json({ error: "Product not found." }, { status: 404 });
-    if (product._count.orderItems > 0) {
-      return NextResponse.json({ error: "This product is linked to existing orders, so it cannot be permanently deleted. You can unpublish it instead to hide it from the storefront while preserving order history." }, { status: 409 });
+    const result = await prisma.$transaction(async (tx) => {
+      const product = await tx.product.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          nameEn: true,
+          _count: { select: { orderItems: true, bundleItems: true, bundleOrderItems: true } },
+        },
+      });
+      if (!product) throw new Error("PRODUCT_NOT_FOUND");
+
+      // Keep products that appear in completed/past orders so order history remains intact.
+      if (product._count.orderItems > 0 || product._count.bundleOrderItems > 0) {
+        throw new Error("PRODUCT_HAS_ORDER_HISTORY");
+      }
+
+      // A product can be removed from current bundle configurations safely.
+      // These references otherwise block deletion because BundleProduct uses onDelete: Restrict.
+      if (product._count.bundleItems > 0) {
+        await tx.bundleProduct.deleteMany({ where: { productId: id } });
+      }
+
+      await tx.product.delete({ where: { id } });
+      return { id: product.id, nameEn: product.nameEn };
+    });
+    return NextResponse.json({ success: true, ...result });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "";
+    if (reason === "PRODUCT_NOT_FOUND") return NextResponse.json({ error: "Product not found." }, { status: 404 });
+    if (reason === "PRODUCT_HAS_ORDER_HISTORY") {
+      return NextResponse.json({ error: "This product is part of existing order history, so it cannot be permanently deleted. Unpublish it instead to hide it from the storefront while keeping old orders accurate." }, { status: 409 });
     }
-    await prisma.product.delete({ where: { id } });
-    return NextResponse.json({ success: true, id: product.id });
-  } catch {
     return NextResponse.json({ error: "Could not delete product. If it has order history, unpublish it instead." }, { status: 409 });
   }
 }
