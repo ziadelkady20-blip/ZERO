@@ -758,3 +758,57 @@ body{background:#050505;color:#f8f8f6}
 .live-bundle-cancel{min-height:46px;padding:0 18px;border:1px solid #bbb;background:transparent;color:#333;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:.1em}
 .live-bundle-line-label{color:#8a5b18!important;font-size:10px!important;letter-spacing:.08em;font-weight:700}
 @media(max-width:600px){.live-bundle-product{grid-template-columns:82px minmax(0,1fr);gap:12px;padding:9px}.live-bundle-product-image{width:82px}.live-bundle-builder-actions .live-primary{width:100%}}
+
+
+/* Horizontal swipe rails for every homepage content collection */
+.site-shell .category-grid,
+.site-shell .product-grid,
+.site-shell .bundles-grid,
+.site-shell .reviews-gallery{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+  gap:18px!important;
+  width:100%!important;
+  max-width:100%!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;
+  scroll-padding-inline:20px;
+  -webkit-overflow-scrolling:touch;
+  padding:4px 2px 18px!important;
+  scrollbar-width:thin;
+  scrollbar-color:#aaa transparent;
+}
+.site-shell .category-grid>a,
+.site-shell .product-grid>.product-card,
+.site-shell .bundles-grid>.bundle-card,
+.site-shell .reviews-gallery>.review-image-card{
+  flex:0 0 280px!important;
+  min-width:0!important;
+  width:280px!important;
+  max-width:280px!important;
+  scroll-snap-align:start;
+}
+.site-shell .category-grid>a{flex-basis: min(44vw,520px)!important;width:min(44vw,520px)!important;max-width:min(44vw,520px)!important}
+.site-shell .reviews-gallery>.review-image-card img{max-height:620px}
+.site-shell .category-grid::-webkit-scrollbar,
+.site-shell .product-grid::-webkit-scrollbar,
+.site-shell .bundles-grid::-webkit-scrollbar,
+.site-shell .reviews-gallery::-webkit-scrollbar{height:6px}
+.site-shell .category-grid::-webkit-scrollbar-thumb,
+.site-shell .product-grid::-webkit-scrollbar-thumb,
+.site-shell .bundles-grid::-webkit-scrollbar-thumb,
+.site-shell .reviews-gallery::-webkit-scrollbar-thumb{background:#aaa;border-radius:99px}
+@media(max-width:760px){
+  .site-shell .category-grid,
+  .site-shell .product-grid,
+  .site-shell .bundles-grid,
+  .site-shell .reviews-gallery{gap:12px!important;padding:2px 1px 14px!important}
+  .site-shell .category-grid>a{flex:0 0 82vw!important;width:82vw!important;max-width:82vw!important}
+  .site-shell .product-grid>.product-card,
+  .site-shell .bundles-grid>.bundle-card,
+  .site-shell .reviews-gallery>.review-image-card{flex:0 0 78vw!important;width:78vw!important;max-width:78vw!important}
+}
