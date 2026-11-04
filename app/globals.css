@@ -942,3 +942,36 @@ body{background:#050505;color:#f8f8f6}
 @media(prefers-reduced-motion:reduce){
   .hero-section .hero-image::before{animation:none!important}
 }
+
+
+/* Bottom shop navigation */
+.footer-shop-nav{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:clamp(18px,3vw,42px);
+  padding:26px 0 30px;
+  margin-top:4px;
+  border-top:1px solid rgba(255,255,255,.16);
+  border-bottom:1px solid rgba(255,255,255,.16);
+}
+.footer-shop-nav h3{
+  margin:0 18px 0 0;
+  color:#fff;
+  font:600 10px/1 var(--font-en);
+  letter-spacing:.2em;
+}
+.footer-shop-nav a{
+  color:#aaa;
+  text-decoration:none;
+  font-size:12px;
+  transition:color .2s ease,transform .2s ease;
+}
+.footer-shop-nav a:hover{color:#fff;transform:translateY(-2px)}
+.rtl .footer-shop-nav{direction:rtl}
+.rtl .footer-shop-nav h3{margin:0 0 0 18px}
+@media(max-width:700px){
+  .footer-shop-nav{display:grid;grid-template-columns:1fr 1fr;gap:17px 20px;padding:24px 0;margin-top:0}
+  .footer-shop-nav h3{grid-column:1/-1;margin:0!important}
+  .footer-shop-nav a{font-size:12px}
+}
