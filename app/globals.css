@@ -870,3 +870,24 @@ body{background:#050505;color:#f8f8f6}
   }
   .site-shell .reviews-gallery>.review-image-card.is-active{filter:blur(0);transform:scale(1)}
 }
+
+
+/* ZERO floating-garment hero artwork */
+.hero-section .hero-image{
+  background-image:url("/hero%20zeros.png")!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
+  background-position:center 50%!important;
+  animation:zero-hero-float 7s ease-in-out infinite!important;
+  will-change:background-position,filter;
+}
+@keyframes zero-hero-float{
+  0%,100%{background-position:center 49%!important;filter:brightness(.98)}
+  50%{background-position:center 53%!important;filter:brightness(1.06)}
+}
+@media(max-width:680px){
+  .hero-section .hero-image{background-size:contain!important;background-position:center 50%!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-section .hero-image{animation:none!important}
+}
