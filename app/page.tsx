@@ -307,6 +307,17 @@ export default function HomePage() {
         <div className="product-grid">{newArrivalProducts.map((product,index)=><article className="product-card" key={product.id}><div className="product-image-wrap">{product.image?<img src={product.image} alt={product.imageAlt} className="product-image" loading={index>1?"lazy":"eager"}/>:<div className="product-image-placeholder" role="img"><span>ZERO.</span></div>}<span className="product-badge">NEW ARRIVAL</span>{product.promotionType==="PERCENT"&&<span className="product-promo-badge">{product.promotionValue}% OFF</span>}{product.promotionType==="BUY2GET1"&&<span className="product-promo-badge">BUY 2 GET 1</span>}<button className="wishlist-button" aria-label={"Save "+product.name}><Heart size={18} strokeWidth={1.6}/></button><a className="quick-add" href={`/product/${product.slug}`}>{isArabic?"عرض المنتج":"VIEW PRODUCT"}<ArrowRight size={15}/></a></div><div className="product-info"><div><p className="product-category">{isArabic?product.categoryAr:product.category}</p><h3><a className="product-name-link" href={`/product/${product.slug}`}>{product.name}</a></h3></div><p className="product-price">{product.promotionType==="PERCENT"&&product.promotionValue?<><del>{product.price.toLocaleString(isArabic?"ar-EG":"en-EG")}</del> {Math.round(product.price*(100-product.promotionValue)/100).toLocaleString(isArabic?"ar-EG":"en-EG")}</>:<>{product.compareAtPrice&&product.compareAtPrice>product.price&&<del>{product.compareAtPrice.toLocaleString(isArabic?"ar-EG":"en-EG")}</del>} {product.price.toLocaleString(isArabic?"ar-EG":"en-EG")}</>} <span>{t.egp}</span></p></div></article>)}</div>
       </section>}
 
+      {storeBundles.length>0&&<section className="bundles-section section-pad" id="bundles">
+        <div className="section-heading">
+          <div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{isArabic?"عروض ZERO":"ZERO BUNDLES"}</p><h2>{isArabic?"عروض متجمعة. سعر أوفر.":"More together. Better value."}</h2><p className="section-description">{isArabic?"اختيارات مجمعة بعناية وبسعر إجمالي مميز.":"Curated combinations, one special total price."}</p></div>
+          <span className="category-count">{String(storeBundles.length).padStart(2,"0")} · BUNDLES</span>
+        </div>
+        <div className="bundles-grid">{storeBundles.map(bundle=><article className="bundle-card" key={bundle.id}>
+          <div className="bundle-card-image"><img src={bundle.imageUrl} alt={isArabic?(bundle.titleAr||bundle.titleEn):bundle.titleEn} loading="lazy"/><span>{isArabic?"عرض خاص":"BUNDLE OFFER"}</span></div>
+          <div className="bundle-card-content"><h3>{isArabic?(bundle.titleAr||bundle.titleEn):bundle.titleEn}</h3><p>{isArabic?(bundle.descriptionAr||bundle.descriptionEn):bundle.descriptionEn}</p>{bundle.items&&bundle.items.length>0&&<p className="bundle-included-products">{isArabic?"تشمل: ":"INCLUDES: "}{bundle.items.map(item=>isArabic?(item.product.nameAr||item.product.nameEn):item.product.nameEn).join(" · ")}</p>}<div className="bundle-total"><span>{isArabic?"السعر الإجمالي":"TOTAL PRICE"}</span><strong>{new Intl.NumberFormat(isArabic?"ar-EG":"en-EG",{maximumFractionDigits:0}).format(bundle.totalPrice)} {isArabic?"جنيه":"EGP"}</strong></div><a className="bundle-add-button" href={"/shop?bundle="+encodeURIComponent(bundle.id)}>{isArabic?"أضف الباقة للسلة":"ADD BUNDLE TO BAG"} <ArrowRight size={15}/></a></div>
+        </article>)}</div>
+      </section>}
+
       <section className="collection-section section-pad" id="collection">
         <div className="section-heading">
           <div>
@@ -359,16 +370,7 @@ export default function HomePage() {
         <a className="underlined-link mobile-view-all" href="/shop">{t.viewAll}<ArrowRight size={16} /></a>
       </section>
 
-      {storeBundles.length>0&&<section className="bundles-section section-pad" id="bundles">
-        <div className="section-heading">
-          <div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{isArabic?"عروض ZERO":"ZERO BUNDLES"}</p><h2>{isArabic?"عروض متجمعة. سعر أوفر.":"More together. Better value."}</h2><p className="section-description">{isArabic?"اختيارات مجمعة بعناية وبسعر إجمالي مميز.":"Curated combinations, one special total price."}</p></div>
-          <span className="category-count">{String(storeBundles.length).padStart(2,"0")} · BUNDLES</span>
-        </div>
-        <div className="bundles-grid">{storeBundles.map(bundle=><article className="bundle-card" key={bundle.id}>
-          <div className="bundle-card-image"><img src={bundle.imageUrl} alt={isArabic?(bundle.titleAr||bundle.titleEn):bundle.titleEn} loading="lazy"/><span>{isArabic?"عرض خاص":"BUNDLE OFFER"}</span></div>
-          <div className="bundle-card-content"><h3>{isArabic?(bundle.titleAr||bundle.titleEn):bundle.titleEn}</h3><p>{isArabic?(bundle.descriptionAr||bundle.descriptionEn):bundle.descriptionEn}</p>{bundle.items&&bundle.items.length>0&&<p className="bundle-included-products">{isArabic?"تشمل: ":"INCLUDES: "}{bundle.items.map(item=>isArabic?(item.product.nameAr||item.product.nameEn):item.product.nameEn).join(" · ")}</p>}<div className="bundle-total"><span>{isArabic?"السعر الإجمالي":"TOTAL PRICE"}</span><strong>{new Intl.NumberFormat(isArabic?"ar-EG":"en-EG",{maximumFractionDigits:0}).format(bundle.totalPrice)} {isArabic?"جنيه":"EGP"}</strong></div><a className="bundle-add-button" href={"/shop?bundle="+encodeURIComponent(bundle.id)}>{isArabic?"أضف الباقة للسلة":"ADD BUNDLE TO BAG"} <ArrowRight size={15}/></a></div>
-        </article>)}</div>
-      </section>}
+
 
       {customerReviews.length>0&&<section className="reviews-section section-pad" id="reviews">
         <div className="section-heading">
