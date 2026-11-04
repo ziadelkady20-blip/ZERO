@@ -975,3 +975,32 @@ body{background:#050505;color:#f8f8f6}
   .footer-shop-nav h3{grid-column:1/-1;margin:0!important}
   .footer-shop-nav a{font-size:12px}
 }
+
+
+/* Mobile hero: preserve the complete 2:1 artwork without cropping */
+@media(max-width:760px){
+  .hero-section{
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    aspect-ratio:2/1!important;
+    overflow:hidden!important;
+    padding:0!important;
+  }
+  .hero-section .hero-image,
+  .hero-section .hero-image::before{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+  }
+  .hero-section .hero-image::before{
+    background-size:100% 100%!important;
+    background-position:center!important;
+    animation:zero-garments-hover-mobile 5.5s ease-in-out infinite!important;
+  }
+}
+@keyframes zero-garments-hover-mobile{
+  0%,100%{transform:translate3d(0,0,0) scale(1)}
+  50%{transform:translate3d(0,-7px,0) scale(1.025)}
+}
