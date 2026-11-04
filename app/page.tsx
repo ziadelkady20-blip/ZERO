@@ -2,7 +2,7 @@
 
 const ZERO_MODEL_IMAGE = "https://raw.githubusercontent.com/ziadelkady20-blip/ZERO/main/hero-zero.png";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowDownRight,
   ArrowRight,
@@ -163,6 +163,8 @@ export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
   const [customerReviews, setCustomerReviews] = useState<CustomerReview[]>([]);
+  const [activeReviewIndex, setActiveReviewIndex] = useState(0);
+  const reviewsRailRef = useRef<HTMLDivElement>(null);
   const [storeBundles, setStoreBundles] = useState<StoreBundle[]>([]);
 
   useEffect(() => {
@@ -377,10 +379,12 @@ export default function HomePage() {
           <div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{isArabic?"آراء عملائنا":"REAL CUSTOMER REVIEWS"}</p><h2>{isArabic?"تجارب حقيقية مع ZERO.":"Worn. Loved. Reviewed."}</h2><p className="section-description">{isArabic?"آراء وتجارب عملائنا مع منتجات ZERO.":"A look at what our customers are saying about ZERO."}</p></div>
           <span className="category-count">{String(customerReviews.length).padStart(2,"0")} · REVIEWS</span>
         </div>
-        <div className="reviews-gallery">{customerReviews.map((review,index)=><article className="review-image-card" key={review.id}>
-          <img src={review.imageUrl} alt={review.customerName?((isArabic?"رأي العميل ":"Customer review by ")+review.customerName):(isArabic?"صورة من آراء العملاء":"Customer review")} loading={index>2?"lazy":"eager"}/>
-          {(review.customerName||review.caption)&&<div className="review-image-caption">{review.customerName&&<strong>{review.customerName}</strong>}{review.caption&&<p>{review.caption}</p>}</div>}
-        </article>)}</div>
+        <div className="reviews-gallery" ref={reviewsRailRef} onScroll={(event)=>{const rail=event.currentTarget;const center=rail.scrollLeft+rail.clientWidth/2;let nearest=0;let distance=Infinity;Array.from(rail.children).forEach((child,index)=>{const card=child as HTMLElement;const cardCenter=card.offsetLeft+card.offsetWidth/2;const delta=Math.abs(center-cardCenter);if(delta<distance){distance=delta;nearest=index;}});setActiveReviewIndex(nearest);}}>
+          {customerReviews.map((review,index)=><article className={index===activeReviewIndex?"review-image-card is-active":"review-image-card"} key={review.id}>
+            <img src={review.imageUrl} alt={review.customerName?((isArabic?"رأي العميل ":"Customer review by ")+review.customerName):(isArabic?"صورة من آراء العملاء":"Customer review")} loading={index>2?"lazy":"eager"}/>
+            {(review.customerName||review.caption)&&<div className="review-image-caption">{review.customerName&&<strong>{review.customerName}</strong>}{review.caption&&<p>{review.caption}</p>}</div>}
+          </article>)}
+        </div>
       </section>}
 
       <footer className="site-footer">
