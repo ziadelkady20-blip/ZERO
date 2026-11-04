@@ -13,6 +13,24 @@ type Product = {
 type CartItem = { variantId: string; productId: string; nameEn: string; nameAr: string; image: string; size: string; color: string; price: number; quantity: number; stock: number };
 const CART_KEY = "zero-cart-v1";
 
+const COLOR_SWATCHES: Record<string, string> = {
+  black: "#111111", white: "#f7f7f2", "off white": "#f7f7f2", cream: "#eee8d8",
+  blue: "#173b78", navy: "#17263c", "royal blue": "#2454a6", sky: "#78bce8",
+  burgundy: "#800020", maroon: "#650d25", red: "#b51f2b", wine: "#722f37",
+  pink: "#e78ca8", green: "#26734d", "dark green": "#14532d", olive: "#73752b",
+  yellow: "#e5c12b", orange: "#e87524", purple: "#7040a0", brown: "#70452c",
+  beige: "#d8c5a2", gray: "#888888", grey: "#888888", silver: "#bfc3c7",
+  charcoal: "#343434", "dark gray": "#454545", "dark grey": "#454545",
+  أسود: "#111111", ابيض: "#f7f7f2", أبيض: "#f7f7f2", ازرق: "#173b78", أزرق: "#173b78",
+  كحلي: "#17263c", نبيتي: "#800020", احمر: "#b51f2b", أحمر: "#b51f2b",
+  اخضر: "#26734d", أخضر: "#26734d", رمادي: "#888888", بيج: "#d8c5a2",
+};
+function getColorSwatch(colorName: string): string {
+  const key = colorName.trim().toLowerCase().replace(/[-_]+/g, " ").replace(/\s+/g, " ");
+  return COLOR_SWATCHES[key] || "#888888";
+}
+
+
 export default function ProductDetailPage() {
   const params = useParams<{ slug: string }>();
   const router = useRouter();
@@ -98,7 +116,7 @@ export default function ProductDetailPage() {
         <div className="zero-detail-option-head"><label>{ar ? "اللون" : "COLOR"}</label><span>{color || (ar ? "اختار اللون" : "SELECT COLOR")}</span></div>
         <div className="zero-detail-colors">{colors.map(c => {
           const available = product.variants.some(v => v.size === size && v.color === c && v.stock > 0);
-          return <button key={c} className={color === c ? "selected" : ""} disabled={!available} onClick={() => { setColor(c); setQuantity(1); }}><span className={"zero-color-swatch " + c.toLowerCase().replace(/[^a-z0-9]+/g, "-")} />{c}{!available && <small> · {ar ? "نفد" : "SOLD OUT"}</small>}</button>;
+          return <button key={c} className={color === c ? "selected" : ""} disabled={!available} onClick={() => { setColor(c); setQuantity(1); }}><span className={"zero-color-swatch " + c.toLowerCase().replace(/[^a-z0-9]+/g, "-")} style={{ backgroundColor: getColorSwatch(c) }} />{c}{!available && <small> · {ar ? "نفد" : "SOLD OUT"}</small>}</button>;
         })}</div>
         <div className="zero-detail-stock">{variant && variant.stock > 0 ? <><span className="zero-stock-dot" />{ar ? "متاح" : "IN STOCK"} · {variant.stock} {ar ? "قطعة" : "LEFT"}</> : <span className="zero-sold-out">{ar ? "المقاس واللون غير متاحين" : "THIS COMBINATION IS SOLD OUT"}</span>}</div>
         <div className="zero-detail-buy-row"><div className="zero-detail-quantity"><button disabled={quantity <= 1} onClick={() => setQuantity(q => Math.max(1, q - 1))}>−</button><span>{quantity}</span><button disabled={!variant || quantity >= variant.stock} onClick={() => setQuantity(q => q + 1)}>+</button></div><button className="zero-detail-button" disabled={!variant || variant.stock < 1} onClick={addToBag}>{ar ? "أضف للسلة" : "ADD TO BAG"} <span>↗</span></button></div>
