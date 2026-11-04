@@ -1004,3 +1004,35 @@ body{background:#050505;color:#f8f8f6}
   0%,100%{transform:translate3d(0,0,0) scale(1)}
   50%{transform:translate3d(0,-7px,0) scale(1.025)}
 }
+
+
+/* Mobile ZERO hero: give the garment artwork a taller, larger stage */
+@media(max-width:760px){
+  .hero-section{
+    width:100%!important;
+    height:clamp(440px,125vw,680px)!important;
+    min-height:440px!important;
+    aspect-ratio:4/5!important;
+    overflow:hidden!important;
+  }
+  .hero-section .hero-image,
+  .hero-section .hero-image::before{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+  }
+  .hero-section .hero-image::before{
+    background-size:cover!important;
+    background-position:center 48%!important;
+    transform:scale(1.06)!important;
+    animation:zero-garments-hover-mobile-large 6s ease-in-out infinite!important;
+  }
+}
+@keyframes zero-garments-hover-mobile-large{
+  0%,100%{transform:translate3d(0,0,0) scale(1.06)}
+  50%{transform:translate3d(0,-9px,0) scale(1.09)}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-section .hero-image::before{animation:none!important}
+}
