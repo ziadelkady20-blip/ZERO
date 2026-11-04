@@ -61,7 +61,10 @@ export default function ProductDetailPage() {
   const sizes = useMemo(() => Array.from(new Set((product?.variants || []).map(v => v.size))), [product]);
   const colors = useMemo(() => Array.from(new Set((product?.variants || []).filter(v => v.size === size).map(v => v.color))), [product, size]);
   const variant = product?.variants.find(v => v.size === size && v.color === color);
-  const image = product?.images[selectedImage]?.url || product?.images[0]?.url || "";
+  const colorImages = product?.images.filter(item => item.alt.startsWith("ZERO_COLOR_IMAGE::") && item.alt.split("::")[2] === color) || [];
+  const colorImageItems = colorImages.map(item => ({...item, alt: item.alt.endsWith("::back") ? color+" back" : color+" front"}));
+  const galleryImages = colorImageItems.length ? colorImageItems : (product?.images.filter(item => !item.alt.startsWith("ZERO_COLOR_IMAGE::")) || []);
+  const image = galleryImages[selectedImage]?.url || galleryImages[0]?.url || "";
   const title = product ? (ar ? product.nameAr : product.nameEn) : "";
   const description = product ? (ar ? product.descriptionAr : product.descriptionEn) : "";
 
@@ -96,10 +99,10 @@ export default function ProductDetailPage() {
     {loading ? <div className="zero-detail-state">{ar ? "جاري تحميل المنتج…" : "LOADING PRODUCT…"}</div> : !product ? <section className="zero-detail-state"><p className="zero-detail-eyebrow">ZERO / PRODUCT</p><h1>{ar ? "المنتج مش موجود في المخزون لسه." : "This product isn't in the catalog yet."}</h1><p>{ar ? "لما تضيف المنتج من لوحة الإدارة بالصور والمقاسات والألوان، هتظهر صفحته هنا." : "Once this product is added from the admin dashboard with its images, sizes, and colors, its detail page will appear here."}</p><Link className="zero-detail-button" href="/shop">{ar ? "ارجع للمتجر" : "BACK TO SHOP"} ↗</Link></section> : <section className="zero-detail-layout">
       <div className="zero-detail-gallery-wrap">
       <div className="zero-detail-gallery">
-        {image ? <img key={image} className="zero-detail-main-image" src={image} alt={product.images[selectedImage]?.alt || title} onError={(event) => { event.currentTarget.style.display = "none"; }} /> : <div className="zero-detail-image-fallback">ZERO<span>.</span><small>{ar ? "أضف صورة المنتج من لوحة الإدارة" : "ADD PRODUCT IMAGE IN ADMIN"}</small></div>}
+        {image ? <img key={image} className="zero-detail-main-image" src={image} alt={galleryImages[selectedImage]?.alt || title} onError={(event) => { event.currentTarget.style.display = "none"; }} /> : <div className="zero-detail-image-fallback">ZERO<span>.</span><small>{ar ? "أضف صورة المنتج من لوحة الإدارة" : "ADD PRODUCT IMAGE IN ADMIN"}</small></div>}
         <span className="zero-detail-image-tag">ZERO / PERFORMANCE ESSENTIALS</span>
       </div>
-      {product.images.length > 1 && <div className="zero-detail-thumbnails" aria-label={ar ? "صور المنتج" : "Product images"}>{product.images.map((item,index)=><button type="button" key={item.url+index} className={selectedImage===index?"active":""} onClick={()=>setSelectedImage(index)} aria-label={ar?`عرض الصورة ${index+1}`:`Show image ${index+1}`}><img src={item.url} alt={item.alt||`${title} ${index+1}`}/></button>)}</div>}
+      {galleryImages.length > 1 && <div className="zero-detail-thumbnails" aria-label={ar ? "صور المنتج" : "Product images"}>{galleryImages.map((item,index)=><button type="button" key={item.url+index} className={selectedImage===index?"active":""} onClick={()=>setSelectedImage(index)} aria-label={ar?`عرض الصورة ${index+1}`:`Show image ${index+1}`}><img src={item.url} alt={item.alt||`${title} ${index+1}`}/></button>)}</div>}
       </div>
       <div className="zero-detail-info">
         <p className="zero-detail-eyebrow">{product.category?.nameEn || "ZERO CLOTHING"} / MEN’S COLLECTION</p>
@@ -116,7 +119,7 @@ export default function ProductDetailPage() {
         <div className="zero-detail-option-head"><label>{ar ? "اللون" : "COLOR"}</label><span>{color || (ar ? "اختار اللون" : "SELECT COLOR")}</span></div>
         <div className="zero-detail-colors">{colors.map(c => {
           const available = product.variants.some(v => v.size === size && v.color === c && v.stock > 0);
-          return <button key={c} className={color === c ? "selected" : ""} disabled={!available} onClick={() => { setColor(c); setQuantity(1); }}><span className={"zero-color-swatch " + c.toLowerCase().replace(/[^a-z0-9]+/g, "-")} style={{ backgroundColor: getColorSwatch(c) }} />{c}{!available && <small> · {ar ? "نفد" : "SOLD OUT"}</small>}</button>;
+          return <button key={c} className={color === c ? "selected" : ""} disabled={!available} onClick={() => { setColor(c); setQuantity(1); setSelectedImage(0); }}><span className={"zero-color-swatch " + c.toLowerCase().replace(/[^a-z0-9]+/g, "-")} style={{ backgroundColor: getColorSwatch(c) }} />{c}{!available && <small> · {ar ? "نفد" : "SOLD OUT"}</small>}</button>;
         })}</div>
         <div className="zero-detail-stock">{variant && variant.stock > 0 ? <><span className="zero-stock-dot" />{ar ? "متاح" : "IN STOCK"} · {variant.stock} {ar ? "قطعة" : "LEFT"}</> : <span className="zero-sold-out">{ar ? "المقاس واللون غير متاحين" : "THIS COMBINATION IS SOLD OUT"}</span>}</div>
         <div className="zero-detail-buy-row"><div className="zero-detail-quantity"><button disabled={quantity <= 1} onClick={() => setQuantity(q => Math.max(1, q - 1))}>−</button><span>{quantity}</span><button disabled={!variant || quantity >= variant.stock} onClick={() => setQuantity(q => q + 1)}>+</button></div><button className="zero-detail-button" disabled={!variant || variant.stock < 1} onClick={addToBag}>{ar ? "أضف للسلة" : "ADD TO BAG"} <span>↗</span></button></div>
