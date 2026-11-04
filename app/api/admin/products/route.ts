@@ -98,11 +98,9 @@ export async function PATCH(request: Request) {
     if (compareAtPrice !== null && (!Number.isInteger(compareAtPrice) || compareAtPrice < 0)) return NextResponse.json({ error: "Compare-at price is invalid." }, { status: 400 });
     data.compareAtPrice = compareAtPrice;
   }
-  const rawImages = Array.isArray(body.images) ? body.images.map((url: unknown) => typeof url === "string" ? url.trim() : "") : null;
-  if (rawImages && rawImages.some((url: string) => url && !/^https:\/\/\S+$/i.test(url))) {
-    return NextResponse.json({ error: "Product images must be direct HTTPS image URLs. Use one URL per line and check that it opens the image itself." }, { status: 400 });
-  }
-  const imageUrls = rawImages?.filter(Boolean).slice(0, 8);
+  const rawImages = Array.isArray(body.images) ? body.images.map((entry: any) => typeof entry === "string" ? { url: entry.trim(), alt: "" } : { url: typeof entry?.url === "string" ? entry.url.trim() : "", alt: typeof entry?.alt === "string" ? entry.alt : "" }) : null;
+  if (rawImages && rawImages.some((entry: {url:string}) => entry.url && !/^https:\/\/\S+$/i.test(entry.url))) return NextResponse.json({ error: "Product images must be direct HTTPS image URLs." }, { status: 400 });
+  const imageUrls = rawImages?.filter((entry: {url:string}) => Boolean(entry.url)).slice(0, 32);
   try {
     const product = await prisma.$transaction(async (tx) => {
       const existing = await tx.product.findUnique({ where: { id } });
@@ -111,7 +109,7 @@ export async function PATCH(request: Request) {
       if (Array.isArray(body.images)) {
         const urls = imageUrls || [];
         await tx.productImage.deleteMany({ where: { productId: id } });
-        await tx.productImage.createMany({ data: urls.map((url: string, position: number) => ({ productId: id, url, position })) });
+        await tx.productImage.createMany({ data: urls.map((entry: {url:string;alt:string}, position: number) => ({ productId: id, url: entry.url, alt: entry.alt, position })) });
       }
       if (Array.isArray(body.variants)) {
         for (const variant of body.variants) {
