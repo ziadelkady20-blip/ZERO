@@ -289,7 +289,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="category-section section-pad" aria-labelledby="category-title">
+      <section className="category-section section-pad" id="categories" aria-labelledby="category-title">
         <div className="category-heading">
           <div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{t.categoriesEyebrow}</p><h2 id="category-title">{t.categoriesTitle}</h2><p>{t.categoriesDescription}</p></div>
           <span className="category-count">01 — 02</span>
@@ -399,6 +399,14 @@ export default function HomePage() {
           <div className="footer-links"><h3>{t.support}</h3><a href="/track-order">{isArabic ? "تتبع طلبك" : "Track your order"}</a><a href="#shipping">{t.shipping}</a><a href="#returns">{t.returns}</a><a href="https://wa.me/201098256906?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7%D8%8C%20%D9%85%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D8%A8%D8%AE%D8%B5%D9%88%D8%B5%20ZERO%20CLOTHING" target="_blank" rel="noopener noreferrer">{t.contact}</a></div>
           <div className="footer-newsletter"><h3>{t.newsletter}</h3><p>{t.newsletterText}</p><form onSubmit={(event) => event.preventDefault()} className="newsletter-form"><input type="email" placeholder={t.emailPlaceholder} aria-label={t.emailPlaceholder} /><button type="submit">{t.join}<ArrowRight size={15} /></button></form></div>
         </div>
+        <nav className="footer-shop-nav" aria-label={isArabic ? "روابط التسوق" : "Shop navigation"}>
+          <h3>{isArabic ? "تسوّق" : "SHOP"}</h3>
+          <a href="#collection">{isArabic ? "كل المنتجات" : "All Products"}</a>
+          <a href="#new-arrivals">{isArabic ? "وصل حديثًا" : "New Arrivals"}</a>
+          <a href="#best-sellers">{isArabic ? "الأكثر مبيعًا" : "Best Sellers"}</a>
+          <a href="#categories">{isArabic ? "الأقسام" : "Categories"}</a>
+          <a href="#bundles">{isArabic ? "الباقات" : "Bundles"}</a>
+        </nav>
         <div className="zero-socials" aria-label="ZERO CLOTHING social media">
   <a href="https://www.facebook.com/share/1F759crQPj/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.4 21v-8h2.7l.4-3.1h-3.1v-2c0-.9.3-1.5 1.6-1.5h1.7V3.6c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.1H7.2V13H10v8h3.4Z" fill="currentColor"/></svg></a>
   <a href="https://www.instagram.com/zero.sportswear_?srtk=cmx0Z3BiNnFhN2ps" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" strokeWidth="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="1.8"/><circle cx="17.7" cy="6.7" r="1.1" fill="currentColor"/></svg></a>
