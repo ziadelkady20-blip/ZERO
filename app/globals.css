@@ -1051,3 +1051,59 @@ body{background:#050505;color:#f8f8f6}
 .footer-contact-arrow{color:#aaa;font-size:14px}
 .footer-contact-numbers a:hover .footer-contact-arrow{color:#25d366}
 @media(max-width:760px){.footer-whatsapp-contacts{align-items:flex-start;flex-direction:column;gap:16px;padding:20px 0}.footer-contact-numbers{width:100%;display:grid;grid-template-columns:1fr;justify-content:stretch}.footer-contact-numbers a{width:100%;justify-content:flex-start}.footer-contact-arrow{margin-left:auto}}
+
+
+/* ZERO SHOP — full-width vertical product catalogue */
+.live-products{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-content:start}
+.live-product-card{display:grid;grid-template-columns:minmax(210px,270px) minmax(0,1fr);min-height:270px;background:#fff;border:1px solid #e4e4df;border-radius:3px;overflow:hidden;box-shadow:0 3px 16px rgba(0,0,0,.025);transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+.live-product-card:hover{border-color:#c7c7c0;box-shadow:0 10px 28px rgba(0,0,0,.07);transform:translateY(-2px)}
+.live-product-image{aspect-ratio:4/5;min-height:270px;max-height:340px}
+.live-product-image img{transition:transform .45s ease}
+.live-product-card:hover .live-product-image img{transform:scale(1.035)}
+.live-product-details{padding:25px 28px;gap:0}
+.live-product-title{align-items:flex-start;gap:18px}
+.live-product-title h2{font-size:clamp(16px,1.6vw,21px);line-height:1.35}
+.live-product-title h2 a{transition:opacity .2s ease}
+.live-product-title h2 a:hover{opacity:.62}
+.live-product-title>strong{font-size:15px}
+.live-product-details>p{font-size:12px;line-height:1.85;color:#777;max-width:620px;margin:14px 0 22px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.live-variant-selects{max-width:520px;gap:12px}
+.live-variant-selects label{color:#555;font-size:9px;letter-spacing:.06em}
+.live-variant-selects select{min-height:42px;padding:10px 12px;border-color:#deded9}
+.live-product-bottom{margin-top:20px;padding-top:15px;border-top:1px solid #efefec}
+.live-product-bottom button{min-width:145px;min-height:42px;padding:12px 18px;transition:background .2s ease,color .2s ease}
+.live-product-bottom button:hover:not(:disabled){background:#fff;color:#090909}
+.live-product-image>i{opacity:0;transition:opacity .2s ease}
+.live-product-card:hover .live-product-image>i{opacity:1}
+.live-product-image>span{z-index:1}
+.live-product-promo-badge{z-index:2}
+@media(max-width:1000px){
+ .live-shop-layout{grid-template-columns:minmax(0,1fr) 310px;gap:18px;padding:28px 3%}
+ .live-product-card{grid-template-columns:minmax(175px,220px) minmax(0,1fr);min-height:235px}
+ .live-product-image{aspect-ratio:4/5;min-height:235px}
+ .live-product-details{padding:18px}
+ .live-product-title{flex-direction:row;align-items:flex-start}
+ .live-product-title h2{font-size:15px}
+ .live-product-details>p{font-size:10px;margin:10px 0 14px}
+ .live-product-bottom{align-items:center;flex-direction:row;margin-top:14px}
+}
+@media(max-width:700px){
+ .live-shop-layout{display:flex;flex-direction:column;padding:18px 12px 40px}
+ .live-products,.live-checkout{width:100%}
+ .live-product-card{grid-template-columns:minmax(112px,36%) minmax(0,1fr);min-height:0;border-radius:2px}
+ .live-product-image{aspect-ratio:3/4;min-height:0;height:100%;max-height:none}
+ .live-product-details{padding:12px 11px}
+ .live-product-title{flex-direction:column;gap:5px}
+ .live-product-title h2{font-size:12px;line-height:1.45}
+ .live-product-title>strong{font-size:11px}
+ .live-product-details>p{font-size:9px;line-height:1.65;margin:7px 0 10px;-webkit-line-clamp:2}
+ .live-variant-selects{grid-template-columns:1fr 1fr;gap:6px}
+ .live-variant-selects label{font-size:8px;gap:5px}
+ .live-variant-selects select{min-height:34px;padding:7px 5px;font-size:9px}
+ .live-product-bottom{align-items:center;flex-direction:column;gap:9px;margin-top:10px;padding-top:9px}
+ .live-product-bottom>span{align-self:flex-start;font-size:8px}
+ .live-product-bottom button{width:100%;min-width:0;min-height:36px;padding:9px 6px;font-size:8px}
+ .live-product-image>span{left:7px;top:7px;padding:5px 6px;font-size:7px}
+ .live-product-image>i{display:none}
+ .live-shop[dir=rtl] .live-product-image>span{left:auto;right:7px}
+}
