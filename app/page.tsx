@@ -407,6 +407,25 @@ export default function HomePage() {
           <a href="#categories">{isArabic ? "الأقسام" : "Categories"}</a>
           <a href="#bundles">{isArabic ? "الباقات" : "Bundles"}</a>
         </nav>
+        <section className="footer-whatsapp-contacts" aria-label={isArabic ? "تواصل معنا عبر واتساب" : "Contact us on WhatsApp"}>
+          <div className="footer-contact-heading">
+            <h3>{isArabic ? "تواصل معنا" : "WHATSAPP CONTACTS"}</h3>
+            <p>{isArabic ? "اختار الرقم المناسب واضغط للتواصل مباشرة." : "Choose a number to start a WhatsApp conversation."}</p>
+          </div>
+          <div className="footer-contact-numbers">
+            {[
+              { phone: "01097725236", link: "201097725236" },
+              { phone: "01070610391", link: "201070610391" },
+              { phone: "01098256906", link: "201098256906" },
+            ].map(({ phone, link }) => (
+              <a key={phone} href={`https://wa.me/${link}`} target="_blank" rel="noopener noreferrer" aria-label={(isArabic ? "تواصل عبر واتساب: " : "WhatsApp: ") + phone}>
+                <span className="footer-whatsapp-icon" aria-hidden="true">◉</span>
+                <span>{phone}</span>
+                <span className="footer-contact-arrow" aria-hidden="true">↗</span>
+              </a>
+            ))}
+          </div>
+        </section>
         <div className="zero-socials" aria-label="ZERO CLOTHING social media">
   <a href="https://www.facebook.com/share/1F759crQPj/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.4 21v-8h2.7l.4-3.1h-3.1v-2c0-.9.3-1.5 1.6-1.5h1.7V3.6c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.1H7.2V13H10v8h3.4Z" fill="currentColor"/></svg></a>
   <a href="https://www.instagram.com/zero.sportswear_?srtk=cmx0Z3BiNnFhN2ps" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" strokeWidth="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="1.8"/><circle cx="17.7" cy="6.7" r="1.1" fill="currentColor"/></svg></a>
