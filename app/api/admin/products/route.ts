@@ -33,11 +33,9 @@ export async function POST(request: Request) {
   if (!nameEn || !nameAr || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !categoryId || !Number.isInteger(price) || price < 0 || (compareAtPrice !== null && (!Number.isInteger(compareAtPrice) || compareAtPrice < price))) {
     return NextResponse.json({ error: "Name, Arabic name, valid slug, category and non-negative integer price are required." }, { status: 400 });
   }
-  const rawImages = Array.isArray(body.images) ? body.images.map((url: unknown) => typeof url === "string" ? url.trim() : "") : [];
-  if (rawImages.some((url: string) => url && !/^https:\/\/\S+$/i.test(url))) {
-    return NextResponse.json({ error: "Product images must be direct HTTPS image URLs. Use one URL per line and check that it opens the image itself." }, { status: 400 });
-  }
-  const imageUrls = rawImages.filter(Boolean).slice(0, 8);
+  const rawImages = Array.isArray(body.images) ? body.images.map((entry: any) => typeof entry === "string" ? { url: entry.trim(), alt: "" } : { url: typeof entry?.url === "string" ? entry.url.trim() : "", alt: typeof entry?.alt === "string" ? entry.alt : "" }) : [];
+  if (rawImages.some((entry: {url:string}) => entry.url && !/^https:\/\/\\S+$/i.test(entry.url))) return NextResponse.json({ error: "Product images must be direct HTTPS image URLs." }, { status: 400 });
+  const imageUrls = rawImages.filter((entry: {url:string}) => Boolean(entry.url)).slice(0, 32);
   try {
     const product = await prisma.product.create({
       data: {
@@ -48,7 +46,7 @@ export async function POST(request: Request) {
         featured: body.featured === true,
         promotionType: ["NONE","PERCENT","BUY2GET1"].includes(body.promotionType) ? body.promotionType : "NONE",
         promotionValue: body.promotionType === "PERCENT" && Number.isInteger(Number(body.promotionValue)) ? Math.min(90,Math.max(1,Number(body.promotionValue))) : 0,
-        images: { create: imageUrls.map((url: string, position: number) => ({ url, position })) },
+        images: { create: imageUrls.map((entry: {url:string;alt:string}, position: number) => ({ url: entry.url, alt: entry.alt, position })) },
         variants: { create: Array.isArray(body.variants) ? body.variants.filter((v: any) => v && typeof v.size === "string" && typeof v.color === "string" && typeof v.sku === "string" && Number.isInteger(Number(v.stock)) && Number(v.stock) >= 0).map((v: any) => ({ size: v.size, color: v.color, sku: v.sku, stock: Number(v.stock) })) : [] },
       },
       include: { category: true, images: true, variants: true },
