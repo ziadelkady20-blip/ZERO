@@ -1037,3 +1037,17 @@ body{background:#050505;color:#f8f8f6}
   .hero-section .hero-image::before{animation:none!important}
 }
 
+
+
+/* WhatsApp contact numbers in the ZERO footer */
+.footer-whatsapp-contacts{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:25px 0;border-top:1px solid #292929;border-bottom:1px solid #292929;margin:8px 0 24px;color:#fff}
+.footer-contact-heading{min-width:180px}
+.footer-contact-heading h3{margin:0 0 7px;font:600 10px "Space Grotesk",sans-serif;letter-spacing:.13em;color:#fff}
+.footer-contact-heading p{margin:0;color:#aaa;font-size:11px;line-height:1.6}
+.footer-contact-numbers{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px}
+.footer-contact-numbers a{display:inline-flex;align-items:center;gap:9px;min-height:42px;padding:0 13px;border:1px solid #444;border-radius:3px;color:#fff;text-decoration:none;font:500 12px "DM Sans",sans-serif;transition:background .18s,border-color .18s}
+.footer-contact-numbers a:hover{background:#18251d;border-color:#25d366}
+.footer-whatsapp-icon{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:#25d366;color:#07150c;font-size:13px;font-weight:700}
+.footer-contact-arrow{color:#aaa;font-size:14px}
+.footer-contact-numbers a:hover .footer-contact-arrow{color:#25d366}
+@media(max-width:760px){.footer-whatsapp-contacts{align-items:flex-start;flex-direction:column;gap:16px;padding:20px 0}.footer-contact-numbers{width:100%;display:grid;grid-template-columns:1fr;justify-content:stretch}.footer-contact-numbers a{width:100%;justify-content:flex-start}.footer-contact-arrow{margin-left:auto}}
