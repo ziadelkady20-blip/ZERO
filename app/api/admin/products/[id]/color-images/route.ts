@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 type PhotoPair = { color: string; front: string; back: string };
+type UnknownRecord = Record<string, unknown>;
 
 function validImageUrl(value: string) {
   try {
@@ -31,10 +32,11 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
   const colors: PhotoPair[] = [];
   for (const item of body.colors) {
-    if (!item || typeof item !== "object") return NextResponse.json({ error: "Invalid color photo entry." }, { status: 400 });
-    const color = typeof (item as any).color === "string" ? (item as any).color.trim() : "";
-    const front = typeof (item as any).front === "string" ? (item as any).front.trim() : "";
-    const back = typeof (item as any).back === "string" ? (item as any).back.trim() : "";
+    if (!item || typeof item !== "object" || Array.isArray(item)) return NextResponse.json({ error: "Invalid color photo entry." }, { status: 400 });
+    const entry = item as UnknownRecord;
+    const color = typeof entry.color === "string" ? entry.color.trim() : "";
+    const front = typeof entry.front === "string" ? entry.front.trim() : "";
+    const back = typeof entry.back === "string" ? entry.back.trim() : "";
     if (!color || !front || !back) return NextResponse.json({ error: "Each color needs both a Front and a Back image URL." }, { status: 400 });
     if (!validImageUrl(front) || !validImageUrl(back)) return NextResponse.json({ error: "Color photos must use valid HTTPS image URLs." }, { status: 400 });
     colors.push({ color, front, back });
