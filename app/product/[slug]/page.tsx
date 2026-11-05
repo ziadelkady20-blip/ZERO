@@ -61,8 +61,15 @@ export default function ProductDetailPage() {
   const sizes = useMemo(() => Array.from(new Set((product?.variants || []).map(v => v.size))), [product]);
   const colors = useMemo(() => Array.from(new Set((product?.variants || []).filter(v => v.size === size).map(v => v.color))), [product, size]);
   const variant = product?.variants.find(v => v.size === size && v.color === color);
-  const colorImages = product?.images.filter(item => item.alt.startsWith("ZERO_COLOR_IMAGE::") && item.alt.split("::")[2] === color) || [];
-  const colorImageItems = colorImages.map(item => ({...item, alt: item.alt.endsWith("::back") ? color+" back" : color+" front"}));
+  const normalizedColor = color.trim().toLocaleLowerCase();
+  const colorImages = product?.images.filter(item => {
+    const parts = item.alt.split("::");
+    return parts.length >= 4 && parts[0] === "ZERO_COLOR_IMAGE" && parts[2].trim().toLocaleLowerCase() === normalizedColor;
+  }) || [];
+  const colorImageItems = colorImages
+    .slice()
+    .sort((a,b) => (a.alt.endsWith("::front") ? 0 : 1) - (b.alt.endsWith("::front") ? 0 : 1))
+    .map(item => ({...item, alt: item.alt.endsWith("::back") ? color+" back" : color+" front"}));
   const galleryImages = colorImageItems.length ? colorImageItems : (product?.images.filter(item => !item.alt.startsWith("ZERO_COLOR_IMAGE::")) || []);
   const image = galleryImages[selectedImage]?.url || galleryImages[0]?.url || "";
   const title = product ? (ar ? product.nameAr : product.nameEn) : "";
