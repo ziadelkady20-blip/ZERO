@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Name, Arabic name, valid slug, category and non-negative integer price are required." }, { status: 400 });
   }
   const rawImages = Array.isArray(body.images) ? body.images.map((entry: any) => typeof entry === "string" ? { url: entry.trim(), alt: "" } : { url: typeof entry?.url === "string" ? entry.url.trim() : "", alt: typeof entry?.alt === "string" ? entry.alt : "" }) : [];
-  if (rawImages.some((entry: {url:string}) => entry.url && !/^https:\/\/\\S+$/i.test(entry.url))) return NextResponse.json({ error: "Product images must be direct HTTPS image URLs." }, { status: 400 });
+  if (rawImages.some((entry: {url:string}) => entry.url && !/^https:\/\/\S+$/i.test(entry.url))) return NextResponse.json({ error: "Product images must be direct HTTPS image URLs." }, { status: 400 });
   const imageUrls = rawImages.filter((entry: {url:string}) => Boolean(entry.url)).slice(0, 32);
   try {
     const product = await prisma.product.create({
