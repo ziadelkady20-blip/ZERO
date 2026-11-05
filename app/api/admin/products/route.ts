@@ -149,10 +149,16 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ product });
   } catch (error) {
     const reason = error instanceof Error ? error.message : "";
+    console.error("[admin/products PATCH] Update failed:", error);
     if (reason === "PRODUCT_NOT_FOUND") return NextResponse.json({ error: "Product not found." }, { status: 404 });
     if (reason === "INVALID_STOCK") return NextResponse.json({ error: "Stock must be a non-negative whole number." }, { status: 400 });
     if (reason === "VARIANT_HAS_ORDER_HISTORY") return NextResponse.json({ error: "This size/color variant is part of an existing order. Keep it and set its stock to 0 instead of removing it." }, { status: 409 });
-    return NextResponse.json({ error: "Could not update product. Check unique slug/SKU and related records." }, { status: 409 });
+    if (typeof error === "object" && error !== null && "code" in error) {
+      const code = String((error as {code:unknown}).code);
+      if (code === "P2002") return NextResponse.json({ error: "A SKU or product slug is already in use. Check the SKU values in Size / color inventory." }, { status: 409 });
+      if (code === "P2003") return NextResponse.json({ error: "This variant is linked to an existing order or bundle and cannot be removed." }, { status: 409 });
+    }
+    return NextResponse.json({ error: "Could not save this product. Please refresh and try again; if it continues, contact support with the time of the error." }, { status: 409 });
   }
 }
 
