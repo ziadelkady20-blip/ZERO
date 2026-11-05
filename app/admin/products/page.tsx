@@ -37,13 +37,14 @@ export default function AdminProductsPage(){
   const pair=d.colorImages[color];
   const front=pair?.front?.trim()||"",back=pair?.back?.trim()||"";
   if(!front||!back){setError(`Add both Front and Back image URLs for ${color} before saving.`);setNotice("");return;}
-  const isHttps=(value:string)=>{try{return new URL(value).protocol==="https:";}catch{return false;}}; if(!isHttps(front)||!isHttps(back)){setError("Color photos must be direct HTTPS image URLs.");setNotice("");return;}
   setBusy(true);setError("");setNotice("");
   try{
-   const images=[...d.images.map(url=>({url:url.trim(),alt:""})).filter(image=>image.url),...Object.entries(d.colorImages).flatMap(([name,photos])=>(["front","back"] as const).filter(side=>photos[side]?.trim()).map(side=>({url:photos[side].trim(),alt:"ZERO_COLOR_IMAGE::"+name+"::"+side})))];
-   const result=await request("/api/admin/products",{method:"PATCH",body:JSON.stringify({id,images})});
+   const result=await request(`/api/admin/products/${encodeURIComponent(id)}/color-images`,{
+    method:"PATCH",
+    body:JSON.stringify({colors:[{color,front,back}]})
+   });
    if(result.product)setProducts(old=>old.map(product=>product.id===id?result.product:product));
-   setNotice(`Saved ${color} front and back photos. They are now published.`);
+   setNotice(`Saved ${color} Front and Back photos successfully.`);
   }catch(e){setError(e instanceof Error?e.message:"Could not save color photos.");}
   finally{setBusy(false);}
  }
