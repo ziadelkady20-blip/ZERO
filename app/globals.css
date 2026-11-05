@@ -1107,3 +1107,49 @@ body{background:#050505;color:#f8f8f6}
  .live-product-image>i{display:none}
  .live-shop[dir=rtl] .live-product-image>span{left:auto;right:7px}
 }
+
+
+/* ZERO CATALOGUE — stack every product vertically on the homepage too */
+.collection-section .product-grid,
+.curated-products-section .product-grid{
+ display:grid!important;
+ grid-template-columns:minmax(0,1fr)!important;
+ gap:18px!important;
+}
+.collection-section .product-card,
+.curated-products-section .product-card{
+ display:grid!important;
+ grid-template-columns:minmax(210px,270px) minmax(0,1fr)!important;
+ align-items:stretch;
+ min-width:0;
+ border:1px solid #deded9;
+ background:#fff;
+}
+.collection-section .product-image-wrap,
+.curated-products-section .product-image-wrap{
+ width:100%;
+ aspect-ratio:4/5;
+ max-height:340px;
+ overflow:hidden;
+}
+.collection-section .product-info,
+.curated-products-section .product-info{
+ display:flex;
+ align-items:flex-start;
+ justify-content:space-between;
+ gap:20px;
+ padding:24px;
+ min-width:0;
+}
+@media(max-width:700px){
+ .collection-section .product-grid,
+ .curated-products-section .product-grid{gap:12px!important}
+ .collection-section .product-card,
+ .curated-products-section .product-card{
+  grid-template-columns:minmax(112px,36%) minmax(0,1fr)!important;
+ }
+ .collection-section .product-image-wrap,
+ .curated-products-section .product-image-wrap{aspect-ratio:3/4;max-height:none}
+ .collection-section .product-info,
+ .curated-products-section .product-info{display:block;padding:12px}
+}
