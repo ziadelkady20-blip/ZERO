@@ -16,7 +16,8 @@ export default function AdminProductsPage(){
  useEffect(()=>{void load();},[]);
  const filteredProducts=useMemo(()=>products.filter(p=>{const q=query.trim().toLowerCase();const matches=!q||[p.nameEn,p.nameAr,p.slug,p.category?.nameEn,p.category?.nameAr].join(" ").toLowerCase().includes(q);return matches&&(categoryFilter==="ALL"||p.categoryId===categoryFilter);}),[products,query,categoryFilter]);
  function patch(id:string,change:Partial<Draft>){setDrafts(old=>({...old,[id]:{...old[id],...change}}));}
- function patchColorImage(id:string,color:string,side:"front"|"back",url:string){const d=drafts[id];if(!d)return;patch(id,{colorImages:{...d.colorImages,[color]:{...(d.colorImages[color]||{front:"",back:""}),[side]:url}}});}\n function patchVariant(id:string,index:number,change:Partial<Variant>){const d=drafts[id];if(!d)return;patch(id,{variants:d.variants.map((v,i)=>i===index?{...v,...change}:v)});}
+ function patchColorImage(id:string,color:string,side:"front"|"back",url:string){const d=drafts[id];if(!d)return;patch(id,{colorImages:{...d.colorImages,[color]:{...(d.colorImages[color]||{front:"",back:""}),[side]:url}}});}
+ function patchVariant(id:string,index:number,change:Partial<Variant>){const d=drafts[id];if(!d)return;patch(id,{variants:d.variants.map((v,i)=>i===index?{...v,...change}:v)});}
  function addVariant(id:string){const d=drafts[id];if(!d)return;patch(id,{variants:[...d.variants,{sku:"",size:"",color:"",stock:0}]});}
  function addImage(id:string){const d=drafts[id];if(!d)return;if(d.images.length>=8){setError("You can add up to 8 images per product.");return;}patch(id,{images:[...d.images,""]});}
  function patchImage(id:string,index:number,url:string){const d=drafts[id];if(!d)return;patch(id,{images:d.images.map((value,i)=>i===index?url:value)});}
