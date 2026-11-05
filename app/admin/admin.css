@@ -224,3 +224,8 @@
 }
 .admin-setup-page .admin-alert{opacity:1!important}
 .admin-setup-page button:disabled{opacity:.65!important}
+
+.admin-add-color-row{display:flex;gap:10px;max-width:620px;margin:16px 0 12px}.admin-add-color-row input{flex:1;min-width:0}
+.admin-color-chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px}.admin-color-chip{display:inline-flex;align-items:center;gap:12px;padding:8px 10px;background:#f1f1ef;border:1px solid #deded9;border-radius:3px;color:#171717;font-size:13px}.admin-color-chip button{border:0;background:#deded9;color:#222;border-radius:50%;width:21px;height:21px;font-size:17px;line-height:1;cursor:pointer}
+.admin-color-photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.admin-color-image-card{padding:16px;background:#fff;border:1px solid #deded9;border-radius:8px}.admin-color-card-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.admin-color-card-title h4{margin:0;font-size:15px;font-weight:650}.admin-color-card-title span{font-size:9px;letter-spacing:.1em;color:#777}.admin-color-image-card .admin-form-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(max-width:760px){.admin-add-color-row{max-width:none}.admin-color-photo-grid{grid-template-columns:1fr}.admin-color-image-card .admin-form-grid{grid-template-columns:1fr}}
