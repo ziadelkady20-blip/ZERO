@@ -350,6 +350,7 @@ export default function HomePage() {
               <article className="zero-product-card product-card" key={product.id}>
                 <div className="product-image-wrap"><a className="product-image-link" href={`/product/${product.slug}`} aria-label={(isArabic?"عرض المنتج: ":"View product: ")+product.name}>
                   {product.image ? <img src={product.image} alt={product.imageAlt} className="product-image" loading={index > 1 ? "lazy" : "eager"} /> : <div className="product-image-placeholder" role="img" aria-label={isArabic ? "لا توجد صورة لهذا المنتج بعد" : "No product image added yet"}><span>ZERO.</span><small>{isArabic ? "أضف صورة من لوحة الإدارة" : "ADD IMAGE IN ADMIN"}</small></div>}
+                  </a>
                   {product.badge && <span className="product-badge">{product.badge}</span>}{product.promotionType==="PERCENT"&&<span className="product-promo-badge">{product.promotionValue}% OFF</span>}{product.promotionType==="BUY2GET1"&&<span className="product-promo-badge">BUY 2 GET 1</span>}
                   <button className="wishlist-button" aria-label={"Save " + product.name}><Heart size={18} strokeWidth={1.6} /></button>
                   
