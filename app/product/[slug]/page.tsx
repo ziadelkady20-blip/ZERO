@@ -63,8 +63,12 @@ export default function ProductDetailPage() {
   const variant = product?.variants.find(v => v.size === size && v.color === color);
   const normalizedColor = color.trim().toLocaleLowerCase();
   const colorImages = product?.images.filter(item => {
+    // Admin stores this exact format: ZERO_COLOR_IMAGE::<color>::<front|back>
     const parts = item.alt.split("::");
-    return parts.length >= 4 && parts[0] === "ZERO_COLOR_IMAGE" && parts[2].trim().toLocaleLowerCase() === normalizedColor;
+    return parts.length === 3
+      && parts[0] === "ZERO_COLOR_IMAGE"
+      && parts[1].trim().toLocaleLowerCase() === normalizedColor
+      && (parts[2] === "front" || parts[2] === "back");
   }) || [];
   const colorImageItems = colorImages
     .slice()
