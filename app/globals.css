@@ -1187,3 +1187,66 @@ body{background:#050505;color:#f8f8f6}
  .collection-section .product-price,
  .curated-products-section .product-price{font-size:11px;margin:0}
 }
+
+
+/* ZERO MOBILE EXPERIENCE — final responsive pass */
+@media(max-width:600px){
+ html,body{max-width:100%;overflow-x:hidden}
+ .site-shell{width:100%;overflow-x:clip}
+ .section-pad{padding:58px 5.2% 64px}
+ .section-heading{align-items:flex-start;gap:14px}
+ .section-heading h2{font-size:clamp(32px,9vw,43px);line-height:.98}
+ .section-description{font-size:11px;line-height:1.65;margin-top:10px}
+ .section-heading .category-count{font-size:7px;letter-spacing:.1em;white-space:nowrap;padding-top:7px}
+ .desktop-view-all{display:none}
+ .collection-toolbar{display:flex;flex-direction:column;align-items:flex-start;gap:13px;margin:24px 0 16px;padding-top:14px}
+ .filter-list{width:100%;display:flex;flex-wrap:nowrap;overflow-x:auto;max-width:100%;gap:7px;padding:0 0 7px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+ .filter-list::-webkit-scrollbar{display:none}
+ .filter-chip{flex:0 0 auto;padding:8px 11px;font-size:10px;white-space:nowrap}
+ .product-count{font-size:8px;align-self:flex-end}
+ .collection-section .product-grid,
+ .curated-products-section .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:22px 11px!important}
+ .collection-section .product-card,
+ .curated-products-section .product-card{min-width:0;width:100%;transform:none!important}
+ .collection-section .product-image-wrap,
+ .curated-products-section .product-image-wrap{width:100%;aspect-ratio:3/4;max-height:none}
+ .collection-section .product-image,
+ .curated-products-section .product-image{width:100%;height:100%;object-fit:cover}
+ .collection-section .product-info,
+ .curated-products-section .product-info{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:9px 1px 0}
+ .collection-section .product-category,
+ .curated-products-section .product-category{font-size:7px;letter-spacing:.1em;margin-bottom:5px}
+ .collection-section .product-info h3,
+ .curated-products-section .product-info h3{font-size:11px;line-height:1.4;overflow-wrap:anywhere}
+ .collection-section .product-price,
+ .curated-products-section .product-price{font-size:11px;margin:0;white-space:nowrap}
+ .collection-section .product-price span,
+ .curated-products-section .product-price span{font-size:8px}
+ .collection-section .product-badge,
+ .curated-products-section .product-badge{top:7px;left:7px;padding:5px 6px;font-size:6px}
+ .collection-section .product-promo-badge,
+ .curated-products-section .product-promo-badge{top:34px;left:7px;padding:5px 6px;font-size:7px}
+ .collection-section .wishlist-button,
+ .curated-products-section .wishlist-button{top:7px;right:7px;width:27px;height:27px}
+ .collection-section .quick-add,
+ .curated-products-section .quick-add{display:none}
+ .category-grid,.categories-grid{grid-template-columns:1fr!important;gap:12px}
+ .category-card{min-height:190px}
+ .footer-shop-nav{grid-template-columns:1fr 1fr}
+ .footer-whatsapp-contacts{padding-left:0;padding-right:0}
+}
+@media(max-width:380px){
+ .section-pad{padding-left:4.2%;padding-right:4.2%}
+ .collection-section .product-grid,
+ .curated-products-section .product-grid{gap:18px 8px!important}
+ .collection-section .product-info h3,
+ .curated-products-section .product-info h3{font-size:10px}
+ .collection-section .product-price,
+ .curated-products-section .product-price{font-size:10px}
+}
+@media(hover:none){
+ .collection-section .product-card:hover,
+ .curated-products-section .product-card:hover{transform:none;border-color:transparent}
+ .collection-section .product-image,
+ .curated-products-section .product-image{animation:none!important}
+}
