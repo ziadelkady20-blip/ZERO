@@ -110,6 +110,17 @@ export async function PATCH(request: Request) {
         await tx.productImage.createMany({ data: urls.map((entry: {url:string;alt:string}, position: number) => ({ productId: id, url: entry.url, alt: entry.alt, position })) });
       }
       if (Array.isArray(body.variants)) {
+        const submittedIds = body.variants.map((variant: any) => typeof variant?.id === "string" ? variant.id : "").filter(Boolean);
+        const existingVariants = await tx.productVariant.findMany({ where: { productId: id }, select: { id: true } });
+        const removedIds = existingVariants.map((variant) => variant.id).filter((variantId) => !submittedIds.includes(variantId));
+        if (removedIds.length) {
+          const [orderReferences, bundleReferences] = await Promise.all([
+            tx.orderItem.count({ where: { variantId: { in: removedIds } } }),
+            tx.bundleOrderItem.count({ where: { variantId: { in: removedIds } } }),
+          ]);
+          if (orderReferences > 0 || bundleReferences > 0) throw new Error("VARIANT_HAS_ORDER_HISTORY");
+          await tx.productVariant.deleteMany({ where: { id: { in: removedIds }, productId: id } });
+        }
         for (const variant of body.variants) {
           if (!variant || typeof variant !== "object") continue;
           if (typeof variant.id === "string" && variant.id) {
@@ -140,6 +151,7 @@ export async function PATCH(request: Request) {
     const reason = error instanceof Error ? error.message : "";
     if (reason === "PRODUCT_NOT_FOUND") return NextResponse.json({ error: "Product not found." }, { status: 404 });
     if (reason === "INVALID_STOCK") return NextResponse.json({ error: "Stock must be a non-negative whole number." }, { status: 400 });
+    if (reason === "VARIANT_HAS_ORDER_HISTORY") return NextResponse.json({ error: "This size/color variant is part of an existing order. Keep it and set its stock to 0 instead of removing it." }, { status: 409 });
     return NextResponse.json({ error: "Could not update product. Check unique slug/SKU and related records." }, { status: 409 });
   }
 }
