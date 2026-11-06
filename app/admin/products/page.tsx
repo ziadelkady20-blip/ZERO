@@ -41,7 +41,7 @@ export default function AdminProductsPage(){
   try{
    const result=await request(`/api/admin/products/${encodeURIComponent(id)}/color-images`,{
     method:"PATCH",
-    body:JSON.stringify({colors:[{color,front,back}]})
+    body:JSON.stringify({colors:[{color,front,back}],variants:d.variants.filter(v=>v.color.trim().toLocaleLowerCase()===color.trim().toLocaleLowerCase()).map(v=>({...v,stock:Number(v.stock)}))})
    });
    if(result.product)setProducts(old=>old.map(product=>product.id===id?result.product:product));
    setNotice(`Saved ${color} Front and Back photos successfully.`);
