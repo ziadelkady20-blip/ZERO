@@ -49,10 +49,40 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
   try {
     const product = await prisma.$transaction(async tx => {
-      const existing = await tx.product.findUnique({ where: { id }, select: { id: true } });
+      const existing = await tx.product.findUnique({
+        where: { id },
+        select: { id: true, slug: true, variants: { select: { size: true, color: true } } },
+      });
       if (!existing) throw new Error("PRODUCT_NOT_FOUND");
 
+      // Saving a new color must also publish its size/color variants.
+      // Keep existing stock untouched and create only missing combinations at zero stock.
+      const sizes = Array.from(new Set(existing.variants.map(variant => variant.size.trim()).filter(Boolean)));
+      if (!sizes.length) throw new Error("PRODUCT_HAS_NO_SIZES");
+
       for (const item of colors) {
+        for (const size of sizes) {
+          const alreadyExists = existing.variants.some(
+            variant => variant.size.trim().toLocaleLowerCase() === size.toLocaleLowerCase()
+              && variant.color.trim().toLocaleLowerCase() === item.color.toLocaleLowerCase()
+          );
+          if (alreadyExists) continue;
+
+          const skuBase = [existing.slug, size, item.color]
+            .map(part => part.toLocaleLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, "-").replace(/^-|-$/g, ""))
+            .filter(Boolean)
+            .join("-");
+          let sku = skuBase;
+          let suffix = 2;
+          while (await tx.productVariant.findUnique({ where: { sku }, select: { id: true } })) {
+            sku = skuBase + "-" + suffix;
+            suffix += 1;
+          }
+          await tx.productVariant.create({
+            data: { productId: id, size, color: item.color, sku, stock: 0 },
+          });
+        }
+
         const prefix = "ZERO_COLOR_IMAGE::" + item.color + "::";
         await tx.productImage.deleteMany({ where: { productId: id, alt: { startsWith: prefix } } });
         const last = await tx.productImage.aggregate({ where: { productId: id }, _max: { position: true } });
@@ -74,6 +104,9 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   } catch (error) {
     if (error instanceof Error && error.message === "PRODUCT_NOT_FOUND") {
       return NextResponse.json({ error: "Product not found." }, { status: 404 });
+    }
+    if (error instanceof Error && error.message === "PRODUCT_HAS_NO_SIZES") {
+      return NextResponse.json({ error: "Add at least one size variant before saving a new color." }, { status: 400 });
     }
     console.error("[admin color images] Save failed:", error);
     return NextResponse.json({ error: "Could not save color photos. Please refresh and try again." }, { status: 500 });
