@@ -69,7 +69,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
           if (alreadyExists) continue;
 
           const skuBase = [existing.slug, size, item.color]
-            .map(part => part.toLocaleLowerCase().replace(/[^\\p{L}\\p{N}]+/gu, "-").replace(/^-|-$/g, ""))
+            .map(part => part.toLocaleLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""))
             .filter(Boolean)
             .join("-");
           let sku = skuBase;
