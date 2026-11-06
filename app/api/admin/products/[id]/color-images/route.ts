@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 type PhotoPair = { color: string; front: string; back: string };
+type VariantInput = { size: string; color: string; sku: string; stock: number };
 type UnknownRecord = Record<string, unknown>;
 
 function validImageUrl(value: string) {
@@ -21,7 +22,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   if (!hasSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
   if (!(await isAdminSessionValid())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
 
-  let body: { colors?: unknown };
+  let body: { colors?: unknown; variants?: unknown };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON." }, { status: 400 }); }
 
   const { id } = await context.params;
@@ -42,6 +43,21 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     colors.push({ color, front, back });
   }
 
+  const submittedVariants: VariantInput[] = [];
+  if (body.variants !== undefined) {
+    if (!Array.isArray(body.variants)) return NextResponse.json({ error: "Invalid color inventory." }, { status: 400 });
+    for (const value of body.variants) {
+      if (!value || typeof value !== "object" || Array.isArray(value)) return NextResponse.json({ error: "Invalid color variant." }, { status: 400 });
+      const entry = value as UnknownRecord;
+      const size = typeof entry.size === "string" ? entry.size.trim() : "";
+      const color = typeof entry.color === "string" ? entry.color.trim() : "";
+      const sku = typeof entry.sku === "string" ? entry.sku.trim() : "";
+      const stock = Number(entry.stock);
+      if (!size || !color || !Number.isInteger(stock) || stock < 0) return NextResponse.json({ error: "Each color size needs a valid non-negative stock value." }, { status: 400 });
+      submittedVariants.push({ size, color, sku, stock });
+    }
+  }
+
   const duplicateColors = colors.map(item => item.color.toLocaleLowerCase());
   if (new Set(duplicateColors).size !== duplicateColors.length) {
     return NextResponse.json({ error: "A color was submitted more than once." }, { status: 400 });
@@ -51,7 +67,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const product = await prisma.$transaction(async tx => {
       const existing = await tx.product.findUnique({
         where: { id },
-        select: { id: true, slug: true, variants: { select: { size: true, color: true } } },
+        select: { id: true, slug: true, variants: { select: { id: true, size: true, color: true, sku: true, stock: true } } },
       });
       if (!existing) throw new Error("PRODUCT_NOT_FOUND");
 
