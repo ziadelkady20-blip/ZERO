@@ -167,6 +167,7 @@ export async function POST(request: Request) {
     if (reason === "SHIPPING_UNAVAILABLE") return NextResponse.json({ error: "Shipping is not configured for this governorate yet." }, { status: 422 });
     if (reason === "ITEM_UNAVAILABLE") return NextResponse.json({ error: "One or more products are no longer available." }, { status: 409 });
     if (reason === "INSUFFICIENT_STOCK") return NextResponse.json({ error: "There is not enough stock for one or more selected variants." }, { status: 409 });
+    if (typeof error === "object" && error !== null && "code" in error && String((error as { code: unknown }).code) === "P2034") return NextResponse.json({ error: "Inventory changed while placing your order. Please refresh your bag and try again." }, { status: 409 });
     return NextResponse.json({ error: "Could not place your order. Please try again." }, { status: 503 });
   }
 }
