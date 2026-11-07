@@ -42,7 +42,7 @@ export async function PATCH(request: Request) {
 
       if (status === "CANCELLED") {
         for (const item of current.items) {
-          if (item.bundleId) {
+          if (item.components.length > 0) {
             for (const component of item.components) {
               await tx.productVariant.update({ where: { id: component.variantId }, data: { stock: { increment: component.quantity } } });
             }
