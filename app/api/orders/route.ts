@@ -11,7 +11,7 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   if (!hasSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
-  const ipLimit = rateLimit(`checkout:ip:${fingerprint(requestIp(request))}`, 8, 60 * 60 * 1000);
+  const ipLimit = await rateLimit(`checkout:ip:${fingerprint(requestIp(request))}`, 8, 60 * 60 * 1000);
   if (!ipLimit.allowed) return rateLimitedResponse(ipLimit.retryAfterSeconds);
 
   const contentLength = Number(request.headers.get("content-length") || "0");
@@ -66,8 +66,10 @@ export async function POST(request: Request) {
 
   try {
     const order = await prisma.$transaction(async tx => {
-      const rate = await tx.shippingRate.findFirst({ where: { governorate, city: "*", active: true } })
-        ?? await tx.shippingRate.findFirst({ where: { governorate, active: true }, orderBy: { city: "asc" } });
+      const governorateRates = await tx.shippingRate.findMany({ where: { governorate, active: true } });
+      const normalizedCity = city.toLocaleLowerCase();
+      const rate = governorateRates.find(item => item.city !== "*" && item.city.trim().toLocaleLowerCase() === normalizedCity)
+        ?? governorateRates.find(item => item.city === "*");
       if (!rate) throw new Error("SHIPPING_UNAVAILABLE");
 
       const variants = await tx.productVariant.findMany({
@@ -83,14 +85,18 @@ export async function POST(request: Request) {
       const bundleById = new Map(bundles.map(bundle => [bundle.id, bundle]));
       let subtotal = 0;
       let percentageDiscount = 0;
-      const buy2Get1Prices: number[] = [];
+      const buy2Get1PricesByProduct = new Map<string, number[]>();
       const orderItems: { productId: string | null; variantId: string | null; bundleId: string | null; productNameEn: string; productNameAr: string; size: string; color: string; unitPrice: number; quantity: number; lineTotal: number; components?: { productId: string; variantId: string; quantity: number }[] }[] = [];
       for (const item of normalItems) {
         const variant = variantById.get(item.variantId)!;
         const lineTotal = variant.product.price * item.quantity;
         subtotal += lineTotal;
         if (variant.product.promotionType === "PERCENT" && variant.product.promotionValue > 0) percentageDiscount += Math.round(variant.product.price * variant.product.promotionValue / 100) * item.quantity;
-        if (variant.product.promotionType === "BUY2GET1") for (let i = 0; i < item.quantity; i++) buy2Get1Prices.push(variant.product.price);
+        if (variant.product.promotionType === "BUY2GET1") {
+          const prices = buy2Get1PricesByProduct.get(variant.productId) || [];
+          for (let i = 0; i < item.quantity; i++) prices.push(variant.product.price);
+          buy2Get1PricesByProduct.set(variant.productId, prices);
+        }
         orderItems.push({ productId: variant.productId, variantId: variant.id, bundleId: null, productNameEn: variant.product.nameEn, productNameAr: variant.product.nameAr, size: variant.size, color: variant.color, unitPrice: variant.product.price, quantity: item.quantity, lineTotal });
       }
       for (const item of bundleRequests) {
@@ -121,9 +127,12 @@ export async function POST(request: Request) {
         if(variant.stock<quantity)throw new Error("INSUFFICIENT_STOCK");
       }
 
-      buy2Get1Prices.sort((a, b) => a - b);
-      const freeItemCount = Math.floor(buy2Get1Prices.length / 3);
-      const buy2Get1Discount = buy2Get1Prices.slice(0, freeItemCount).reduce((sum, price) => sum + price, 0);
+      let buy2Get1Discount = 0;
+      for (const prices of buy2Get1PricesByProduct.values()) {
+        prices.sort((a, b) => a - b);
+        const freeItemCount = Math.floor(prices.length / 3);
+        buy2Get1Discount += prices.slice(0, freeItemCount).reduce((sum, price) => sum + price, 0);
+      }
       const automaticDiscount = percentageDiscount + buy2Get1Discount;
       if (couponCode && automaticDiscount > 0) throw new Error("AUTO_PROMO_CONFLICT");
 
@@ -162,6 +171,7 @@ export async function POST(request: Request) {
     if (reason === "SHIPPING_UNAVAILABLE") return NextResponse.json({ error: "Shipping is not configured for this governorate yet." }, { status: 422 });
     if (reason === "ITEM_UNAVAILABLE") return NextResponse.json({ error: "One or more products are no longer available." }, { status: 409 });
     if (reason === "INSUFFICIENT_STOCK") return NextResponse.json({ error: "There is not enough stock for one or more selected variants." }, { status: 409 });
+    if (typeof error === "object" && error !== null && "code" in error && String((error as { code: unknown }).code) === "P2034") return NextResponse.json({ error: "Inventory changed while placing your order. Please refresh your bag and try again." }, { status: 409 });
     return NextResponse.json({ error: "Could not place your order. Please try again." }, { status: 503 });
   }
 }

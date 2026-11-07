@@ -111,19 +111,29 @@ export async function PATCH(request: Request) {
       }
       if (Array.isArray(body.variants)) {
         const submittedIds = body.variants.map((variant: any) => typeof variant?.id === "string" ? variant.id : "").filter(Boolean);
-        const existingVariants = await tx.productVariant.findMany({ where: { productId: id }, select: { id: true } });
+        const existingVariants = await tx.productVariant.findMany({ where: { productId: id }, select: { id: true, size: true, color: true } });
         const removedIds = existingVariants.map((variant) => variant.id).filter((variantId) => !submittedIds.includes(variantId));
         if (removedIds.length) {
-          const [orderReferences, bundleReferences] = await Promise.all([
+          const [orderReferences, bundleReferences, configuredBundleReferences] = await Promise.all([
             tx.orderItem.count({ where: { variantId: { in: removedIds } } }),
             tx.bundleOrderItem.count({ where: { variantId: { in: removedIds } } }),
+            tx.bundleProduct.count({ where: { variantId: { in: removedIds } } }),
           ]);
           if (orderReferences > 0 || bundleReferences > 0) throw new Error("VARIANT_HAS_ORDER_HISTORY");
+          if (configuredBundleReferences > 0) throw new Error("VARIANT_IN_BUNDLE");
           await tx.productVariant.deleteMany({ where: { id: { in: removedIds }, productId: id } });
         }
         for (const variant of body.variants) {
           if (!variant || typeof variant !== "object") continue;
           if (typeof variant.id === "string" && variant.id) {
+            const original = existingVariants.find(entry => entry.id === variant.id);
+            if (!original) throw new Error("VARIANT_NOT_FOUND");
+            const nextSize = typeof variant.size === "string" && variant.size.trim() ? variant.size.trim() : original.size;
+            const nextColor = typeof variant.color === "string" && variant.color.trim() ? variant.color.trim() : original.color;
+            if (nextSize !== original.size || nextColor !== original.color) {
+              const configuredBundleReferences = await tx.bundleProduct.count({ where: { variantId: variant.id } });
+              if (configuredBundleReferences > 0) throw new Error("VARIANT_IN_BUNDLE");
+            }
             const variantData: Record<string, unknown> = {};
             if (typeof variant.sku === "string" && variant.sku.trim()) variantData.sku = variant.sku.trim();
             if (typeof variant.size === "string" && variant.size.trim()) variantData.size = variant.size.trim();
@@ -153,6 +163,8 @@ export async function PATCH(request: Request) {
     if (reason === "PRODUCT_NOT_FOUND") return NextResponse.json({ error: "Product not found." }, { status: 404 });
     if (reason === "INVALID_STOCK") return NextResponse.json({ error: "Stock must be a non-negative whole number." }, { status: 400 });
     if (reason === "VARIANT_HAS_ORDER_HISTORY") return NextResponse.json({ error: "This size/color variant is part of an existing order. Keep it and set its stock to 0 instead of removing it." }, { status: 409 });
+    if (reason === "VARIANT_IN_BUNDLE") return NextResponse.json({ error: "This variant is fixed in an existing bundle. Remove or update the bundle configuration before deleting or changing its size/color." }, { status: 409 });
+    if (reason === "VARIANT_NOT_FOUND") return NextResponse.json({ error: "A submitted variant does not belong to this product. Refresh and try again." }, { status: 400 });
     if (typeof error === "object" && error !== null && "code" in error) {
       const code = String((error as {code:unknown}).code);
       if (code === "P2002") return NextResponse.json({ error: "A SKU or product slug is already in use. Check the SKU values in Size / color inventory." }, { status: 409 });
@@ -187,11 +199,8 @@ export async function DELETE(request: Request) {
         throw new Error("PRODUCT_HAS_ORDER_HISTORY");
       }
 
-      // A product can be removed from current bundle configurations safely.
-      // These references otherwise block deletion because BundleProduct uses onDelete: Restrict.
-      if (product._count.bundleItems > 0) {
-        await tx.bundleProduct.deleteMany({ where: { productId: id } });
-      }
+      // Keep configured bundles valid. Remove the product from its bundles first.
+      if (product._count.bundleItems > 0) throw new Error("PRODUCT_IN_BUNDLE");
 
       await tx.product.delete({ where: { id } });
       return { id: product.id, nameEn: product.nameEn };
@@ -200,6 +209,7 @@ export async function DELETE(request: Request) {
   } catch (error) {
     const reason = error instanceof Error ? error.message : "";
     if (reason === "PRODUCT_NOT_FOUND") return NextResponse.json({ error: "Product not found." }, { status: 404 });
+    if (reason === "PRODUCT_IN_BUNDLE") return NextResponse.json({ error: "This product is included in one or more bundles. Remove it from those bundle configurations before deleting it." }, { status: 409 });
     if (reason === "PRODUCT_HAS_ORDER_HISTORY") {
       return NextResponse.json({ error: "This product is part of existing order history, so it cannot be permanently deleted. Unpublish it instead to hide it from the storefront while keeping old orders accurate." }, { status: 409 });
     }

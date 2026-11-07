@@ -31,6 +31,8 @@ Copy `.env.example` to `.env.local` and set:
 - `ADMIN_EMAIL` — admin sign-in email
 - `ADMIN_PASSWORD` — strong admin password
 - `AUTH_SECRET` — cryptographically random secret, at least 32 characters
+- `NEXT_PUBLIC_SITE_URL` — optional canonical public store URL for product metadata
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` — optional but recommended shared rate limiting across serverless instances
 
 Never commit production credentials.
 
@@ -41,7 +43,7 @@ Never commit production credentials.
 3. `npx prisma db push`
 4. `npm run dev`
 
-Configure the production environment variables in the hosting dashboard before using the live store. Add the actual delivery price for each governorate and city/area through `/admin/setup`. Shipping options without an active configured rate are not available at checkout.
+Configure the production environment variables in the hosting dashboard before using the live store. For production, configure Upstash Redis so login, coupon, and checkout rate limits are shared across serverless instances; without it, a per-instance in-memory fallback is used. Add the actual delivery price for each governorate and city/area through `/admin/setup`. City-specific rates take precedence over the governorate-wide `*` rate; shipping is unavailable when neither exists.
 
 ## Product images
 
@@ -50,6 +52,7 @@ The current admin editor accepts direct HTTP(S) image URLs, one per line. A pers
 ## API routes
 
 - `GET /api/products` — active product catalog
+- `GET /api/products/[slug]` — one active product for its detail page
 - `POST /api/orders` — server-side price, shipping, and stock validation; creates COD order and reserves inventory transactionally
 - `POST /api/orders/track` — track with order code + phone
 - `POST /api/admin/login` and `POST /api/admin/logout` — admin session
@@ -60,4 +63,8 @@ The current admin editor accepts direct HTTP(S) image URLs, one per line. A pers
 
 ## Verification
 
-GitHub Actions runs Prisma generation and `next build` on pushes to `main`. Verify the latest workflow run before deploying.
+GitHub Actions runs Prisma generation, ESLint, TypeScript checks, and `next build` for pull requests targeting `main` and pushes to `main`. Verify every check before merging or deploying.
+
+## Database migration note
+
+The current repository setup documents `prisma db push` for schema synchronization. Do not switch production to `prisma migrate deploy` until a complete baseline migration has been generated and reconciled with the live database's `_prisma_migrations` history. Creating a baseline blindly can fail or alter a live database.

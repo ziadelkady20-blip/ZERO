@@ -160,12 +160,32 @@ export default function HomePage() {
   const [query, setQuery] = useState("");
   const [cartOpen, setCartOpen] = useState(false);
   const [cart, setCart] = useState<Record<number, number>>({});
+  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [wishlistLoaded, setWishlistLoaded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [catalogProducts, setCatalogProducts] = useState<Product[]>([]);
   const [customerReviews, setCustomerReviews] = useState<CustomerReview[]>([]);
   const [activeReviewIndex, setActiveReviewIndex] = useState(0);
   const reviewsRailRef = useRef<HTMLDivElement>(null);
   const [storeBundles, setStoreBundles] = useState<StoreBundle[]>([]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("zero-wishlist-v1");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) setWishlist(parsed.filter((value): value is string => typeof value === "string"));
+      }
+    } catch {
+      // Ignore invalid local wishlist data and start with an empty list.
+    } finally {
+      setWishlistLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (wishlistLoaded) localStorage.setItem("zero-wishlist-v1", JSON.stringify(wishlist));
+  }, [wishlist, wishlistLoaded]);
 
   useEffect(() => {
     fetch("/api/bundles").then(response => response.json()).then(data => { if (Array.isArray(data.bundles)) setStoreBundles(data.bundles); }).catch(() => {});
@@ -205,6 +225,23 @@ export default function HomePage() {
       return categoryMatches && searchMatches;
     });
   }, [activeCategory, query, catalogProducts]);
+
+  function toggleWishlist(slug: string) {
+    setWishlist(current => current.includes(slug) ? current.filter(item => item !== slug) : [...current, slug]);
+  }
+
+  function continueToCheckout() {
+    const pending = catalogProducts
+      .filter(product => (cart[product.id] || 0) > 0)
+      .map(product => ({ slug: product.slug, quantity: cart[product.id] }));
+    if (!pending.length) return;
+    try {
+      localStorage.setItem("zero-home-cart-pending-v1", JSON.stringify(pending));
+      window.location.assign("/shop?importHomeCart=1");
+    } catch {
+      window.location.assign("/shop");
+    }
+  }
 
   function updateQuantity(productId: number, change: number) {
     setCart((current) => {
@@ -352,7 +389,7 @@ export default function HomePage() {
                   {product.image ? <img src={product.image} alt={product.imageAlt} className="product-image" loading={index > 1 ? "lazy" : "eager"} /> : <div className="product-image-placeholder" role="img" aria-label={isArabic ? "لا توجد صورة لهذا المنتج بعد" : "No product image added yet"}><span>ZERO.</span><small>{isArabic ? "أضف صورة من لوحة الإدارة" : "ADD IMAGE IN ADMIN"}</small></div>}
                   </a>
                   {product.badge && <span className="product-badge">{product.badge}</span>}{product.promotionType==="PERCENT"&&<span className="product-promo-badge">{product.promotionValue}% OFF</span>}{product.promotionType==="BUY2GET1"&&<span className="product-promo-badge">BUY 2 GET 1</span>}
-                  <button className="wishlist-button" aria-label={"Save " + product.name}><Heart size={18} strokeWidth={1.6} /></button>
+                  <button type="button" className="wishlist-button" aria-label={wishlist.includes(product.slug) ? (isArabic ? "إزالة من المفضلة" : "Remove from wishlist") : (isArabic ? "إضافة للمفضلة" : "Add to wishlist")} aria-pressed={wishlist.includes(product.slug)} onClick={() => toggleWishlist(product.slug)}><Heart size={18} strokeWidth={1.6} fill={wishlist.includes(product.slug) ? "currentColor" : "none"} /></button>
                   
                   </div>
                 <div className="product-info">
@@ -396,7 +433,7 @@ export default function HomePage() {
           </div>
           <div className="footer-links"><h3>{t.quickLinks}</h3><a href="#collection">{t.shop}</a><a href="#collection">{t.compression}</a><a href="#collection">{t.tees}</a></div>
           <div className="footer-links"><h3>{t.support}</h3><a href="/track-order">{isArabic ? "تتبع طلبك" : "Track your order"}</a><a href="#shipping">{t.shipping}</a><a href="#returns">{t.returns}</a><a href="https://wa.me/201098256906?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7%D8%8C%20%D9%85%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D8%A8%D8%AE%D8%B5%D9%88%D8%B5%20ZERO%20CLOTHING" target="_blank" rel="noopener noreferrer">{t.contact}</a></div>
-          <div className="footer-newsletter"><h3>{t.newsletter}</h3><p>{t.newsletterText}</p><form onSubmit={(event) => event.preventDefault()} className="newsletter-form"><input type="email" placeholder={t.emailPlaceholder} aria-label={t.emailPlaceholder} /><button type="submit">{t.join}<ArrowRight size={15} /></button></form></div>
+          <div className="footer-newsletter"><h3>{isArabic ? "تواصل مع ZERO" : "GET IN TOUCH"}</h3><p>{isArabic ? "محتاج مساعدة في اختيار المقاس أو متابعة طلبك؟ فريقنا جاهز يساعدك." : "Need help with sizing or an order? Our team is ready to help."}</p><a className="newsletter-contact-link" href="https://wa.me/201098256906?text=Hello%20ZERO%20CLOTHING" target="_blank" rel="noopener noreferrer">{isArabic ? "راسلنا على واتساب" : "CHAT WITH US"} <ArrowRight size={15} /></a></div>
         </div>
         <nav className="footer-shop-nav" aria-label={isArabic ? "روابط التسوق" : "Shop navigation"}>
           <h3>{isArabic ? "تسوّق" : "SHOP"}</h3>
@@ -442,7 +479,7 @@ export default function HomePage() {
             ) : (
               <>
                 <div className="cart-items">
-                  {products.filter((product) => cart[product.id]).map((product) => (
+                  {catalogProducts.filter((product) => cart[product.id]).map((product) => (
                     <div className="cart-item" key={product.id}>
                       <img src={product.image} alt={product.imageAlt} />
                       <div className="cart-item-details"><h3>{product.name}</h3><p>{product.price.toLocaleString(isArabic ? "ar-EG" : "en-EG")} {t.egp}</p><div className="quantity-control"><button onClick={() => updateQuantity(product.id, -1)} aria-label="Decrease quantity">−</button><span>{cart[product.id]}</span><button onClick={() => updateQuantity(product.id, 1)} aria-label="Increase quantity">+</button></div></div>
@@ -450,7 +487,7 @@ export default function HomePage() {
                     </div>
                   ))}
                 </div>
-                <div className="cart-summary"><div><span>{t.subtotal}</span><strong>{subtotal.toLocaleString(isArabic ? "ar-EG" : "en-EG")} {t.egp}</strong></div><p>{t.checkoutNote}</p><button className="button button-dark checkout-disabled" disabled>CHECKOUT — COMING NEXT</button></div>
+                <div className="cart-summary"><div><span>{t.subtotal}</span><strong>{subtotal.toLocaleString(isArabic ? "ar-EG" : "en-EG")} {t.egp}</strong></div><p>{t.checkoutNote}</p><button type="button" className="button button-dark checkout-button" onClick={continueToCheckout}>{isArabic ? "إتمام الطلب" : "CONTINUE TO CHECKOUT"} <ArrowRight size={15} /></button></div>
               </>
             )}
           </aside>
