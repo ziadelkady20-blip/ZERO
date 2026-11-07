@@ -1,14 +1,11 @@
 import { createHash } from "node:crypto";
 
 type Bucket = { count: number; resetAt: number };
+type RateLimitResult = { allowed: boolean; retryAfterSeconds: number };
 const buckets = new Map<string, Bucket>();
 let calls = 0;
 
-/**
- * Best-effort per-process limiter. On serverless deployments this is defense-in-depth,
- * not a substitute for a shared store or Vercel Firewall rate limiting.
- */
-export function rateLimit(key: string, limit: number, windowMs: number) {
+function inMemoryRateLimit(key: string, limit: number, windowMs: number): RateLimitResult {
   const now = Date.now();
   calls += 1;
   if (calls % 100 === 0 || buckets.size > 10_000) {
@@ -22,7 +19,6 @@ export function rateLimit(key: string, limit: number, windowMs: number) {
     buckets.set(effectiveKey, { count: 1, resetAt: now + windowMs });
     return { allowed: true, retryAfterSeconds: 0 };
   }
-
   current.count += 1;
   return {
     allowed: current.count <= limit,
@@ -30,6 +26,42 @@ export function rateLimit(key: string, limit: number, windowMs: number) {
   };
 }
 
+/**
+ * Uses Upstash Redis when configured so limits are shared across serverless instances.
+ * The in-memory fallback keeps local development and temporary Redis outages functional;
+ * configure Vercel Firewall rate limits as an additional production layer.
+ */
+export async function rateLimit(key: string, limit: number, windowMs: number): Promise<RateLimitResult> {
+  const url = process.env.UPSTASH_REDIS_REST_URL?.replace(/\/$/, "");
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return inMemoryRateLimit(key, limit, windowMs);
+
+  const script = "local count=redis.call('INCR',KEYS[1]); if count==1 then redis.call('PEXPIRE',KEYS[1],ARGV[1]); end; local ttl=redis.call('PTTL',KEYS[1]); return {count,ttl}";
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(["EVAL", script, "1", `zero:rate:${key}`, String(windowMs)]),
+      cache: "no-store",
+    });
+    const payload = await response.json() as { result?: unknown; error?: string };
+    if (!response.ok || payload.error || !Array.isArray(payload.result) || payload.result.length < 2) {
+      throw new Error("Shared rate-limit service returned an invalid response.");
+    }
+    const count = Number(payload.result[0]);
+    const ttl = Number(payload.result[1]);
+    if (!Number.isFinite(count) || !Number.isFinite(ttl)) throw new Error("Invalid shared rate-limit values.");
+    return {
+      allowed: count <= limit,
+      retryAfterSeconds: Math.max(1, Math.ceil(Math.max(0, ttl) / 1000)),
+    };
+  } catch (error) {
+    console.error("[rate-limit] Shared store unavailable; using per-instance fallback.", error);
+    return inMemoryRateLimit(key, limit, windowMs);
+  }
+}
+
+/** Prefer trusted hosting headers; x-forwarded-for is a last-resort fallback. */
 export function requestIp(request: Request) {
   const value =
     request.headers.get("x-vercel-forwarded-for") ??
