@@ -162,7 +162,9 @@ export async function PATCH(request: Request) {
     console.error("[admin/products PATCH] Update failed:", error);
     if (reason === "PRODUCT_NOT_FOUND") return NextResponse.json({ error: "Product not found." }, { status: 404 });
     if (reason === "INVALID_STOCK") return NextResponse.json({ error: "Stock must be a non-negative whole number." }, { status: 400 });
-    if (reason === "VARIANT_HAS_ORDER_HISTORY") return NextResponse.json({ error: "This size/color variant is part of an existing order. Keep it and set its stock to 0 instead of removing it." }, { status: 409 });\n    if (reason === "VARIANT_IN_BUNDLE") return NextResponse.json({ error: "This variant is fixed in an existing bundle. Remove or update the bundle configuration before deleting or changing its size/color." }, { status: 409 });\n    if (reason === "VARIANT_NOT_FOUND") return NextResponse.json({ error: "A submitted variant does not belong to this product. Refresh and try again." }, { status: 400 });
+    if (reason === "VARIANT_HAS_ORDER_HISTORY") return NextResponse.json({ error: "This size/color variant is part of an existing order. Keep it and set its stock to 0 instead of removing it." }, { status: 409 });
+    if (reason === "VARIANT_IN_BUNDLE") return NextResponse.json({ error: "This variant is fixed in an existing bundle. Remove or update the bundle configuration before deleting or changing its size/color." }, { status: 409 });
+    if (reason === "VARIANT_NOT_FOUND") return NextResponse.json({ error: "A submitted variant does not belong to this product. Refresh and try again." }, { status: 400 });
     if (typeof error === "object" && error !== null && "code" in error) {
       const code = String((error as {code:unknown}).code);
       if (code === "P2002") return NextResponse.json({ error: "A SKU or product slug is already in use. Check the SKU values in Size / color inventory." }, { status: 409 });
@@ -207,7 +209,8 @@ export async function DELETE(request: Request) {
   } catch (error) {
     const reason = error instanceof Error ? error.message : "";
     if (reason === "PRODUCT_NOT_FOUND") return NextResponse.json({ error: "Product not found." }, { status: 404 });
-    if (reason === "PRODUCT_IN_BUNDLE") return NextResponse.json({ error: "This product is included in one or more bundles. Remove it from those bundle configurations before deleting it." }, { status: 409 });\n    if (reason === "PRODUCT_HAS_ORDER_HISTORY") {
+    if (reason === "PRODUCT_IN_BUNDLE") return NextResponse.json({ error: "This product is included in one or more bundles. Remove it from those bundle configurations before deleting it." }, { status: 409 });
+    if (reason === "PRODUCT_HAS_ORDER_HISTORY") {
       return NextResponse.json({ error: "This product is part of existing order history, so it cannot be permanently deleted. Unpublish it instead to hide it from the storefront while keeping old orders accurate." }, { status: 409 });
     }
     return NextResponse.json({ error: "Could not delete product. If it has order history, unpublish it instead." }, { status: 409 });
