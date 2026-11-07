@@ -10,8 +10,34 @@ type OrderMessage = {
   customerName: string;
   phone: string;
   total: number;
+  whatsappOptIn: boolean;
 };
 
+const WHATSAPP_OPT_IN_MARKER = "[[ZERO_WHATSAPP_OPT_IN]]";
+const ESCAPE = String.fromCharCode(92);
+const NEWLINE = String.fromCharCode(10);
+
+export function addWhatsAppOptInMarker(notes: string | null, optedIn: boolean) {
+  if (!optedIn) {
+    return notes?.startsWith(WHATSAPP_OPT_IN_MARKER)
+      ? ESCAPE + notes
+      : notes;
+  }
+  return WHATSAPP_OPT_IN_MARKER + (notes ? NEWLINE + notes : "");
+}
+
+export function hasWhatsAppOptIn(notes: string | null) {
+  return typeof notes === "string" && notes.startsWith(WHATSAPP_OPT_IN_MARKER);
+}
+
+export function stripWhatsAppOptIn(notes: string | null) {
+  if (typeof notes !== "string") return notes;
+  if (notes.startsWith(WHATSAPP_OPT_IN_MARKER)) {
+    const clean = notes.slice(WHATSAPP_OPT_IN_MARKER.length);
+    return (clean.startsWith(NEWLINE) ? clean.slice(1) : clean) || null;
+  }
+  return notes.startsWith(ESCAPE + WHATSAPP_OPT_IN_MARKER) ? notes.slice(1) : notes;
+}
 const COUNTRY_CODE = (process.env.WHATSAPP_DEFAULT_COUNTRY_CODE || "20").replace(/\D/g, "");
 
 export function isWhatsAppConfigured() {
@@ -93,6 +119,7 @@ async function sendTemplate(
 }
 
 export function sendOrderConfirmation(order: OrderMessage, trackingUrl: string) {
+  if (!order.whatsappOptIn) return { configured: isWhatsAppConfigured(), sent: false, reason: "not_opted_in" as const };
   const template = process.env.WHATSAPP_TEMPLATE_ORDER_CONFIRMATION || "zero_order_confirmation";
   return sendTemplate(order.phone, template, [
     order.customerName,
@@ -112,6 +139,7 @@ const statusCopy: Record<string, { ar: string; en: string }> = {
 };
 
 export function sendOrderStatusUpdate(order: OrderMessage, status: string, trackingUrl: string) {
+  if (!order.whatsappOptIn) return { configured: isWhatsAppConfigured(), sent: false, reason: "not_opted_in" as const };
   const template = process.env.WHATSAPP_TEMPLATE_ORDER_STATUS || "zero_order_status_update";
   const language = (process.env.WHATSAPP_TEMPLATE_LANGUAGE || "ar").toLowerCase();
   const statusLabel = statusCopy[status]?.[language.startsWith("ar") ? "ar" : "en"] || status;

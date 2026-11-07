@@ -67,7 +67,7 @@ export default function AdminPage() {
   }
   async function changeStatus(code:string,status:string) {
     setBusy(true);setError("");setNotice("");
-    try {const result=await api("/api/admin/orders",{method:"PATCH",body:JSON.stringify({code,status})});setNotice(result.changed===false?"Order status was already up to date.":result.whatsapp?.sent?"Order status updated and WhatsApp notification sent.":result.whatsapp?.configured?"Order status updated, but WhatsApp notification could not be delivered.":"Order status updated. WhatsApp notifications are not connected yet.");await load(false);}
+    try {const result=await api("/api/admin/orders",{method:"PATCH",body:JSON.stringify({code,status})});setNotice(result.changed===false?"Order status was already up to date.":result.whatsapp?.sent?"Order status updated and WhatsApp notification sent.":result.whatsapp?.optedIn===false?"Order status updated. Customer did not opt in to WhatsApp updates.":result.whatsapp?.configured?"Order status updated, but WhatsApp notification could not be delivered.":"Order status updated. WhatsApp notifications are not connected yet.");await load(false);}
     catch(e){setError(e instanceof Error?e.message:"Update failed");}
     finally{setBusy(false);}
   }

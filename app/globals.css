@@ -64,7 +64,7 @@ a{color:inherit;text-decoration:none}
 .product-image-wrap:after{content:"";position:absolute;inset:-60% auto -60% -45%;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);transform:rotate(18deg) translateX(-250%);transition:transform .8s ease;pointer-events:none}.product-card:hover .product-image-wrap:after{transform:rotate(18deg) translateX(650%)}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 .section-pad{padding:105px 7.2% 112px}
-.section-heading{display:flex;justify-content:space-between;align-items:end;gap:24px}
+.section-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
 .dark-eyebrow{color:#666;margin-bottom:16px}
 .section-heading h2{font:600 clamp(36px,4.6vw,58px)/1 var(--font-en);letter-spacing:-.07em;margin:0}
 .section-description{color:#727272;font-size:12px;line-height:1.8;max-width:420px;margin:17px 0 0}
@@ -250,7 +250,7 @@ body{background:#050505;color:#f8f8f6}
 .ticker-track b{color:#777}
 .section-pad{padding:94px 5.2%}
 .category-section{background:#080808;color:#f7f7f5;padding:72px 5.2% 84px}
-.category-heading{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:28px}
+.category-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-bottom:28px}
 .category-heading h2{font:500 clamp(34px,4.2vw,58px)/.98 var(--font-en);letter-spacing:-.065em;margin:0;max-width:650px}
 .category-heading>div>p:last-child{font-size:12px;color:#9a9a9a;margin:13px 0 0;max-width:420px;line-height:1.7}
 .category-count{font:10px var(--font-en);letter-spacing:.18em;color:#858585;padding-bottom:6px}
@@ -431,7 +431,7 @@ body{background:#050505;color:#f8f8f6}
 
 
 /* Checkout promo code controls */
-.live-promo-box{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:end;margin:4px 0 20px;padding:14px;border:1px solid #deddd7;background:#f9f8f5}
+.live-promo-box{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:flex-end;margin:4px 0 20px;padding:14px;border:1px solid #deddd7;background:#f9f8f5}
 .live-promo-box label{display:grid;gap:8px;font-size:9px;font-weight:700;letter-spacing:.08em;color:#555}
 .live-promo-box input{width:100%;min-width:0;height:43px;padding:0 12px;border:1px solid #d7d5ce;background:#fff;color:#111;font:12px var(--font-body,Arial,sans-serif);text-transform:uppercase;outline:none}
 .live-promo-box input:focus{border-color:#111}
@@ -441,7 +441,7 @@ body{background:#050505;color:#f8f8f6}
 .live-promo-feedback.error{color:#a12820}
 .live-promo-feedback.success{color:#327440}
 .live-promo-discount{color:#327440}
-.admin-coupon-form{padding:22px 24px;display:grid;grid-template-columns:1.3fr 1fr .8fr auto auto;align-items:end;gap:13px}
+.admin-coupon-form{padding:22px 24px;display:grid;grid-template-columns:1.3fr 1fr .8fr auto auto;align-items:flex-end;gap:13px}
 .admin-coupon-form label{display:flex;flex-direction:column;gap:8px;font-size:10px;font-weight:600;color:#555;min-width:0}
 .admin-coupon-form input:not([type=checkbox]),.admin-coupon-form select{width:100%;min-width:0;height:42px;padding:0 11px;border:1px solid #deded9;background:#fff;color:#111;font:12px "DM Sans",sans-serif}
 .admin-coupon-form small{font-size:9px;line-height:1.4;color:#999;font-weight:400}
@@ -1558,3 +1558,7 @@ img,video,iframe,svg{max-width:100%}
 
 .order-whatsapp-note { max-width: 420px; margin: 18px auto 12px; color: #686861; font-size: 12px; line-height: 1.65; }
 .order-success .live-secondary { display: inline-flex; justify-content: center; margin: 0 auto 10px; color: #171717; font-size: 10px; letter-spacing: .1em; text-decoration: underline; text-underline-offset: 4px; }
+
+.live-whatsapp-consent { display: flex !important; grid-template-columns: auto 1fr; align-items: flex-start; gap: 10px; margin: 4px 0 14px; color: #686861; font-size: 11px; line-height: 1.55; }
+.live-whatsapp-consent input { width: 17px !important; min-width: 17px; min-height: 17px !important; margin: 1px 0 0; accent-color: #171717; }
+.live-whatsapp-consent span { display: block; }

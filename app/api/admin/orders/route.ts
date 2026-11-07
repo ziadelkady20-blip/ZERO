@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { hasSameOrigin } from "@/lib/security";
 import { isAdminSessionValid } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
-import { isWhatsAppConfigured, sendOrderStatusUpdate } from "@/lib/whatsapp";
+import { hasWhatsAppOptIn, isWhatsAppConfigured, sendOrderStatusUpdate, stripWhatsAppOptIn } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +14,9 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
       take: 200,
     });
-    return NextResponse.json({ orders }, { headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json({
+      orders: orders.map(order => ({ ...order, notes: stripWhatsAppOptIn(order.notes) })),
+    }, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return NextResponse.json({ error: "Database is not configured." }, { status: 503 });
   }
@@ -78,18 +80,19 @@ export async function PATCH(request: Request) {
       return { order: await tx.order.findUniqueOrThrow({ where: { code } }), changed: true };
     });
 
-    const whatsapp = result.changed
+    const optedIn = hasWhatsAppOptIn(result.order.notes);
+    const whatsapp = result.changed && optedIn
       ? await sendOrderStatusUpdate(
-          { code: result.order.code, customerName: result.order.customerName, phone: result.order.phone, total: result.order.total },
+          { code: result.order.code, customerName: result.order.customerName, phone: result.order.phone, total: result.order.total, whatsappOptIn: optedIn },
           status,
           new URL("/track-order", request.url).toString(),
         )
       : { configured: isWhatsAppConfigured(), sent: false };
 
     return NextResponse.json({
-      order: result.order,
+      order: { ...result.order, notes: stripWhatsAppOptIn(result.order.notes) },
       changed: result.changed,
-      whatsapp: { configured: whatsapp.configured, sent: whatsapp.sent },
+      whatsapp: { configured: whatsapp.configured, sent: whatsapp.sent, optedIn },
     }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     if (error instanceof Error && error.message === "NOT_FOUND") {

@@ -1,11 +1,11 @@
 import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { buildWhatsAppSupportUrl, sendOrderConfirmation } from "@/lib/whatsapp";
+import { addWhatsAppOptInMarker, buildWhatsAppSupportUrl, sendOrderConfirmation } from "@/lib/whatsapp";
 import { fingerprint, hasSameOrigin, rateLimit, rateLimitedResponse, requestIp } from "@/lib/security";
 
 type IncomingItem = { variantId?: unknown; quantity?: unknown; bundleId?: unknown; components?: unknown };
-type CheckoutBody = { customerName?: unknown; phone?: unknown; email?: unknown; governorate?: unknown; city?: unknown; address?: unknown; notes?: unknown; items?: unknown; paymentMethod?: unknown; couponCode?: unknown };
+type CheckoutBody = { customerName?: unknown; phone?: unknown; email?: unknown; governorate?: unknown; city?: unknown; address?: unknown; notes?: unknown; items?: unknown; paymentMethod?: unknown; couponCode?: unknown; whatsappOptIn?: unknown };
 const text = (v: unknown) => typeof v === "string" ? v.trim() : "";
 
 export const runtime = "nodejs";
@@ -27,7 +27,9 @@ export async function POST(request: Request) {
   const governorate = text(body.governorate).slice(0, 100);
   const city = text(body.city).slice(0, 100);
   const address = text(body.address).slice(0, 500);
-  const notes = text(body.notes).slice(0, 1000) || null;
+  const customerNotes = text(body.notes).slice(0, 1000) || null;
+  const whatsappOptIn = body.whatsappOptIn === true;
+  const notes = addWhatsAppOptInMarker(customerNotes, whatsappOptIn);
   const couponCode = text(body.couponCode).toUpperCase().slice(0, 32) || null;
   if (couponCode && !/^[A-Z0-9_-]{2,32}$/.test(couponCode)) return NextResponse.json({ error: "Promo code format is invalid." }, { status: 400 });
   if (!customerName || phone.length < 8 || !governorate || !city || address.length < 5) {
@@ -163,10 +165,11 @@ export async function POST(request: Request) {
       });
     }, { isolationLevel: "Serializable" });
     const trackingUrl = new URL("/track-order", request.url).toString();
-    const whatsapp = await sendOrderConfirmation({ code: order.code, customerName, phone, total: order.total }, trackingUrl);
+    const whatsapp = await sendOrderConfirmation({ code: order.code, customerName, phone, total: order.total, whatsappOptIn }, trackingUrl);
     return NextResponse.json({
       order,
-      whatsapp: { configured: whatsapp.configured, sent: whatsapp.sent },
+      whatsapp: { configured: whatsapp.configured, sent: whatsapp.sent, optedIn: whatsappOptIn },
+      whatsappOptIn,
       supportWhatsAppUrl: buildWhatsAppSupportUrl(order.code),
     }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
