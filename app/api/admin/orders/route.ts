@@ -56,7 +56,10 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ order });
   } catch (error) {
     if (error instanceof Error && error.message === "NOT_FOUND") return NextResponse.json({ error: "Order not found." }, { status: 404 });
-    if (error instanceof Error && error.message === "CANCELLED_ORDER_LOCKED") return NextResponse.json({ error: "A cancelled order cannot be reopened; create a new order instead." }, { status: 409 });\n    if (error instanceof Error && error.message === "DELIVERED_ORDER_CANNOT_CANCEL") return NextResponse.json({ error: "A delivered order cannot be cancelled. Use a return workflow instead." }, { status: 409 });\n    if (error instanceof Error && error.message === "ORDER_STATUS_CHANGED") return NextResponse.json({ error: "The order was updated by another request. Refresh and try again." }, { status: 409 });\n    if (typeof error === "object" && error !== null && "code" in error && String((error as { code: unknown }).code) === "P2034") return NextResponse.json({ error: "The order changed concurrently. Refresh and try again." }, { status: 409 });
+    if (error instanceof Error && error.message === "CANCELLED_ORDER_LOCKED") return NextResponse.json({ error: "A cancelled order cannot be reopened; create a new order instead." }, { status: 409 });
+    if (error instanceof Error && error.message === "DELIVERED_ORDER_CANNOT_CANCEL") return NextResponse.json({ error: "A delivered order cannot be cancelled. Use a return workflow instead." }, { status: 409 });
+    if (error instanceof Error && error.message === "ORDER_STATUS_CHANGED") return NextResponse.json({ error: "The order was updated by another request. Refresh and try again." }, { status: 409 });
+    if (typeof error === "object" && error !== null && "code" in error && String((error as { code: unknown }).code) === "P2034") return NextResponse.json({ error: "The order changed concurrently. Refresh and try again." }, { status: 409 });
     return NextResponse.json({ error: "Could not update order status." }, { status: 503 });
   }
 }
