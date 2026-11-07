@@ -101,6 +101,10 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
           if (current && current.color.toLocaleLowerCase() !== item.color.toLocaleLowerCase()) throw new Error("VARIANT_COLOR_MISMATCH");
 
           if (current) {
+            if (current.size !== variant.size || current.color !== item.color) {
+              const bundleReferences = await tx.bundleProduct.count({ where: { variantId: current.id } });
+              if (bundleReferences > 0) throw new Error("VARIANT_IN_BUNDLE");
+            }
             await tx.productVariant.update({
               where: { id: current.id },
               data: { size: variant.size, color: item.color, sku: variant.sku, stock: variant.stock },
@@ -137,6 +141,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     if (reason === "COLOR_VARIANTS_MISMATCH") return NextResponse.json({ error: "Every color must include exactly one stock entry for each product size." }, { status: 400 });
     if (reason === "VARIANT_NOT_FOUND") return NextResponse.json({ error: "A submitted size variant does not belong to this product. Refresh and try again." }, { status: 400 });
     if (reason === "VARIANT_COLOR_MISMATCH") return NextResponse.json({ error: "A submitted variant does not match the selected color." }, { status: 400 });
+    if (reason === "VARIANT_IN_BUNDLE") return NextResponse.json({ error: "This variant is fixed in an existing bundle. Remove or update the bundle configuration before changing its size or color." }, { status: 409 });
     if (typeof error === "object" && error !== null && "code" in error && String((error as { code: unknown }).code) === "P2002") {
       return NextResponse.json({ error: "This SKU or size/color combination already exists. Check the product inventory." }, { status: 409 });
     }
