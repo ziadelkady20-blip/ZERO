@@ -92,7 +92,11 @@ export async function POST(request: Request) {
         const lineTotal = variant.product.price * item.quantity;
         subtotal += lineTotal;
         if (variant.product.promotionType === "PERCENT" && variant.product.promotionValue > 0) percentageDiscount += Math.round(variant.product.price * variant.product.promotionValue / 100) * item.quantity;
-        if (variant.product.promotionType === "BUY2GET1") {\n          const prices = buy2Get1PricesByProduct.get(variant.productId) || [];\n          for (let i = 0; i < item.quantity; i++) prices.push(variant.product.price);\n          buy2Get1PricesByProduct.set(variant.productId, prices);\n        }
+        if (variant.product.promotionType === "BUY2GET1") {
+          const prices = buy2Get1PricesByProduct.get(variant.productId) || [];
+          for (let i = 0; i < item.quantity; i++) prices.push(variant.product.price);
+          buy2Get1PricesByProduct.set(variant.productId, prices);
+        }
         orderItems.push({ productId: variant.productId, variantId: variant.id, bundleId: null, productNameEn: variant.product.nameEn, productNameAr: variant.product.nameAr, size: variant.size, color: variant.color, unitPrice: variant.product.price, quantity: item.quantity, lineTotal });
       }
       for (const item of bundleRequests) {
