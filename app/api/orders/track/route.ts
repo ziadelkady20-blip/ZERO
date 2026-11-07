@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   if (!hasSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
   const contentLength = Number(request.headers.get("content-length") || "0");
   if (contentLength > 8_000) return NextResponse.json({ error: "Request is too large." }, { status: 413 });
-  const ipLimit = rateLimit(`order-track:ip:${fingerprint(requestIp(request))}`, 12, 10 * 60 * 1000);
+  const ipLimit = await rateLimit(`order-track:ip:${fingerprint(requestIp(request))}`, 12, 10 * 60 * 1000);
   if (!ipLimit.allowed) return rateLimitedResponse(ipLimit.retryAfterSeconds);
   let body: { code?: unknown; phone?: unknown };
   try {
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Enter a valid order code and phone number." }, { status: 400 });
   }
   try {
-    const detailLimit = rateLimit(`order-track:details:${fingerprint(`${code}:${phone}`)}`, 6, 10 * 60 * 1000);
+    const detailLimit = await rateLimit(`order-track:details:${fingerprint(`${code}:${phone}`)}`, 6, 10 * 60 * 1000);
     if (!detailLimit.allowed) return rateLimitedResponse(detailLimit.retryAfterSeconds);
     const order = await prisma.order.findFirst({
       where: { code, phone },
