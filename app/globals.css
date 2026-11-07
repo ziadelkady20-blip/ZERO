@@ -135,7 +135,9 @@ a{color:inherit;text-decoration:none}
 .cart-summary>div{display:flex;justify-content:space-between;font-size:12px}
 .cart-summary>div strong{font:600 13px var(--font-en)}
 .cart-summary>p{font-size:11px;color:#777;line-height:1.6;margin:15px 0}
-.checkout-disabled{width:100%;opacity:.55;cursor:not-allowed}
+.checkout-button{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.newsletter-contact-link{display:inline-flex;align-items:center;gap:9px;margin-top:8px;padding:11px 14px;border:1px solid #555;color:#fff;font:600 9px var(--font-en);letter-spacing:.1em;transition:background .2s,border-color .2s}
+.newsletter-contact-link:hover{background:#222;border-color:#888}
 .rtl .site-header{direction:rtl}
 .rtl .main-nav a{font-family:var(--font-ar);font-size:12px}
 .rtl .header-actions{direction:rtl}
