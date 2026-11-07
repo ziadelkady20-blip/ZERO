@@ -5,7 +5,7 @@ import { fingerprint, hasSameOrigin, rateLimit, rateLimitedResponse, requestIp }
 export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   if (!hasSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
-  const limit = rateLimit(`coupon-check:ip:${fingerprint(requestIp(request))}`, 30, 60 * 60 * 1000);
+  const limit = await rateLimit(`coupon-check:ip:${fingerprint(requestIp(request))}`, 30, 60 * 60 * 1000);
   if (!limit.allowed) return rateLimitedResponse(limit.retryAfterSeconds);
   let body: { code?: unknown; subtotal?: unknown };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON." }, { status: 400 }); }
