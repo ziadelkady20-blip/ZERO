@@ -1,13 +1,15 @@
 "use client";
 
+import Image from "next/image";
+
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type Variant = { id: string; size: string; color: string; stock: number; sku: string };
 type Product = {
   id: string; slug: string; nameEn: string; nameAr: string; descriptionEn: string; descriptionAr: string;
-  price: number; compareAtPrice?: number | null; promotionType?:"NONE"|"PERCENT"|"BUY2GET1"; promotionValue?:number; sizeChartUrl?: string | null; active: boolean; category: { nameEn: string; nameAr: string; slug: string };
+  price: number; compareAtPrice?: number | null; promotionType?:string; promotionValue?:number; sizeChartUrl?: string | null; active: boolean; category: { nameEn: string; nameAr: string; slug: string };
   images: { url: string; alt: string; position: number }[]; variants: Variant[];
 };
 type CartItem = { variantId: string; productId: string; nameEn: string; nameAr: string; image: string; size: string; color: string; price: number; quantity: number; stock: number };
@@ -31,14 +33,14 @@ function getColorSwatch(colorName: string): string {
 }
 
 
-export default function ProductDetailPage() {
-  const params = useParams<{ slug: string }>();
+export default function ProductDetailPage({ initialProduct }: { initialProduct: Product }) {
   const router = useRouter();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
+  const product = initialProduct;
+  const loading = false;
   const [locale, setLocale] = useState<"en" | "ar">("en");
-  const [size, setSize] = useState("");
-  const [color, setColor] = useState("");
+  const initialVariant = initialProduct.variants.find(v => v.stock > 0) || initialProduct.variants[0];
+  const [size, setSize] = useState(initialVariant?.size || "");
+  const [color, setColor] = useState(initialVariant?.color || "");
   const [quantity, setQuantity] = useState(1);
   const [notice, setNotice] = useState("");
   const [selectedImage, setSelectedImage] = useState(0);
@@ -46,20 +48,13 @@ export default function ProductDetailPage() {
   const ar = locale === "ar";
 
   useEffect(() => {
-    fetch(`/api/products/${encodeURIComponent(params.slug)}`, { cache: "no-store" }).then(async response => {
-      if (!response.ok) throw new Error("Product not found.");
-      return response.json();
-    }).then(data => {
-      const found = data.product as Product | null;
-      if (found) {
-        setProduct(found);
-        setSelectedImage(0);
-        const firstAvailable = found.variants.find((v: Variant) => v.stock > 0) || found.variants[0];
-        if (firstAvailable) { setSize(firstAvailable.size); setColor(firstAvailable.color); }
-      }
-    }).catch(() => setNotice("Could not load this product. Please try again."))
-      .finally(() => setLoading(false));
-  }, [params.slug]);
+    const nextVariant = initialProduct.variants.find(v => v.stock > 0) || initialProduct.variants[0];
+    setSize(nextVariant?.size || "");
+    setColor(nextVariant?.color || "");
+    setQuantity(1);
+    setSelectedImage(0);
+    setNotice("");
+  }, [initialProduct.id, initialProduct.variants]);
 
   const sizes = useMemo(() => Array.from(new Set((product?.variants || []).map(v => v.size))), [product]);
   const colors = useMemo(() => Array.from(new Set((product?.variants || []).filter(v => v.size === size).map(v => v.color))), [product, size]);
@@ -113,10 +108,10 @@ export default function ProductDetailPage() {
     {loading ? <div className="zero-detail-state">{ar ? "جاري تحميل المنتج…" : "LOADING PRODUCT…"}</div> : !product ? <section className="zero-detail-state"><p className="zero-detail-eyebrow">ZERO / PRODUCT</p><h1>{ar ? "المنتج مش موجود في المخزون لسه." : "This product isn't in the catalog yet."}</h1><p>{ar ? "لما تضيف المنتج من لوحة الإدارة بالصور والمقاسات والألوان، هتظهر صفحته هنا." : "Once this product is added from the admin dashboard with its images, sizes, and colors, its detail page will appear here."}</p><Link className="zero-detail-button" href="/shop">{ar ? "ارجع للمتجر" : "BACK TO SHOP"} ↗</Link></section> : <section className="zero-detail-layout">
       <div className="zero-detail-gallery-wrap">
       <div className="zero-detail-gallery">
-        {image ? <img key={image} className="zero-detail-main-image" src={image} alt={galleryImages[selectedImage]?.alt || title} onError={(event) => { event.currentTarget.style.display = "none"; }} /> : <div className="zero-detail-image-fallback">ZERO<span>.</span><small>{ar ? "أضف صورة المنتج من لوحة الإدارة" : "ADD PRODUCT IMAGE IN ADMIN"}</small></div>}
+        {image ? <Image key={image} className="zero-detail-main-image" src={image || "/zero-image-placeholder.svg"} alt={galleryImages[selectedImage]?.alt || title} onError={(event) => { event.currentTarget.style.display = "none"; }}  width={1200} height={1500} sizes="(max-width: 700px) 100vw, 58vw" /> : <div className="zero-detail-image-fallback">ZERO<span>.</span><small>{ar ? "أضف صورة المنتج من لوحة الإدارة" : "ADD PRODUCT IMAGE IN ADMIN"}</small></div>}
         <span className="zero-detail-image-tag">ZERO / PERFORMANCE ESSENTIALS</span>
       </div>
-      {galleryImages.length > 1 && <div className="zero-detail-thumbnails" aria-label={ar ? "صور المنتج" : "Product images"}>{galleryImages.map((item,index)=><button type="button" key={item.url+index} className={selectedImage===index?"active":""} onClick={()=>setSelectedImage(index)} aria-label={ar?`عرض الصورة ${index+1}`:`Show image ${index+1}`}><img src={item.url} alt={item.alt||`${title} ${index+1}`}/></button>)}</div>}
+      {galleryImages.length > 1 && <div className="zero-detail-thumbnails" aria-label={ar ? "صور المنتج" : "Product images"}>{galleryImages.map((item,index)=><button type="button" key={item.url+index} className={selectedImage===index?"active":""} onClick={()=>setSelectedImage(index)} aria-label={ar?`عرض الصورة ${index+1}`:`Show image ${index+1}`}><Image src={item.url} alt={item.alt||`${title} ${index+1}`} width={900} height={1100} sizes="(max-width: 700px) 90vw, 34vw" /></button>)}</div>}
       </div>
       <div className="zero-detail-info">
         <p className="zero-detail-eyebrow">{product.category?.nameEn || "ZERO CLOTHING"} / MEN’S COLLECTION</p>
@@ -141,7 +136,7 @@ export default function ProductDetailPage() {
         <div className="zero-detail-perks"><p><span>01</span>{ar ? "الدفع عند الاستلام" : "CASH ON DELIVERY"}</p><p><span>02</span>{ar ? "المقاس واللون بيتأكدوا في الطلب" : "YOUR SIZE & COLOR ARE SAVED WITH THE ORDER"}</p></div>
       </div>
     </section>}
-    {showSizeChart && product?.sizeChartUrl && <div className="zero-size-chart-overlay" role="presentation" onClick={() => setShowSizeChart(false)}><section className="zero-size-chart-modal" role="dialog" aria-modal="true" aria-label={ar ? "جدول المقاسات" : "Size chart"} onClick={event => event.stopPropagation()}><div className="zero-size-chart-modal-head"><h2>{ar ? "جدول المقاسات" : "SIZE CHART"}</h2><button type="button" onClick={() => setShowSizeChart(false)} aria-label={ar ? "إغلاق" : "Close"}>×</button></div><img src={product.sizeChartUrl} alt={ar ? "جدول مقاسات المنتج" : "Product size chart"} /><button type="button" className="zero-size-chart-close" onClick={() => setShowSizeChart(false)}>{ar ? "إغلاق" : "CLOSE"}</button></section></div>}
+    {showSizeChart && product?.sizeChartUrl && <div className="zero-size-chart-overlay" role="presentation" onClick={() => setShowSizeChart(false)}><section className="zero-size-chart-modal" role="dialog" aria-modal="true" aria-label={ar ? "جدول المقاسات" : "Size chart"} onClick={event => event.stopPropagation()}><div className="zero-size-chart-modal-head"><h2>{ar ? "جدول المقاسات" : "SIZE CHART"}</h2><button type="button" onClick={() => setShowSizeChart(false)} aria-label={ar ? "إغلاق" : "Close"}>×</button></div><Image src={product.sizeChartUrl} alt={ar ? "جدول مقاسات المنتج" : "Product size chart"}  width={900} height={1100} sizes="(max-width: 700px) 90vw, 34vw" /><button type="button" className="zero-size-chart-close" onClick={() => setShowSizeChart(false)}>{ar ? "إغلاق" : "CLOSE"}</button></section></div>}
     <footer className="zero-detail-footer">ZERO CLOTHING <span>MEN’S PERFORMANCE WEAR · CAIRO, EGYPT</span></footer>
   </main>;
 }

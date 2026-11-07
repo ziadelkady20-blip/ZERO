@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     if (!detailLimit.allowed) return rateLimitedResponse(detailLimit.retryAfterSeconds);
     const order = await prisma.order.findFirst({
       where: { code, phone },
-      select: { code: true, status: true, createdAt: true, subtotal: true, discountAmount: true, couponCode: true, shippingCost: true, total: true, items: { select: { productNameEn: true, productNameAr: true, size: true, color: true, quantity: true, components: { select: { product: { select: { nameEn: true, nameAr: true } }, variant: { select: { size: true, color: true } }, quantity: true } } } } },
+      select: { code: true, status: true, createdAt: true, subtotal: true, discountAmount: true, couponCode: true, shippingCost: true, total: true, items: { select: { productNameEn: true, productNameAr: true, size: true, color: true, quantity: true, unitPrice: true, lineTotal: true, components: { select: { product: { select: { nameEn: true, nameAr: true } }, variant: { select: { size: true, color: true } }, quantity: true } } } } },
     });
     if (!order) return NextResponse.json({ error: "No order found for those details." }, { status: 404, headers: { "Cache-Control": "no-store" } });
     return NextResponse.json({ order }, { headers: { "Cache-Control": "no-store" } });

@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { buildWhatsAppSupportUrl, sendOrderConfirmation } from "@/lib/whatsapp";
 import { fingerprint, hasSameOrigin, rateLimit, rateLimitedResponse, requestIp } from "@/lib/security";
 
 type IncomingItem = { variantId?: unknown; quantity?: unknown; bundleId?: unknown; components?: unknown };
@@ -161,7 +162,13 @@ export async function POST(request: Request) {
         select: { code: true, subtotal: true, discountAmount: true, couponCode: true, shippingCost: true, total: true, status: true, createdAt: true },
       });
     }, { isolationLevel: "Serializable" });
-    return NextResponse.json({ order }, { status: 201, headers: { "Cache-Control": "no-store" } });
+    const trackingUrl = new URL("/track-order", request.url).toString();
+    const whatsapp = await sendOrderConfirmation({ code: order.code, customerName, phone, total: order.total }, trackingUrl);
+    return NextResponse.json({
+      order,
+      whatsapp: { configured: whatsapp.configured, sent: whatsapp.sent },
+      supportWhatsAppUrl: buildWhatsAppSupportUrl(order.code),
+    }, { status: 201, headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     const reason = error instanceof Error ? error.message : "";
     if (reason === "BUNDLE_UNAVAILABLE") return NextResponse.json({ error: "One of the selected bundles is no longer available." }, { status: 409 });

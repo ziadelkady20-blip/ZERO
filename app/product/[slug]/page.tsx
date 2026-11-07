@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
 import ProductDetailClient from "./ProductDetailClient";
 
 export const dynamic = "force-dynamic";
@@ -11,14 +12,21 @@ async function loadProduct(slug: string) {
     return await prisma.product.findFirst({
       where: { slug, active: true },
       select: {
+        id: true,
         slug: true,
         nameEn: true,
         nameAr: true,
         descriptionEn: true,
         descriptionAr: true,
         price: true,
-        images: { select: { url: true }, orderBy: { position: "asc" } },
-        variants: { select: { stock: true } },
+        compareAtPrice: true,
+        promotionType: true,
+        promotionValue: true,
+        sizeChartUrl: true,
+        active: true,
+        category: { select: { nameEn: true, nameAr: true, slug: true } },
+        images: { select: { url: true, alt: true, position: true }, orderBy: { position: "asc" } },
+        variants: { select: { id: true, size: true, color: true, stock: true, sku: true } },
       },
     });
   } catch {
@@ -60,6 +68,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
   const product = await loadProduct(slug);
+  if (!product) notFound();
   const structuredData = product ? {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -89,7 +98,7 @@ export default async function ProductPage({ params }: PageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
         />
       )}
-      <ProductDetailClient />
+      <ProductDetailClient initialProduct={product as NonNullable<typeof product>} />
     </>
   );
 }

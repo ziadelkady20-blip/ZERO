@@ -1,0 +1,505 @@
+"use client";
+
+import Image from "next/image";
+
+const ZERO_MODEL_IMAGE = "https://raw.githubusercontent.com/ziadelkady20-blip/ZERO/main/hero-zero.png";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ArrowDownRight,
+  ArrowRight,
+  Heart,
+  Menu,
+  Search,
+  ShoppingBag,
+  X,
+} from "lucide-react";
+
+type Locale = "en" | "ar";
+export type CustomerReview = { id:string; imageUrl:string; customerName:string; caption:string };
+export type HomeProduct = {
+  id: string; slug: string; nameEn: string; nameAr: string; price: number;
+  compareAtPrice?: number | null; featured?: boolean; bestSeller?: boolean; newArrival?: boolean;
+  promotionType?: string; promotionValue?: number;
+  category?: { slug?: string; nameEn?: string; nameAr?: string };
+  images?: { url: string; alt?: string }[];
+};
+export type HomeClientProps = {
+  initialProducts: HomeProduct[];
+  initialReviews: CustomerReview[];
+  initialBundles: StoreBundle[];
+};
+type StoreBundle = { id:string; titleEn:string; titleAr:string; descriptionEn:string; descriptionAr:string; imageUrl:string; totalPrice:number; items?:{productId:string;quantity:number;product:{id:string;nameEn:string;nameAr:string;price:number;images:{url:string}[];variants:{id:string;size:string;color:string;stock:number}[]}}[] };
+type Product = {
+  id: number;
+  slug: string;
+  name: string;
+  category: string;
+  categoryAr: string;
+  categorySlug: string;
+  price: number;
+  compareAtPrice?: number | null;
+  badge?: string;
+  image: string;
+  imageAlt: string;
+  bestSeller?: boolean;
+  newArrival?: boolean;
+  promotionType?: "NONE"|"PERCENT"|"BUY2GET1";
+  promotionValue?: number;
+};
+
+const copy = {
+  en: {
+    announcement: "ZERO MENSWEAR — EVERYDAY ESSENTIALS, REDEFINED",
+    shop: "Shop",
+    compression: "Compression",
+    tees: "T-Shirts",
+    ourStandard: "Our Standard",
+    search: "Search",
+    bag: "Bag",
+    heroEyebrow: "ZERO MENSWEAR · DESIGNED FOR EVERY DAY",
+    heroTitleA: "DISCIPLINE",
+    heroTitleB: "IN EVERY",
+    heroTitleC: "DETAIL.",
+    heroDescription: "Considered essentials. Timeless silhouettes. Made to move naturally between every part of your day.",
+    shopCollection: "SHOP THE COLLECTION",
+    categoriesEyebrow: "THE MEN’S WARDROBE",
+    categoriesTitle: "Built for his everyday.",
+    categoriesDescription: "Two essentials to start with: clean everyday T-shirts and close-fit ZERO compression built for movement.",
+    categoryTee: "T-SHIRTS",
+    categoryCompression: "COMPRESSION",
+    categoryHoodie: "HOODIES",
+    categoryPants: "PANTS",
+    categoryAccessories: "MEN’S ACCESSORIES",
+    categoryExplore: "EXPLORE",
+    bestsellerEyebrow: "THE ZERO EDIT",
+    explore: "EXPLORE THE DROP",
+    collectionEyebrow: "THE STARTING LINE",
+    collectionTitle: "Menswear. No excess.",
+    collectionDescription: "Versatile menswear essentials. Refined fits. Pieces that work with your style, wherever the day takes you.",
+    all: "All products",
+    add: "Add to bag",
+    added: "Added",
+    egp: "EGP",
+    viewAll: "VIEW ALL PRODUCTS",
+    manifestoEyebrow: "LESS, BUT BETTER.",
+    manifestoTitle: "His style. His standard.",
+    manifestoBody: "ZERO is menswear built around thoughtful design, versatile essentials, and lasting comfort. A considered wardrobe for the way you live now—and whatever comes next.",
+    manifestoCta: "OUR STANDARD",
+    footerLine: "Considered menswear. Your everyday standard.",
+    quickLinks: "QUICK LINKS",
+    support: "SUPPORT",
+    shipping: "Shipping & delivery",
+    returns: "Exchange & returns",
+    contact: "Contact",
+    newsletter: "THE ZERO LIST",
+    newsletterText: "Drop updates. No noise.",
+    emailPlaceholder: "Your email address",
+    join: "JOIN",
+    rights: "© 2026 ZERO CLOTHING. ALL RIGHTS RESERVED.",
+    cartTitle: "Your bag",
+    emptyBag: "Your bag is empty.",
+    subtotal: "Subtotal",
+    checkoutNote: "Cash on Delivery available at checkout.",
+    continue: "CONTINUE SHOPPING",
+    language: "العربية",
+    searchPlaceholder: "Search products…",
+    noResults: "No products found.",
+  },
+  ar: {
+    announcement: "ZERO للملابس الرجالي — أساسيات يومك بمعايير مختلفة",
+    shop: "تسوّق",
+    compression: "كومبريشن",
+    tees: "تيشيرتات",
+    ourStandard: "معاييرنا",
+    search: "بحث",
+    bag: "السلة",
+    heroEyebrow: "ZERO للملابس الرجالي · مصممة لكل يوم",
+    heroTitleA: "التفاصيل",
+    heroTitleB: "تصنع",
+    heroTitleC: "الفرق.",
+    heroDescription: "قطع أساسية بتصميم مدروس وقصّات مريحة، تناسب يومك وتكمل معاك في كل وقت.",
+    shopCollection: "تسوّق المجموعة",
+    categoriesEyebrow: "دولابك، بمعايير ZERO",
+    categoriesTitle: "ستايل رجالي لكل يوم.",
+    categoriesDescription: "هنبدأ بفئتين أساسيتين: تيشيرتات يومية بتصميم نظيف، وكومبريشن ZERO بقَصّة مظبوطة للحركة.",
+    categoryTee: "تيشيرتات",
+    categoryCompression: "كومبريشن",
+    categoryHoodie: "هوديز",
+    categoryPants: "بناطيل",
+    categoryAccessories: "إكسسوارات رجالي",
+    categoryExplore: "اكتشف",
+    bestsellerEyebrow: "اختيارات ZERO",
+    explore: "اكتشف المجموعة",
+    collectionEyebrow: "خط البداية",
+    collectionTitle: "ملابس رجالي من غير تكلف.",
+    collectionDescription: "قطع رجالي أساسية بتفاصيل متقنة وقصّات متعددة الاستخدام، تناسب أسلوبك في أي وقت.",
+    all: "كل المنتجات",
+    add: "أضف للسلة",
+    added: "اتضاف",
+    egp: "جنيه",
+    viewAll: "عرض كل المنتجات",
+    manifestoEyebrow: "الأقل، لكن الأفضل.",
+    manifestoTitle: "ستايلك. معاييرك.",
+    manifestoBody: "ZERO للملابس الرجالي، مبنية على التصميم المدروس والقطع الأساسية متعددة الاستخدام والراحة اللي تكمل معاك. دولاب يناسب حياتك دلوقتي وكل اللي جاي.",
+    manifestoCta: "معاييرنا",
+    footerLine: "ملابس رجالي بتفاصيل مدروسة. معاييرك اليومية.",
+    quickLinks: "روابط سريعة",
+    support: "المساعدة",
+    shipping: "الشحن والتوصيل",
+    returns: "الاستبدال والاسترجاع",
+    contact: "تواصل معنا",
+    newsletter: "قائمة ZERO",
+    newsletterText: "آخر الإصدارات، من غير دوشة.",
+    emailPlaceholder: "بريدك الإلكتروني",
+    join: "اشترك",
+    rights: "© 2026 ZERO CLOTHING. جميع الحقوق محفوظة.",
+    cartTitle: "سلة مشترياتك",
+    emptyBag: "السلة لسه فاضية.",
+    subtotal: "الإجمالي الفرعي",
+    checkoutNote: "الدفع عند الاستلام متاح عند إتمام الطلب.",
+    continue: "كمّل تسوّق",
+    language: "English",
+    searchPlaceholder: "ابحث عن منتج…",
+    noResults: "مفيش منتجات مطابقة.",
+  },
+};
+
+export default function HomeClient({ initialProducts, initialReviews, initialBundles }: HomeClientProps) {
+  const [locale, setLocale] = useState<Locale>("en");
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [cartOpen, setCartOpen] = useState(false);
+  const [cart, setCart] = useState<Record<number, number>>({});
+  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [wishlistLoaded, setWishlistLoaded] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeReviewIndex, setActiveReviewIndex] = useState(0);
+  const reviewsRailRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("zero-wishlist-v1");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) setWishlist(parsed.filter((value): value is string => typeof value === "string"));
+      }
+    } catch {
+      // Ignore invalid local wishlist data and start with an empty list.
+    } finally {
+      setWishlistLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (wishlistLoaded) localStorage.setItem("zero-wishlist-v1", JSON.stringify(wishlist));
+  }, [wishlist, wishlistLoaded]);
+
+  const catalogProducts = useMemo(() => initialProducts.map((item, index) => ({
+    id: index + 1,
+    slug: item.slug,
+    name: locale === "ar" ? item.nameAr : item.nameEn,
+    category: item.category?.nameEn || item.category?.slug || "Performance",
+    categoryAr: item.category?.nameAr || item.category?.nameEn || "ملابس رياضية",
+    categorySlug: item.category?.slug || "uncategorized",
+    price: item.price,
+    compareAtPrice: item.compareAtPrice,
+    badge: item.featured ? "FEATURED" : undefined,
+    bestSeller: item.bestSeller === true,
+    newArrival: item.newArrival === true,
+    promotionType: item.promotionType as Product["promotionType"],
+    promotionValue: item.promotionValue,
+    image: item.images?.[0]?.url || "",
+    imageAlt: item.images?.[0]?.alt || (locale === "ar" ? "موديل رجالي بملابس ZERO الرياضية" : "Male model wearing ZERO performance wear"),
+  })), [initialProducts, locale]);
+  const customerReviews = initialReviews;
+  const storeBundles = initialBundles;
+
+  const bestSellerProducts = catalogProducts.filter((product) => product.bestSeller);
+  const newArrivalProducts = catalogProducts.filter((product) => product.newArrival);
+
+  const t = copy[locale];
+  const isArabic = locale === "ar";
+  const cartCount = Object.values(cart).reduce((sum, quantity) => sum + quantity, 0);
+  const subtotal = catalogProducts.reduce((sum, product) => sum + product.price * (cart[product.id] || 0), 0);
+
+  const filteredProducts = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return catalogProducts.filter((product) => {
+      const categoryMatches = activeCategory === "All" || product.categorySlug === activeCategory;
+      const searchMatches = !normalizedQuery || product.name.toLowerCase().includes(normalizedQuery) || product.category.toLowerCase().includes(normalizedQuery) || product.categoryAr.toLowerCase().includes(normalizedQuery);
+      return categoryMatches && searchMatches;
+    });
+  }, [activeCategory, query, catalogProducts]);
+
+  function toggleWishlist(slug: string) {
+    setWishlist(current => current.includes(slug) ? current.filter(item => item !== slug) : [...current, slug]);
+  }
+
+  function continueToCheckout() {
+    const pending = catalogProducts
+      .filter(product => (cart[product.id] || 0) > 0)
+      .map(product => ({ slug: product.slug, quantity: cart[product.id] }));
+    if (!pending.length) return;
+    try {
+      localStorage.setItem("zero-home-cart-pending-v1", JSON.stringify(pending));
+      window.location.assign("/shop?importHomeCart=1");
+    } catch {
+      window.location.assign("/shop");
+    }
+  }
+
+  function updateQuantity(productId: number, change: number) {
+    setCart((current) => {
+      const nextQuantity = (current[productId] || 0) + change;
+      const next = { ...current };
+      if (nextQuantity <= 0) delete next[productId];
+      else next[productId] = nextQuantity;
+      return next;
+    });
+  }
+
+  return (
+    <main className={isArabic ? "site-shell rtl" : "site-shell"} dir={isArabic ? "rtl" : "ltr"}>
+      <div className="announcement-bar">
+        <span>{t.announcement}</span>
+      </div>
+
+      <header className="site-header">
+        <button className="icon-button mobile-menu-trigger" aria-label="Open menu" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+        <a className="brand-lockup" href="#" aria-label="ZERO CLOTHING home">
+          <Image className="brand-logo-image" src="https://raw.githubusercontent.com/ziadelkady20-blip/ZERO/main/IMG_0832.PNG" alt="ZERO CLOTHING official logo"  width={160} height={56} sizes="160px" />
+        </a>
+
+        <nav className={mobileMenuOpen ? "main-nav is-open" : "main-nav"} aria-label="Main navigation">
+          <a href="/shop" onClick={() => setMobileMenuOpen(false)}>{t.shop}</a>
+          <a href="#collection" onClick={() => { setActiveCategory("compression"); setMobileMenuOpen(false); }}>{t.compression}</a>
+          <a href="#collection" onClick={() => { setActiveCategory("training-tees"); setMobileMenuOpen(false); }}>{t.tees}</a>
+        </nav>
+
+        <div className="header-actions">
+          <button className="text-action language-toggle" onClick={() => setLocale(isArabic ? "en" : "ar")} aria-label="Switch language">
+            {t.language}
+          </button>
+          <button className="icon-button" aria-label={t.search} onClick={() => setSearchOpen(!searchOpen)}>
+            <Search size={19} strokeWidth={1.7} />
+          </button>
+          <button className="bag-button" aria-label={t.bag} onClick={() => setCartOpen(true)}>
+            <ShoppingBag size={19} strokeWidth={1.7} />
+            <span>{t.bag}</span>
+            <span className="bag-count">{cartCount}</span>
+          </button>
+        </div>
+      </header>
+
+      {searchOpen && (
+        <div className="search-panel">
+          <Search size={18} />
+          <input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.searchPlaceholder} aria-label={t.searchPlaceholder} />
+          {query && <button className="icon-button small" onClick={() => setQuery("")} aria-label="Clear search"><X size={16} /></button>}
+          <button className="icon-button small" onClick={() => setSearchOpen(false)} aria-label="Close search"><X size={18} /></button>
+        </div>
+      )}
+
+      <section className="hero-section">
+        <div className="hero-image" role="img" aria-label="Minimal monochrome clothing editorial" />
+        <div className="hero-shade" />
+        <div className="hero-floating-products">
+          <div className="hero-model-frame"><Image src={ZERO_MODEL_IMAGE} alt="Male model wearing a white ZERO compression shirt"  width={900} height={1200} sizes="(max-width: 700px) 70vw, 34vw" priority /></div>
+          <div className="hero-orbit hero-orbit-one" /><div className="hero-orbit hero-orbit-two" />
+          <div className="hero-product-caption"><span>ZERO / 001</span><span>MEN’S EVERYDAY TEE</span></div>
+        </div>
+        <div className="hero-content">
+          <p className="eyebrow"><span className="eyebrow-line" />{t.heroEyebrow}</p>
+          <h1>{t.heroTitleA}<br /><span>{t.heroTitleB}</span> <em>{t.heroTitleC}</em></h1>
+          <p className="hero-description">{t.heroDescription}</p>
+          <a className="button button-light" href="/shop">
+            {t.shopCollection}<ArrowRight size={17} />
+          </a>
+          <div className="hero-index"><span>01</span><span className="index-rule" /><span>04</span></div>
+        </div>
+        <div className="hero-vertical-note">ZERO / EVERYDAY COLLECTION</div>
+        <div className="hero-bottom-note"><span>MADE FOR EVERYDAY</span><ArrowDownRight size={18} /></div>
+      </section>
+
+      <section className="ticker" aria-label="Brand statement">
+        <div className="ticker-track">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <span key={index}>MADE FOR EVERY DAY <b>✳</b> DETAILS MATTER <b>✳</b> ZERO COMPROMISE <b>✳</b></span>
+          ))}
+        </div>
+      </section>
+
+      <section className="category-section section-pad" id="categories" aria-labelledby="category-title">
+        <div className="category-heading">
+          <div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{t.categoriesEyebrow}</p><h2 id="category-title">{t.categoriesTitle}</h2><p>{t.categoriesDescription}</p></div>
+          <span className="category-count">01 — 02</span>
+        </div>
+        <div className="category-grid">
+          <a href="#collection" className="category-card category-card-tee" onClick={() => setActiveCategory("training-tees")}><Image src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1100&q=90" alt="Male model wearing a clean everyday T-shirt"  width={1100} height={1350} sizes="(max-width: 700px) 48vw, 42vw" /><span className="category-index">01 / EVERYDAY ESSENTIALS</span><span className="category-title">{t.categoryTee}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+          <a href="#collection" className="category-card category-card-compression" onClick={() => setActiveCategory("compression")}><Image src={ZERO_MODEL_IMAGE} alt="Male model wearing a white ZERO compression shirt"  width={900} height={1200} sizes="(max-width: 700px) 70vw, 34vw" priority /><span className="category-index">02 / PERFORMANCE FIT</span><span className="category-title">{t.categoryCompression}</span><span className="category-arrow"><ArrowDownRight size={18}/></span></a>
+        </div>   </section>
+
+      {bestSellerProducts.length>0&&<section className="curated-products-section section-pad" id="best-sellers">
+        <div className="section-heading"><div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{isArabic?"اختيارات ZERO":"ZERO SELECTION"}</p><h2>{isArabic?"الأكثر مبيعًا":"Best Sellers"}</h2><p className="section-description">{isArabic?"اختيارات عملائنا المفضلة.":"Customer favourites, selected for you."}</p></div><span className="category-count">{String(bestSellerProducts.length).padStart(2,"0")} · BEST SELLERS</span></div>
+        <div className="zero-product-grid">{bestSellerProducts.map((product,index)=><article className="zero-product-card product-card" key={product.id}><div className="product-image-wrap"><a className="product-image-link" href={`/product/${product.slug}`} aria-label={(isArabic?"عرض المنتج: ":"View product: ")+product.name}>{product.image?<Image src={product.image || "/zero-image-placeholder.svg"} alt={product.imageAlt} className="product-image" loading={index>1?"lazy":"eager"} width={900} height={1100} sizes="(max-width: 700px) 46vw, (max-width: 1050px) 45vw, 22vw" />:<div className="product-image-placeholder" role="img"><span>ZERO.</span></div>}</a><span className="product-badge">BEST SELLER</span>{product.promotionType==="PERCENT"&&<span className="product-promo-badge">{product.promotionValue}% OFF</span>}{product.promotionType==="BUY2GET1"&&<span className="product-promo-badge">BUY 2 GET 1</span>}<button className="wishlist-button" aria-label={"Save "+product.name}><Heart size={18} strokeWidth={1.6}/></button></div><div className="product-info"><div><p className="product-category">{isArabic?product.categoryAr:product.category}</p><h3><a className="product-name-link" href={`/product/${product.slug}`}>{product.name}</a></h3></div><p className="product-price">{product.promotionType==="PERCENT"&&product.promotionValue?<><del>{product.price.toLocaleString(isArabic?"ar-EG":"en-EG")}</del> {Math.round(product.price*(100-product.promotionValue)/100).toLocaleString(isArabic?"ar-EG":"en-EG")}</>:<>{product.compareAtPrice&&product.compareAtPrice>product.price&&<del>{product.compareAtPrice.toLocaleString(isArabic?"ar-EG":"en-EG")}</del>} {product.price.toLocaleString(isArabic?"ar-EG":"en-EG")}</>} <span>{t.egp}</span></p></div></article>)}</div>
+      </section>}
+
+      {newArrivalProducts.length>0&&<section className="curated-products-section section-pad" id="new-arrivals">
+        <div className="section-heading"><div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{isArabic?"اختيارات ZERO":"ZERO SELECTION"}</p><h2>{isArabic?"وصل حديثًا":"New Arrivals"}</h2><p className="section-description">{isArabic?"اكتشف أحدث قطع ZERO.":"The latest additions to the ZERO collection."}</p></div><span className="category-count">{String(newArrivalProducts.length).padStart(2,"0")} · NEW ARRIVALS</span></div>
+        <div className="zero-product-grid">{newArrivalProducts.map((product,index)=><article className="zero-product-card product-card" key={product.id}><div className="product-image-wrap"><a className="product-image-link" href={`/product/${product.slug}`} aria-label={(isArabic?"عرض المنتج: ":"View product: ")+product.name}>{product.image?<Image src={product.image || "/zero-image-placeholder.svg"} alt={product.imageAlt} className="product-image" loading={index>1?"lazy":"eager"} width={900} height={1100} sizes="(max-width: 700px) 46vw, (max-width: 1050px) 45vw, 22vw" />:<div className="product-image-placeholder" role="img"><span>ZERO.</span></div>}</a><span className="product-badge">NEW ARRIVAL</span>{product.promotionType==="PERCENT"&&<span className="product-promo-badge">{product.promotionValue}% OFF</span>}{product.promotionType==="BUY2GET1"&&<span className="product-promo-badge">BUY 2 GET 1</span>}<button className="wishlist-button" aria-label={"Save "+product.name}><Heart size={18} strokeWidth={1.6}/></button></div><div className="product-info"><div><p className="product-category">{isArabic?product.categoryAr:product.category}</p><h3><a className="product-name-link" href={`/product/${product.slug}`}>{product.name}</a></h3></div><p className="product-price">{product.promotionType==="PERCENT"&&product.promotionValue?<><del>{product.price.toLocaleString(isArabic?"ar-EG":"en-EG")}</del> {Math.round(product.price*(100-product.promotionValue)/100).toLocaleString(isArabic?"ar-EG":"en-EG")}</>:<>{product.compareAtPrice&&product.compareAtPrice>product.price&&<del>{product.compareAtPrice.toLocaleString(isArabic?"ar-EG":"en-EG")}</del>} {product.price.toLocaleString(isArabic?"ar-EG":"en-EG")}</>} <span>{t.egp}</span></p></div></article>)}</div>
+      </section>}
+
+      {storeBundles.length>0&&<section className="bundles-section section-pad" id="bundles">
+        <div className="section-heading">
+          <div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{isArabic?"عروض ZERO":"ZERO BUNDLES"}</p><h2>{isArabic?"عروض متجمعة. سعر أوفر.":"More together. Better value."}</h2><p className="section-description">{isArabic?"اختيارات مجمعة بعناية وبسعر إجمالي مميز.":"Curated combinations, one special total price."}</p></div>
+          <span className="category-count">{String(storeBundles.length).padStart(2,"0")} · BUNDLES</span>
+        </div>
+        <div className="bundles-grid">{storeBundles.map(bundle=><article className="bundle-card" key={bundle.id}>
+          <div className="bundle-card-image"><Image src={bundle.imageUrl || "/zero-image-placeholder.svg"} alt={isArabic?(bundle.titleAr||bundle.titleEn):bundle.titleEn} loading="lazy" width={1000} height={1000} sizes="(max-width: 700px) 80vw, 30vw" /><span>{isArabic?"عرض خاص":"BUNDLE OFFER"}</span></div>
+          <div className="bundle-card-content"><h3>{isArabic?(bundle.titleAr||bundle.titleEn):bundle.titleEn}</h3><p>{isArabic?(bundle.descriptionAr||bundle.descriptionEn):bundle.descriptionEn}</p>{bundle.items&&bundle.items.length>0&&<p className="bundle-included-products">{isArabic?"تشمل: ":"INCLUDES: "}{bundle.items.map(item=>isArabic?(item.product.nameAr||item.product.nameEn):item.product.nameEn).join(" · ")}</p>}<div className="bundle-total"><span>{isArabic?"السعر الإجمالي":"TOTAL PRICE"}</span><strong>{new Intl.NumberFormat(isArabic?"ar-EG":"en-EG",{maximumFractionDigits:0}).format(bundle.totalPrice)} {isArabic?"جنيه":"EGP"}</strong></div><a className="bundle-add-button" href={"/shop?bundle="+encodeURIComponent(bundle.id)}>{isArabic?"أضف الباقة للسلة":"ADD BUNDLE TO BAG"} <ArrowRight size={15}/></a></div>
+        </article>)}</div>
+      </section>}
+
+      <section className="collection-section section-pad" id="collection">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{t.bestsellerEyebrow} · {t.collectionEyebrow}</p>
+            <h2>{t.collectionTitle}</h2>
+            <p className="section-description">{t.collectionDescription}</p>
+          </div>
+          <a className="underlined-link desktop-view-all" href="/shop">{t.viewAll}<ArrowRight size={16} /></a>
+        </div>
+
+        <div className="collection-toolbar">
+          <div className="filter-list" aria-label="Filter products">
+            {[
+              { value: "All", label: t.all },
+              ...Array.from(new Map(catalogProducts.map((product) => [product.categorySlug, { value: product.categorySlug, label: isArabic ? product.categoryAr : product.category }])).values()),
+            ].map((filter) => (
+              <button key={filter.value} className={activeCategory === filter.value ? "filter-chip active" : "filter-chip"} onClick={() => setActiveCategory(filter.value)}>
+                {filter.label}
+              </button>
+            ))}
+          </div>
+          <span className="product-count">{String(filteredProducts.length).padStart(2, "0")} PRODUCTS</span>
+        </div>
+
+        {filteredProducts.length > 0 ? (
+          <div className="zero-product-grid">
+            {filteredProducts.map((product, index) => (
+              <article className="zero-product-card product-card" key={product.id}>
+                <div className="product-image-wrap"><a className="product-image-link" href={`/product/${product.slug}`} aria-label={(isArabic?"عرض المنتج: ":"View product: ")+product.name}>
+                  {product.image ? <Image src={product.image || "/zero-image-placeholder.svg"} alt={product.imageAlt} className="product-image" loading={index > 1 ? "lazy" : "eager"}  width={900} height={1100} sizes="(max-width: 700px) 46vw, (max-width: 1050px) 45vw, 22vw" /> : <div className="product-image-placeholder" role="img" aria-label={isArabic ? "لا توجد صورة لهذا المنتج بعد" : "No product image added yet"}><span>ZERO.</span><small>{isArabic ? "أضف صورة من لوحة الإدارة" : "ADD IMAGE IN ADMIN"}</small></div>}
+                  </a>
+                  {product.badge && <span className="product-badge">{product.badge}</span>}{product.promotionType==="PERCENT"&&<span className="product-promo-badge">{product.promotionValue}% OFF</span>}{product.promotionType==="BUY2GET1"&&<span className="product-promo-badge">BUY 2 GET 1</span>}
+                  <button type="button" className="wishlist-button" aria-label={wishlist.includes(product.slug) ? (isArabic ? "إزالة من المفضلة" : "Remove from wishlist") : (isArabic ? "إضافة للمفضلة" : "Add to wishlist")} aria-pressed={wishlist.includes(product.slug)} onClick={() => toggleWishlist(product.slug)}><Heart size={18} strokeWidth={1.6} fill={wishlist.includes(product.slug) ? "currentColor" : "none"} /></button>
+                  
+                  </div>
+                <div className="product-info">
+                  <div>
+                    <p className="product-category">{isArabic ? product.categoryAr : product.category}</p>
+                    <h3><a className="product-name-link" href={`/product/${product.slug}`}>{product.name}</a></h3>
+                  </div>
+                  <p className="product-price">{product.compareAtPrice && product.compareAtPrice > product.price && <del>{product.compareAtPrice.toLocaleString(isArabic ? "ar-EG" : "en-EG")}</del>} {product.price.toLocaleString(isArabic ? "ar-EG" : "en-EG")} <span>{t.egp}</span></p>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-results">{t.noResults}</div>
+        )}
+        <a className="underlined-link mobile-view-all" href="/shop">{t.viewAll}<ArrowRight size={16} /></a>
+      </section>
+
+
+
+      {customerReviews.length>0&&<section className="reviews-section section-pad" id="reviews">
+        <div className="section-heading">
+          <div><p className="eyebrow dark-eyebrow"><span className="eyebrow-line" />{isArabic?"آراء عملائنا":"REAL CUSTOMER REVIEWS"}</p><h2>{isArabic?"تجارب حقيقية مع ZERO.":"Worn. Loved. Reviewed."}</h2><p className="section-description">{isArabic?"آراء وتجارب عملائنا مع منتجات ZERO.":"A look at what our customers are saying about ZERO."}</p></div>
+          <span className="category-count">{String(customerReviews.length).padStart(2,"0")} · REVIEWS</span>
+        </div>
+        <div className="reviews-gallery" ref={reviewsRailRef} onScroll={(event)=>{const rail=event.currentTarget;const center=rail.scrollLeft+rail.clientWidth/2;let nearest=0;let distance=Infinity;Array.from(rail.children).forEach((child,index)=>{const card=child as HTMLElement;const cardCenter=card.offsetLeft+card.offsetWidth/2;const delta=Math.abs(center-cardCenter);if(delta<distance){distance=delta;nearest=index;}});setActiveReviewIndex(nearest);}}>
+          {customerReviews.map((review,index)=><article className={index===activeReviewIndex?"review-image-card is-active":"review-image-card"} key={review.id}>
+            <Image src={review.imageUrl || "/zero-image-placeholder.svg"} alt={review.customerName?((isArabic?"رأي العميل ":"Customer review by ")+review.customerName):(isArabic?"صورة من آراء العملاء":"Customer review")} loading={index>2?"lazy":"eager"} width={900} height={1100} sizes="(max-width: 700px) 84vw, 34vw" />
+            {(review.customerName||review.caption)&&<div className="review-image-caption">{review.customerName&&<strong>{review.customerName}</strong>}{review.caption&&<p>{review.caption}</p>}</div>}
+          </article>)}
+        </div>
+      </section>}
+
+      <footer className="site-footer">
+        <div className="footer-top">
+          <div className="footer-brand">
+            <a className="brand-lockup footer-lockup" href="#">
+              <Image className="brand-logo-image" src="https://raw.githubusercontent.com/ziadelkady20-blip/ZERO/main/IMG_0832.PNG" alt="ZERO CLOTHING official logo"  width={160} height={56} sizes="160px" />
+            </a>
+            <p>{t.footerLine}</p>
+          </div>
+          <div className="footer-links"><h3>{t.quickLinks}</h3><a href="#collection">{t.shop}</a><a href="#collection">{t.compression}</a><a href="#collection">{t.tees}</a></div>
+          <div className="footer-links"><h3>{t.support}</h3><a href="/track-order">{isArabic ? "تتبع طلبك" : "Track your order"}</a><a href="#shipping">{t.shipping}</a><a href="#returns">{t.returns}</a><a href="https://wa.me/201098256906?text=%D9%85%D8%B1%D8%AD%D8%A8%D9%8B%D8%A7%D8%8C%20%D9%85%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D8%A8%D8%AE%D8%B5%D9%88%D8%B5%20ZERO%20CLOTHING" target="_blank" rel="noopener noreferrer">{t.contact}</a></div>
+          <div className="footer-newsletter"><h3>{isArabic ? "تواصل مع ZERO" : "GET IN TOUCH"}</h3><p>{isArabic ? "محتاج مساعدة في اختيار المقاس أو متابعة طلبك؟ فريقنا جاهز يساعدك." : "Need help with sizing or an order? Our team is ready to help."}</p><a className="newsletter-contact-link" href="https://wa.me/201098256906?text=Hello%20ZERO%20CLOTHING" target="_blank" rel="noopener noreferrer">{isArabic ? "راسلنا على واتساب" : "CHAT WITH US"} <ArrowRight size={15} /></a></div>
+        </div>
+        <nav className="footer-shop-nav" aria-label={isArabic ? "روابط التسوق" : "Shop navigation"}>
+          <h3>{isArabic ? "تسوّق" : "SHOP"}</h3>
+          <a href="#collection">{isArabic ? "كل المنتجات" : "All Products"}</a>
+          <a href="#new-arrivals">{isArabic ? "وصل حديثًا" : "New Arrivals"}</a>
+          <a href="#best-sellers">{isArabic ? "الأكثر مبيعًا" : "Best Sellers"}</a>
+          <a href="#categories">{isArabic ? "الأقسام" : "Categories"}</a>
+          <a href="#bundles">{isArabic ? "الباقات" : "Bundles"}</a>
+        </nav>
+        <section className="footer-whatsapp-contacts" aria-label={isArabic ? "تواصل معنا عبر واتساب" : "Contact us on WhatsApp"}>
+          <div className="footer-contact-heading">
+            <h3>{isArabic ? "تواصل معنا" : "WHATSAPP CONTACTS"}</h3>
+            <p>{isArabic ? "اختار الرقم المناسب واضغط للتواصل مباشرة." : "Choose a number to start a WhatsApp conversation."}</p>
+          </div>
+          <div className="footer-contact-numbers">
+            {[
+              { phone: "01097725236", link: "201097725236" },
+              { phone: "01070610391", link: "201070610391" },
+              { phone: "01098256906", link: "201098256906" },
+            ].map(({ phone, link }) => (
+              <a key={phone} href={`https://wa.me/${link}`} target="_blank" rel="noopener noreferrer" aria-label={(isArabic ? "تواصل عبر واتساب: " : "WhatsApp: ") + phone}>
+                <span className="footer-whatsapp-icon" aria-hidden="true">◉</span>
+                <span>{phone}</span>
+                <span className="footer-contact-arrow" aria-hidden="true">↗</span>
+              </a>
+            ))}
+          </div>
+        </section>
+        <div className="zero-socials" aria-label="ZERO CLOTHING social media">
+  <a href="https://www.facebook.com/share/1F759crQPj/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.4 21v-8h2.7l.4-3.1h-3.1v-2c0-.9.3-1.5 1.6-1.5h1.7V3.6c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.1H7.2V13H10v8h3.4Z" fill="currentColor"/></svg></a>
+  <a href="https://www.instagram.com/zero.sportswear_?srtk=cmx0Z3BiNnFhN2ps" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" strokeWidth="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" strokeWidth="1.8"/><circle cx="17.7" cy="6.7" r="1.1" fill="currentColor"/></svg></a>
+  <a href="https://www.tiktok.com/@zero.sportwear?_r=1&_t=ZS-9AUciyEp0cC" target="_blank" rel="noopener noreferrer" aria-label="TikTok" title="TikTok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.7 3h-3.2v12.1a2.7 2.7 0 1 1-2.7-2.7c.4 0 .8.1 1.1.2V9.3a6 6 0 1 0 4.8 5.8V9a8.1 8.1 0 0 0 4.1 1.1V6.9c-2.3-.1-4.1-1.8-4.1-3.9Z" fill="currentColor"/></svg></a>
+</div>
+        <div className="footer-bottom"><span>{t.rights}</span><span>CAIRO, EGYPT · ZERO STANDARD</span></div>
+      </footer>
+
+      {cartOpen && (
+        <div className="overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setCartOpen(false); }}>
+          <aside className="cart-drawer" aria-label={t.cartTitle}>
+            <div className="drawer-header"><h2>{t.cartTitle}<span> ({cartCount})</span></h2><button className="icon-button" onClick={() => setCartOpen(false)} aria-label="Close cart"><X size={20} /></button></div>
+            {cartCount === 0 ? (
+              <div className="empty-cart"><ShoppingBag size={30} strokeWidth={1.2} /><p>{t.emptyBag}</p><button className="button button-dark" onClick={() => setCartOpen(false)}>{t.continue}</button></div>
+            ) : (
+              <>
+                <div className="cart-items">
+                  {catalogProducts.filter((product) => cart[product.id]).map((product) => (
+                    <div className="cart-item" key={product.id}>
+                      <Image src={product.image || "/zero-image-placeholder.svg"} alt={product.imageAlt}  width={900} height={1100} sizes="(max-width: 700px) 90vw, 34vw" />
+                      <div className="cart-item-details"><h3>{product.name}</h3><p>{product.price.toLocaleString(isArabic ? "ar-EG" : "en-EG")} {t.egp}</p><div className="quantity-control"><button onClick={() => updateQuantity(product.id, -1)} aria-label="Decrease quantity">−</button><span>{cart[product.id]}</span><button onClick={() => updateQuantity(product.id, 1)} aria-label="Increase quantity">+</button></div></div>
+                      <button className="remove-item" onClick={() => setCart((current) => { const next = { ...current }; delete next[product.id]; return next; })} aria-label="Remove item"><X size={16} /></button>
+                    </div>
+                  ))}
+                </div>
+                <div className="cart-summary"><div><span>{t.subtotal}</span><strong>{subtotal.toLocaleString(isArabic ? "ar-EG" : "en-EG")} {t.egp}</strong></div><p>{t.checkoutNote}</p><button type="button" className="button button-dark checkout-button" onClick={continueToCheckout}>{isArabic ? "إتمام الطلب" : "CONTINUE TO CHECKOUT"} <ArrowRight size={15} /></button></div>
+              </>
+            )}
+          </aside>
+        </div>
+      )}
+    </main>
+  );
+}

@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowDownUp, ArrowRight, Box, ClipboardList, ExternalLink, ImagePlus, LogOut, PackagePlus, RefreshCw, Search, Settings2, Ticket, Truck } from "lucide-react";
@@ -65,7 +67,7 @@ export default function AdminPage() {
   }
   async function changeStatus(code:string,status:string) {
     setBusy(true);setError("");setNotice("");
-    try {await api("/api/admin/orders",{method:"PATCH",body:JSON.stringify({code,status})});setNotice("Order status updated.");await load(false);}
+    try {const result=await api("/api/admin/orders",{method:"PATCH",body:JSON.stringify({code,status})});setNotice(result.changed===false?"Order status was already up to date.":result.whatsapp?.sent?"Order status updated and WhatsApp notification sent.":result.whatsapp?.configured?"Order status updated, but WhatsApp notification could not be delivered.":"Order status updated. WhatsApp notifications are not connected yet.");await load(false);}
     catch(e){setError(e instanceof Error?e.message:"Update failed");}
     finally{setBusy(false);}
   }
@@ -136,11 +138,11 @@ export default function AdminPage() {
           <label>Review image URL<input type="url" required placeholder="https://.../customer-review.jpg" value={reviewDraft.imageUrl} onChange={e=>setReviewDraft(v=>({...v,imageUrl:e.target.value}))}/></label>
           <label>Customer name (optional)<input value={reviewDraft.customerName} placeholder="Customer name" onChange={e=>setReviewDraft(v=>({...v,customerName:e.target.value}))}/></label>
           <label>Review caption (optional)<textarea rows={2} value={reviewDraft.caption} placeholder="Short customer feedback..." onChange={e=>setReviewDraft(v=>({...v,caption:e.target.value}))}/></label>
-          {reviewDraft.imageUrl&&<div className="admin-review-preview"><img src={reviewDraft.imageUrl} alt="Review preview" onError={e=>{e.currentTarget.style.opacity="0.25";}}/></div>}
+          {reviewDraft.imageUrl&&<div className="admin-review-preview"><Image src={reviewDraft.imageUrl || "/zero-image-placeholder.svg"} alt="Review preview" onError={e=>{e.currentTarget.style.opacity="0.25";}} width={900} height={1100} sizes="(max-width: 700px) 84vw, 34vw" /></div>}
           <button className="admin-primary" disabled={busy||!/^https:\/\/\S+$/i.test(reviewDraft.imageUrl.trim())}>+ Add customer review</button>
         </form>
         <div className="admin-review-grid">{reviews.map(review=><article className="admin-review-card" key={review.id}>
-          <img src={review.imageUrl} alt={review.customerName||"Customer review"} />
+          <Image src={review.imageUrl || "/zero-image-placeholder.svg"} alt={review.customerName||"Customer review"}  width={900} height={1100} sizes="(max-width: 700px) 84vw, 34vw" />
           <div><strong>{review.customerName||"Customer review"}</strong>{review.caption&&<p>{review.caption}</p>}<small>Position: {review.position}</small></div>
           <label className="admin-toggle"><input type="checkbox" checked={review.active} onChange={async e=>{try{await api("/api/admin/reviews",{method:"PATCH",body:JSON.stringify({id:review.id,active:e.target.checked})});await load(false);}catch(err){setError(err instanceof Error?err.message:"Update failed.");}}}/><span>{review.active?"Visible on site":"Hidden"}</span></label>
           <button className="admin-secondary" onClick={async()=>{if(!window.confirm("Delete this customer review image?"))return;try{await api("/api/admin/reviews",{method:"DELETE",body:JSON.stringify({id:review.id})});setNotice("Review deleted.");await load(false);}catch(err){setError(err instanceof Error?err.message:"Delete failed.");}}}>Delete</button>
@@ -157,11 +159,11 @@ export default function AdminPage() {
           <label>Combined bundle image URL<input type="url" required value={bundleDraft.imageUrl} onChange={e=>setBundleDraft(v=>({...v,imageUrl:e.target.value}))} placeholder="https://.../bundle.jpg"/></label>
           <label>Total bundle price (EGP)<input type="number" min="0" step="1" required value={bundleDraft.totalPrice} onChange={e=>setBundleDraft(v=>({...v,totalPrice:e.target.value}))} placeholder="750"/></label>
           <label>Display order<input type="number" step="1" value={bundleDraft.position} onChange={e=>setBundleDraft(v=>({...v,position:e.target.value}))}/></label>
-          {bundleDraft.imageUrl&&<div className="admin-review-preview"><img src={bundleDraft.imageUrl} alt="Bundle preview"/></div>}
+          {bundleDraft.imageUrl&&<div className="admin-review-preview"><Image src={bundleDraft.imageUrl || "/zero-image-placeholder.svg"} alt="Bundle preview" width={900} height={1100} sizes="(max-width: 700px) 84vw, 34vw" /></div>}
           <button className="admin-primary" disabled={busy||!bundleDraft.titleEn.trim()||bundleDraft.productIds.length===0||bundleDraft.productIds.some(id=>!bundleDraft.variantIds[id])||!/^https:\/\/\S+$/i.test(bundleDraft.imageUrl.trim())||bundleDraft.totalPrice===""||!Number.isInteger(Number(bundleDraft.totalPrice))}>+ Add bundle</button>
         </form>
         <div className="admin-review-grid">{bundles.map(bundle=><article className="admin-review-card" key={bundle.id}>
-          <img src={bundle.imageUrl} alt={bundle.titleEn}/>
+          <Image src={bundle.imageUrl || "/zero-image-placeholder.svg"} alt={bundle.titleEn} width={900} height={1100} sizes="(max-width: 700px) 84vw, 34vw" />
           <div><strong>{bundle.titleEn}</strong><p>{bundle.descriptionEn}</p><strong>{money(bundle.totalPrice)}</strong><small>Fixed products: {(bundle.items||[]).map(item=>item.product?.nameEn).filter(Boolean).join(" · ")||"No products assigned"}</small><small>Display order: {bundle.position}</small><fieldset className="admin-bundle-products admin-bundle-products-existing"><legend>Included products</legend><div className="admin-bundle-product-options">{products.filter(product=>product.active).map(product=><label key={product.id}><input type="checkbox" checked={(bundleProductDrafts[bundle.id]||[]).includes(product.id)} onChange={e=>setBundleProductDrafts(old=>({...old,[bundle.id]:e.target.checked?[...(old[bundle.id]||[]),product.id]:(old[bundle.id]||[]).filter(id=>id!==product.id)}))}/><span>{product.nameEn}<small>{money(product.price)}</small>{(bundleProductDrafts[bundle.id]||[]).includes(product.id)&&<select value={bundleVariantDrafts[bundle.id]?.[product.id]||""} onChange={e=>setBundleVariantDrafts(old=>({...old,[bundle.id]:{...(old[bundle.id]||{}),[product.id]:e.target.value}}))}><option value="">Fix color</option>{Array.from(new Map(product.variants.map(variant=>[variant.color,variant])).values()).map(variant=><option key={variant.id} value={variant.id}>{variant.color}</option>)}</select>}</span></label>)}</div><button type="button" className="admin-secondary" disabled={busy||!(bundleProductDrafts[bundle.id]||[]).length||(bundleProductDrafts[bundle.id]||[]).some(productId=>!bundleVariantDrafts[bundle.id]?.[productId])||JSON.stringify([...(bundleProductDrafts[bundle.id]||[])].sort())===JSON.stringify((bundle.items||[]).map(item=>item.productId).sort())&&(bundle.items||[]).every(item=>bundleVariantDrafts[bundle.id]?.[item.productId]===item.variantId)} onClick={async()=>{setBusy(true);try{await api("/api/admin/bundles",{method:"PATCH",body:JSON.stringify({id:bundle.id,fixedItems:(bundleProductDrafts[bundle.id]||[]).map(productId=>({productId,variantId:bundleVariantDrafts[bundle.id]?.[productId]||""}))})});setNotice("Fixed products updated for this bundle.");await load(false);}catch(err){setError(err instanceof Error?err.message:"Could not update bundle products.");}finally{setBusy(false);}}}>Save included products</button></fieldset></div>
           <label className="admin-toggle"><input type="checkbox" checked={bundle.active} onChange={async e=>{try{await api("/api/admin/bundles",{method:"PATCH",body:JSON.stringify({id:bundle.id,active:e.target.checked})});await load(false);}catch(err){setError(err instanceof Error?err.message:"Update failed.");}}}/><span>{bundle.active?"Visible on site":"Hidden"}</span></label>
           <button className="admin-secondary" onClick={async()=>{if(!window.confirm("Delete this bundle?"))return;try{await api("/api/admin/bundles",{method:"DELETE",body:JSON.stringify({id:bundle.id})});setNotice("Bundle deleted.");await load(false);}catch(err){setError(err instanceof Error?err.message:"Delete failed.");}}}>Delete</button>

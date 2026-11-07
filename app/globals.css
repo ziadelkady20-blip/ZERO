@@ -1537,3 +1537,24 @@ img,video,iframe,svg{max-width:100%}
  .zero-product-grid .product-info h3,.zero-product-grid .product-name-link{font-size:11px!important}
  .zero-product-grid .product-price{font-size:12px!important}
 }
+
+/* ZERO mobile checkout refinements */
+@media (max-width: 760px) {
+  .live-shop { overflow-x: clip; padding-left: 16px; padding-right: 16px; }
+  .live-shop-layout { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 22px !important; }
+  .live-products, .live-checkout, .live-bag, .live-checkout-form { min-width: 0; width: 100%; }
+  .live-checkout { position: static !important; top: auto !important; max-height: none !important; }
+  .live-checkout-form input, .live-checkout-form select, .live-checkout-form textarea,
+  .live-checkout-form button, .live-shop button, .live-shop select { min-height: 46px; }
+  .live-bag img { max-width: 100%; }
+  .live-selected-gallery { overflow: hidden; }
+  .live-shop-layout > * { min-width: 0; }
+}
+@media (max-width: 420px) {
+  .live-shop { padding-left: 12px; padding-right: 12px; }
+  .live-checkout-form { padding: 16px 12px; }
+  .live-bag-head { gap: 8px; flex-wrap: wrap; }
+}
+
+.order-whatsapp-note { max-width: 420px; margin: 18px auto 12px; color: #686861; font-size: 12px; line-height: 1.65; }
+.order-success .live-secondary { display: inline-flex; justify-content: center; margin: 0 auto 10px; color: #171717; font-size: 10px; letter-spacing: .1em; text-decoration: underline; text-underline-offset: 4px; }
