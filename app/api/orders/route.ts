@@ -68,8 +68,9 @@ export async function POST(request: Request) {
     const order = await prisma.$transaction(async tx => {
       const governorateRates = await tx.shippingRate.findMany({ where: { governorate, active: true } });
       const normalizedCity = city.toLocaleLowerCase();
-      const rate = governorateRates.find(item => item.city !== "*" && item.city.trim().toLocaleLowerCase() === normalizedCity)
-        ?? governorateRates.find(item => item.city === "*");
+      const isWildcardCity = (city: string) => ["*", "any area", "all areas"].includes(city.trim().toLocaleLowerCase());
+      const rate = governorateRates.find(item => !isWildcardCity(item.city) && item.city.trim().toLocaleLowerCase() === normalizedCity)
+        ?? governorateRates.find(item => isWildcardCity(item.city));
       if (!rate) throw new Error("SHIPPING_UNAVAILABLE");
 
       const variants = await tx.productVariant.findMany({
