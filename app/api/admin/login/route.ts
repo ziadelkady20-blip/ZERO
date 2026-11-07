@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   const contentLength = Number(request.headers.get("content-length") || "0");
   if (contentLength > 8_000) return NextResponse.json({ error: "Request is too large." }, { status: 413, headers: { "Cache-Control": "no-store" } });
 
-  const ipLimit = rateLimit(`admin-login:ip:${fingerprint(requestIp(request))}`, 10, 15 * 60 * 1000);
+  const ipLimit = await rateLimit(`admin-login:ip:${fingerprint(requestIp(request))}`, 10, 15 * 60 * 1000);
   if (!ipLimit.allowed) return rateLimitedResponse(ipLimit.retryAfterSeconds);
 
   const emailExpected = process.env.ADMIN_EMAIL;
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase().slice(0, 254) : "";
   const password = typeof body.password === "string" ? body.password : "";
-  const emailLimit = rateLimit(`admin-login:email:${fingerprint(email || "missing")}`, 8, 15 * 60 * 1000);
+  const emailLimit = await rateLimit(`admin-login:email:${fingerprint(email || "missing")}`, 8, 15 * 60 * 1000);
   if (!emailLimit.allowed) return rateLimitedResponse(emailLimit.retryAfterSeconds);
 
   if (password.length > 1024 || !equalSecret(email, emailExpected.trim().toLowerCase()) || !equalSecret(password, passwordExpected)) {
