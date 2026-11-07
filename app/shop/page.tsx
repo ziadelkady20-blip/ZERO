@@ -9,17 +9,65 @@ type CartItem={cartKey?:string;variantId:string;productId:string;nameEn:string;n
 type StoreBundle={id:string;titleEn:string;titleAr:string;descriptionEn:string;descriptionAr:string;imageUrl:string;totalPrice:number;items:{productId:string;variantId:string|null;quantity:number;product:Product}[]};
 type OrderResult={code:string;subtotal:number;discountAmount:number;couponCode?:string|null;shippingCost:number;total:number;status:string};
 type AppliedCoupon={code:string;discountType:"PERCENT"|"FIXED";discountValue:number};
+function calculateBuy2Get1Discount(items:CartItem[], products:Product[]) {
+ const grouped=new Map<string,number[]>();
+ for(const item of items){
+  if(item.bundleId)continue;
+  const product=products.find(entry=>entry.id===item.productId);
+  if(product?.promotionType!=="BUY2GET1")continue;
+  const prices=grouped.get(item.productId)||[];
+  for(let index=0;index<item.quantity;index++)prices.push(item.price);
+  grouped.set(item.productId,prices);
+ }
+ let discount=0;
+ for(const prices of grouped.values()){
+  prices.sort((a,b)=>a-b);
+  discount+=prices.slice(0,Math.floor(prices.length/3)).reduce((sum,price)=>sum+price,0);
+ }
+ return discount;
+}
 export default function ShopPage(){
  const [locale,setLocale]=useState<"en"|"ar">("en"),[products,setProducts]=useState<Product[]>([]),[rates,setRates]=useState<Rate[]>([]),[bundles,setBundles]=useState<StoreBundle[]>([]),[handledBundleId,setHandledBundleId]=useState<string>(""),[pendingBundleId,setPendingBundleId]=useState<string>(""),[bundleSizes,setBundleSizes]=useState<Record<string,string>>({});
  const [selections,setSelections]=useState<Record<string,{size:string;color:string}>>({}),[cart,setCart]=useState<Record<string,CartItem>>({});
  const [loading,setLoading]=useState(true),[error,setError]=useState(""),[busy,setBusy]=useState(false),[order,setOrder]=useState<OrderResult|null>(null),[cartLoaded,setCartLoaded]=useState(false),[browseMore,setBrowseMore]=useState(false);
  const [customer,setCustomer]=useState({customerName:"",phone:"",email:"",governorate:"",city:"",address:"",notes:""});
  const [couponInput,setCouponInput]=useState(""),[appliedCoupon,setAppliedCoupon]=useState<AppliedCoupon|null>(null),[couponBusy,setCouponBusy]=useState(false),[couponMessage,setCouponMessage]=useState(""),[couponError,setCouponError]=useState(false);
- const ar=locale==="ar",items=Object.values(cart),subtotal=items.reduce((sum,item)=>sum+item.price*item.quantity,0),governorates=Array.from(new Set(rates.map(r=>r.governorate))),selectedRate=rates.find(r=>r.governorate===customer.governorate),buy2Prices=items.filter(item=>!item.bundleId&&products.find(p=>p.id===item.productId)?.promotionType==="BUY2GET1").flatMap(item=>Array(item.quantity).fill(item.price)).sort((a,b)=>a-b),freeItemCount=Math.floor(buy2Prices.length/3),buy2Discount=buy2Prices.slice(0,freeItemCount).reduce((sum,price)=>sum+price,0),percentDiscount=items.reduce((sum,item)=>{const p=products.find(product=>product.id===item.productId);return sum+(!item.bundleId&&p?.promotionType==="PERCENT"?Math.round(item.price*(p.promotionValue||0)/100)*item.quantity:0);},0),automaticDiscount=buy2Discount+percentDiscount,qualifiesForAutomaticOffer=automaticDiscount>0,discountAmount=automaticDiscount+(appliedCoupon&&!qualifiesForAutomaticOffer?Math.min(subtotal,appliedCoupon.discountType==="PERCENT"?Math.round(subtotal*appliedCoupon.discountValue/100):appliedCoupon.discountValue):0),total=subtotal-discountAmount+(selectedRate?.price||0);
+ const ar=locale==="ar",items=Object.values(cart),subtotal=items.reduce((sum,item)=>sum+item.price*item.quantity,0),governorates=Array.from(new Set(rates.map(r=>r.governorate))),normalizedCity=customer.city.trim().toLocaleLowerCase(),selectedRate=rates.find(r=>r.governorate===customer.governorate&&r.city!=="*"&&(r.city||"").trim().toLocaleLowerCase()===normalizedCity)||rates.find(r=>r.governorate===customer.governorate&&r.city==="*"),buy2Discount=calculateBuy2Get1Discount(items,products),percentDiscount=items.reduce((sum,item)=>{const p=products.find(product=>product.id===item.productId);return sum+(!item.bundleId&&p?.promotionType==="PERCENT"?Math.round(item.price*(p.promotionValue||0)/100)*item.quantity:0);},0),automaticDiscount=buy2Discount+percentDiscount,qualifiesForAutomaticOffer=automaticDiscount>0,discountAmount=automaticDiscount+(appliedCoupon&&!qualifiesForAutomaticOffer?Math.min(subtotal,appliedCoupon.discountType==="PERCENT"?Math.round(subtotal*appliedCoupon.discountValue/100):appliedCoupon.discountValue):0),total=subtotal-discountAmount+(selectedRate?.price||0);
  useEffect(()=>{try{const saved=localStorage.getItem("zero-cart-v1");if(saved){const parsed=JSON.parse(saved) as Record<string,CartItem>;setCart(Object.fromEntries(Object.entries(parsed).filter(([,item])=>!item.bundleId||Array.isArray(item.components))));}}catch{}finally{setCartLoaded(true);}},[]);
  useEffect(()=>{if(cartLoaded)localStorage.setItem("zero-cart-v1",JSON.stringify(cart));},[cart,cartLoaded]);
  useEffect(()=>{if(qualifiesForAutomaticOffer){setAppliedCoupon(null);setCouponInput("");setCouponMessage("");setCouponError(false);}},[qualifiesForAutomaticOffer]);
  useEffect(()=>{Promise.all([fetch("/api/products").then(r=>r.json()),fetch("/api/shipping").then(r=>r.json()),fetch("/api/bundles").then(r=>r.json())]).then(([p,s,b])=>{if(p.products){setProducts(p.products);const initial:Record<string,{size:string;color:string}>={};p.products.forEach((item:Product)=>{const available=item.variants.find(v=>v.stock>0)||item.variants[0];if(available)initial[item.id]={size:available.size,color:available.color};});setSelections(initial);}if(s.rates)setRates(s.rates);else setError(s.error||"");if(b.bundles)setBundles(b.bundles);if(p.error)setError(p.error);}).catch(()=>setError("Could not load store data. Please refresh and try again.")).finally(()=>setLoading(false));},[]);
+ useEffect(()=>{
+  if(!cartLoaded||products.length===0)return;
+  const params=new URLSearchParams(window.location.search);
+  if(params.get("importHomeCart")!=="1")return;
+  let skipped=0;
+  try{
+   const raw=localStorage.getItem("zero-home-cart-pending-v1");
+   const pending=raw?JSON.parse(raw) as {slug?:unknown;quantity?:unknown}[]:[];
+   const imported:CartItem[]=[];
+   for(const entry of pending){
+    if(typeof entry?.slug!=="string")continue;
+    const product=products.find(item=>item.slug===entry.slug);
+    const variant=product?.variants.find(item=>item.stock>0);
+    const requested=Math.max(1,Math.min(20,Math.floor(Number(entry.quantity)||1)));
+    if(!product||!variant){skipped++;continue;}
+    if(requested>variant.stock)skipped++;
+    imported.push({variantId:variant.id,productId:product.id,nameEn:product.nameEn,nameAr:product.nameAr,image:product.images[0]?.url||"",size:variant.size,color:variant.color,price:product.price,quantity:Math.min(requested,variant.stock),stock:variant.stock});
+   }
+   setCart(current=>{
+    const next={...current};
+    for(const item of imported){
+     const old=next[item.variantId];
+     next[item.variantId]=old?{...old,quantity:Math.min(item.stock,old.quantity+item.quantity),stock:item.stock}:item;
+    }
+    return next;
+   });
+   if(skipped>0)setError("Some homepage items were unavailable or exceeded stock. Please review your bag.");
+  }catch{setError("Could not import the homepage bag. Please add your items again.");}
+  localStorage.removeItem("zero-home-cart-pending-v1");
+  window.history.replaceState({},"","/shop");
+ },[cartLoaded,products]);
  useEffect(()=>{if(!cartLoaded||!bundles.length||handledBundleId)return;const params=new URLSearchParams(window.location.search);const bundleId=params.get("bundle");if(!bundleId)return;const selected=bundles.find(bundle=>bundle.id===bundleId);if(!selected){setError(ar?"الباقة المطلوبة غير موجودة أو لم تعد متاحة.":"This bundle could not be found or is no longer available.");setHandledBundleId(bundleId);window.history.replaceState({},"","/shop");return;}if(!selected.items.length||selected.items.some(item=>!item.variantId||!item.product.variants.some(v=>v.id===item.variantId))){setError(ar?"الباقة غير مكتملة. يرجى التواصل مع المتجر.":"This bundle is not fully configured yet.");setHandledBundleId(bundleId);window.history.replaceState({},"","/shop");return;}const initial:Record<string,string>={};for(const item of selected.items){const anchor=item.product.variants.find(v=>v.id===item.variantId)!;const available=item.product.variants.find(v=>v.color===anchor.color&&v.stock>=item.quantity);initial[item.productId]=available?.size||item.product.variants.find(v=>v.color===anchor.color)?.size||"";}setBundleSizes(initial);setPendingBundleId(bundleId);setHandledBundleId(bundleId);window.history.replaceState({},"","/shop");},[bundles,cartLoaded,handledBundleId,ar]);
  function updateCustomer(key:keyof typeof customer,value:string){setCustomer(current=>({...current,[key]:value,...(key==="governorate"?{city:""}:{})}));}
  function addItem(product:Product){const selection=selections[product.id];const variant=product.variants.find(v=>v.size===selection?.size&&v.color===selection?.color);if(!variant){setError(ar?"اختار مقاس ولون متاحين الأول.":"Choose an available size and color first.");return;}if(variant.stock<1){setError(ar?"المقاس واللون دول نفدوا.":"That size and color are out of stock.");return;}setError("");setCart(current=>{const old=current[variant.id];if(old&&old.quantity>=variant.stock){setError(ar?"وصلت لأقصى كمية متاحة.":"You have reached available stock.");return current;}return {...current,[variant.id]:old?{...old,quantity:old.quantity+1}:{variantId:variant.id,productId:product.id,nameEn:product.nameEn,nameAr:product.nameAr,image:product.images[0]?.url||"",size:variant.size,color:variant.color,price:product.price,quantity:1,stock:variant.stock}};});}
