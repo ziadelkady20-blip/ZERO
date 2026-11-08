@@ -291,14 +291,14 @@ export default function AdminProductsPage() {
   }
   async function deleteProduct(product: Product) {
     const confirmed = window.confirm(
-      `Delete “${product.nameEn}” permanently? Its images and size/color variants will also be deleted. This cannot be undone.`,
+      `Remove “${product.nameEn}” from the store? If it has order or bundle history, it will be archived to preserve those records. Otherwise, it will be permanently deleted.`,
     );
     if (!confirmed) return;
     setBusy(true);
     setError("");
     setNotice("");
     try {
-      await request("/api/admin/products", {
+      const result = await request("/api/admin/products", {
         method: "DELETE",
         body: JSON.stringify({ id: product.id }),
       });
@@ -308,7 +308,11 @@ export default function AdminProductsPage() {
         delete next[product.id];
         return next;
       });
-      setNotice(`“${product.nameEn}” was deleted.`);
+      setNotice(
+        result.archived
+          ? `“${product.nameEn}” was removed from the store and archived to preserve order history.`
+          : `“${product.nameEn}” was permanently deleted.`,
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not delete product.");
     } finally {
@@ -430,7 +434,6 @@ export default function AdminProductsPage() {
         [id]: {
           ...old[id],
           variants: savedDraft.variants,
-          images: savedDraft.images,
           colorImages: savedDraft.colorImages,
         },
       }));
@@ -896,6 +899,13 @@ export default function AdminProductsPage() {
                     <div className="admin-add-color-row">
                       <input
                         value={colorDrafts[p.id] || ""}
+                        disabled={busy}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addProductColor(p.id);
+                          }
+                        }}
                         onChange={(e) =>
                           setColorDrafts((old) => ({
                             ...old,
@@ -909,7 +919,7 @@ export default function AdminProductsPage() {
                         type="button"
                         className="admin-secondary"
                         onClick={() => addProductColor(p.id)}
-                        disabled={!(colorDrafts[p.id] || "").trim()}
+                        disabled={busy || !(colorDrafts[p.id] || "").trim()}
                       >
                         + Add color
                       </button>
@@ -925,6 +935,7 @@ export default function AdminProductsPage() {
                           <button
                             type="button"
                             onClick={() => removeProductColor(p.id, color)}
+                            disabled={busy}
                             aria-label={"Remove " + color}
                           >
                             ×
@@ -951,6 +962,7 @@ export default function AdminProductsPage() {
                                   : "Back image URL (optional)"}
                                 <input
                                   type="url"
+                                  disabled={busy}
                                   value={d.colorImages[color]?.[side] || ""}
                                   onChange={(e) =>
                                     patchColorImage(
@@ -1061,6 +1073,7 @@ export default function AdminProductsPage() {
                     type="button"
                     className="admin-secondary"
                     onClick={() => addVariant(p.id)}
+                    disabled={busy}
                   >
                     + Add variant
                   </button>
@@ -1072,6 +1085,7 @@ export default function AdminProductsPage() {
                         SKU
                         <input
                           value={v.sku}
+                          disabled={busy}
                           onChange={(e) =>
                             patchVariant(p.id, i, { sku: e.target.value })
                           }
@@ -1082,6 +1096,7 @@ export default function AdminProductsPage() {
                         Size
                         <input
                           value={v.size}
+                          disabled={busy}
                           onChange={(e) =>
                             patchVariant(p.id, i, { size: e.target.value })
                           }
@@ -1092,6 +1107,7 @@ export default function AdminProductsPage() {
                         Color
                         <input
                           value={v.color}
+                          disabled={busy}
                           onChange={(e) =>
                             patchVariant(p.id, i, { color: e.target.value })
                           }
@@ -1105,6 +1121,7 @@ export default function AdminProductsPage() {
                           min="0"
                           step="1"
                           value={v.stock}
+                          disabled={busy}
                           onChange={(e) =>
                             patchVariant(p.id, i, { stock: e.target.value })
                           }

@@ -10,7 +10,7 @@ export async function GET() {
   if (!(await isAdminSessionValid())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   try {
     const [products, categories] = await Promise.all([
-      prisma.product.findMany({ include: { category: true, images: { orderBy: { position: "asc" } }, variants: true }, orderBy: { createdAt: "desc" } }),
+      prisma.product.findMany({ where: { deletedAt: null }, include: { category: true, images: { orderBy: { position: "asc" } }, variants: true }, orderBy: { createdAt: "desc" } }),
       prisma.category.findMany({ orderBy: { nameEn: "asc" } }),
     ]);
     return NextResponse.json({ products, categories }, { headers: { "Cache-Control": "no-store" } });
@@ -36,6 +36,62 @@ export async function POST(request: Request) {
   const rawImages = Array.isArray(body.images) ? body.images.map((entry: any) => typeof entry === "string" ? { url: entry.trim(), alt: "" } : { url: typeof entry?.url === "string" ? entry.url.trim() : "", alt: typeof entry?.alt === "string" ? entry.alt : "" }) : [];
   if (rawImages.some((entry: {url:string}) => entry.url && !/^https:\/\/\S+$/i.test(entry.url))) return NextResponse.json({ error: "Product images must be direct HTTPS image URLs." }, { status: 400 });
   const imageUrls = rawImages.filter((entry: {url:string}) => Boolean(entry.url)).slice(0, 32);
+  if (Array.isArray(body.variants)) {
+    if (body.variants.length < 1 || body.variants.length > 100) {
+      return NextResponse.json(
+        { error: "A product must have between 1 and 100 size/color combinations." },
+        { status: 400 },
+      );
+    }
+    const combinations = new Set<string>();
+    const skus = new Set<string>();
+    const variantIds = new Set<string>();
+    for (const variant of body.variants) {
+      if (!variant || typeof variant !== "object") {
+        return NextResponse.json(
+          { error: "One of the size/color options is invalid." },
+          { status: 400 },
+        );
+      }
+      const sku = typeof variant.sku === "string" ? variant.sku.trim() : "";
+      const size = typeof variant.size === "string" ? variant.size.trim() : "";
+      const color = typeof variant.color === "string" ? variant.color.trim() : "";
+      const stock = Number(variant.stock);
+      if (!sku || !size || !color || !Number.isInteger(stock) || stock < 0 ||
+          (variant.id !== undefined && typeof variant.id !== "string")) {
+        return NextResponse.json(
+          { error: "Every option needs a SKU, size, color and valid stock quantity." },
+          { status: 400 },
+        );
+      }
+      const normalizedSku = sku.toLocaleLowerCase("en-US");
+      const combination = `${size.normalize("NFKC").toLocaleLowerCase("en-US")}::${color.normalize("NFKC").toLocaleLowerCase("en-US")}`;
+      if (skus.has(normalizedSku)) {
+        return NextResponse.json(
+          { error: `The SKU "${sku}" is repeated. Each size/color option needs a unique SKU.` },
+          { status: 409 },
+        );
+      }
+      if (combinations.has(combination)) {
+        return NextResponse.json(
+          { error: `The size/color combination "${size} / ${color}" is repeated.` },
+          { status: 409 },
+        );
+      }
+      if (variant.id) {
+        if (variantIds.has(variant.id)) {
+          return NextResponse.json(
+            { error: "A size/color option was submitted more than once. Refresh and try again." },
+            { status: 400 },
+          );
+        }
+        variantIds.add(variant.id);
+      }
+      skus.add(normalizedSku);
+      combinations.add(combination);
+    }
+  }
+
   try {
     const product = await prisma.product.create({
       data: {
@@ -102,7 +158,7 @@ export async function PATCH(request: Request) {
   try {
     const product = await prisma.$transaction(async (tx) => {
       const existing = await tx.product.findUnique({ where: { id } });
-      if (!existing) throw new Error("PRODUCT_NOT_FOUND");
+      if (!existing || existing.deletedAt) throw new Error("PRODUCT_NOT_FOUND");
       await tx.product.update({ where: { id }, data: data as any });
       if (Array.isArray(body.images)) {
         const urls = imageUrls || [];
@@ -176,12 +232,28 @@ export async function PATCH(request: Request) {
 
 
 export async function DELETE(request: Request) {
-  if (!hasSameOrigin(request)) return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
-  if (!(await isAdminSessionValid())) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  if (!hasSameOrigin(request))
+    return NextResponse.json(
+      { error: "Invalid request origin." },
+      { status: 403 },
+    );
+  if (!(await isAdminSessionValid()))
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
   let body: { id?: unknown };
-  try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON." }, { status: 400 }); }
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
+  }
+
   const id = typeof body.id === "string" ? body.id.trim() : "";
-  if (!id) return NextResponse.json({ error: "Product id is required." }, { status: 400 });
+  if (!id)
+    return NextResponse.json(
+      { error: "Product id is required." },
+      { status: 400 },
+    );
+
   try {
     const result = await prisma.$transaction(async (tx) => {
       const product = await tx.product.findUnique({
@@ -189,30 +261,86 @@ export async function DELETE(request: Request) {
         select: {
           id: true,
           nameEn: true,
-          _count: { select: { orderItems: true, bundleItems: true, bundleOrderItems: true } },
+          deletedAt: true,
+          variants: { select: { id: true } },
+          _count: {
+            select: {
+              orderItems: true,
+              bundleItems: true,
+              bundleOrderItems: true,
+            },
+          },
         },
       });
-      if (!product) throw new Error("PRODUCT_NOT_FOUND");
 
-      // Keep products that appear in completed/past orders so order history remains intact.
-      if (product._count.orderItems > 0 || product._count.bundleOrderItems > 0) {
-        throw new Error("PRODUCT_HAS_ORDER_HISTORY");
+      if (!product || product.deletedAt)
+        throw new Error("PRODUCT_NOT_FOUND");
+
+      const variantIds = product.variants.map((variant) => variant.id);
+      const [variantOrderReferences, variantBundleOrderReferences] =
+        variantIds.length > 0
+          ? await Promise.all([
+              tx.orderItem.count({ where: { variantId: { in: variantIds } } }),
+              tx.bundleOrderItem.count({ where: { variantId: { in: variantIds } } }),
+            ])
+          : [0, 0];
+
+      const hasHistoryOrBundleReferences =
+        product._count.orderItems > 0 ||
+        product._count.bundleOrderItems > 0 ||
+        variantOrderReferences > 0 ||
+        variantBundleOrderReferences > 0 ||
+        product._count.bundleItems > 0;
+
+      if (hasHistoryOrBundleReferences) {
+        if (product._count.bundleItems > 0) {
+          await tx.bundle.updateMany({
+            where: { items: { some: { productId: id } } },
+            data: { active: false },
+          });
+        }
+
+        await tx.product.update({
+          where: { id },
+          data: {
+            active: false,
+            deletedAt: new Date(),
+            slug: `archived-${id}`,
+          },
+        });
+
+        return { id: product.id, nameEn: product.nameEn, archived: true };
       }
 
-      // Keep configured bundles valid. Remove the product from its bundles first.
-      if (product._count.bundleItems > 0) throw new Error("PRODUCT_IN_BUNDLE");
-
       await tx.product.delete({ where: { id } });
-      return { id: product.id, nameEn: product.nameEn };
+      return { id: product.id, nameEn: product.nameEn, archived: false };
     });
+
     return NextResponse.json({ success: true, ...result });
   } catch (error) {
     const reason = error instanceof Error ? error.message : "";
-    if (reason === "PRODUCT_NOT_FOUND") return NextResponse.json({ error: "Product not found." }, { status: 404 });
-    if (reason === "PRODUCT_IN_BUNDLE") return NextResponse.json({ error: "This product is included in one or more bundles. Remove it from those bundle configurations before deleting it." }, { status: 409 });
-    if (reason === "PRODUCT_HAS_ORDER_HISTORY") {
-      return NextResponse.json({ error: "This product is part of existing order history, so it cannot be permanently deleted. Unpublish it instead to hide it from the storefront while keeping old orders accurate." }, { status: 409 });
+    if (reason === "PRODUCT_NOT_FOUND")
+      return NextResponse.json(
+        { error: "Product not found. It may already have been removed." },
+        { status: 404 },
+      );
+
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      String((error as { code: unknown }).code) === "P2003"
+    ) {
+      return NextResponse.json(
+        { error: "This product is still linked to an order or bundle. Refresh and try again." },
+        { status: 409 },
+      );
     }
-    return NextResponse.json({ error: "Could not delete product. If it has order history, unpublish it instead." }, { status: 409 });
+
+    console.error("[admin/products DELETE] Delete failed:", error);
+    return NextResponse.json(
+      { error: "Could not remove this product. Please refresh and try again." },
+      { status: 500 },
+    );
   }
 }
