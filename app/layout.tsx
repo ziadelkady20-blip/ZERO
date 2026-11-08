@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import MetaPixel from "./meta-pixel";
 
 export const metadata: Metadata = {
   title: "ZERO CLOTHING — Modern Menswear",
@@ -11,6 +12,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
+        <MetaPixel />
         {children}
         <a
           className="zero-whatsapp-float"
