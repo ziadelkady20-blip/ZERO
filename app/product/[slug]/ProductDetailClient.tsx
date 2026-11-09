@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { trackMetaEvent } from "@/lib/meta-events";
 
 type Variant = { id: string; size: string; color: string; stock: number; sku: string };
 type Product = {
@@ -46,6 +47,10 @@ export default function ProductDetailPage({ initialProduct }: { initialProduct: 
   const [selectedImage, setSelectedImage] = useState(0);
   const [showSizeChart, setShowSizeChart] = useState(false);
   const ar = locale === "ar";
+
+  useEffect(() => {
+    trackMetaEvent("ViewContent", { content_ids: [product.id], content_type: "product", value: product.price, currency: "EGP", contents: [{ id: product.id, quantity: 1, item_price: product.price }] });
+  }, [product.id, product.price]);
 
   useEffect(() => {
     const nextVariant = initialProduct.variants.find(v => v.stock > 0) || initialProduct.variants[0];
@@ -93,6 +98,7 @@ export default function ProductDetailPage({ initialProduct }: { initialProduct: 
         ? { ...existing, quantity: existing.quantity + quantity, stock: variant.stock }
         : { variantId: variant.id, productId: product.id, nameEn: product.nameEn, nameAr: product.nameAr, image, size: variant.size, color: variant.color, price: product.price, quantity, stock: variant.stock };
       localStorage.setItem(CART_KEY, JSON.stringify(current));
+      trackMetaEvent("AddToCart", { content_ids: [product.id], content_type: "product", contents: [{ id: product.id, quantity, item_price: product.price }], value: product.price * quantity, currency: "EGP", num_items: quantity });
       router.push("/shop?cart=updated");
     } catch {
       setNotice(ar ? "حصلت مشكلة في إضافة المنتج للسلة." : "Could not add this item to your bag.");
